@@ -26,7 +26,7 @@ class JumpReLUSAEConfig(SAEConfig):
 
 class SAE(nn.Module):
     def __init__(self, cfg: SAEConfig):
-        super(TopKSAE, self).__init__()
+        super(SAE, self).__init__()
 
         self.d_sae = cfg.d_in * cfg.c
         self.W_enc = nn.Parameter(torch.randn(cfg.d_in, self.d_sae))
