@@ -1,5 +1,7 @@
-import torch
 from typing import Any
+
+import torch
+
 
 def rectangle(x: torch.Tensor) -> torch.Tensor:
     return ((x > -0.5) & (x < 0.5)).to(x)

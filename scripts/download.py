@@ -1,9 +1,8 @@
-import json
-import os
-from huggingface_hub import snapshot_download
+import argparse
 import os
 import shutil
-import argparse
+
+from huggingface_hub import snapshot_download
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", type=str, required=True)
