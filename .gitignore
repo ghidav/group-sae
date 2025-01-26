@@ -181,3 +181,4 @@ cython_debug/
 *.safetensors
 cfg.json
 saes/*
+interp/data/*
