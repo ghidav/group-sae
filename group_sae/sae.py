@@ -1,10 +1,11 @@
-import torch
-import torch.nn as nn
 from dataclasses import dataclass
-import einops
 from typing import cast
 
-from utils import JumpReLU
+import einops
+import torch
+import torch.nn as nn
+
+from group_sae.utils import JumpReLU
 
 
 @dataclass
@@ -73,10 +74,7 @@ class TopKSAE(SAE):
         self.k = cfg.k
 
     def forward(self, x):
-        h = (
-            torch.einsum("d_in d_sae, d_in -> d_sae", self.W_enc, x - self.b_dec)
-            + self.b_enc
-        )
+        h = torch.einsum("d_in d_sae, d_in -> d_sae", self.W_enc, x - self.b_dec) + self.b_enc
         h = torch.relu(h)
         top_acts, top_ids = h.topk(self.k, sorted=False)
         buf = top_acts.new_zeros(top_acts.shape[:-1] + (self.W_dec.shape[-1],))
@@ -88,16 +86,11 @@ class JumpReLUSAE(SAE):
     def __init__(self, cfg: JumpReLUSAEConfig):
         super(JumpReLUSAE, self).__init__(cfg)
 
-        self.log_threshold = nn.Parameter(
-            torch.ones(self.num_latents) * torch.log(0.001)
-        )
+        self.log_threshold = nn.Parameter(torch.ones(self.num_latents) * torch.log(0.001))
         self.bandwidth = 0.001
 
     def forward(self, x):
-        h = (
-            torch.einsum("d_in d_sae, d_in -> d_sae", self.W_enc, x - self.b_dec)
-            + self.b_enc
-        )
+        h = torch.einsum("d_in d_sae, d_in -> d_sae", self.W_enc, x - self.b_dec) + self.b_enc
         threshold = torch.exp(self.log_threshold)
         h = cast(torch.Tensor, JumpReLU.apply(h, threshold, self.bandwidth))
         return torch.einsum("d_sae d_in, d_sae -> d_in", self.W_dec, h) + self.b_dec
