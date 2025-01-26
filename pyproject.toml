@@ -25,9 +25,6 @@ dependencies = [
 ]
 version = "0.1.0"
 
-[project.scripts]
-group_sae = "group_sae.__main__:run"
-
 [tool.pyright]
 include = ["group_sae*"]
 reportPrivateImportUsage = false
