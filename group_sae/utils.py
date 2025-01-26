@@ -2,6 +2,16 @@ from typing import Any
 
 import torch
 
+MODEL_MAP = {
+    "pythia-160m-deduped": "pythia_160m",
+    "pythia-410m-deduped": "pythia_410m",
+    "pythia-160m-deduped": "pythia_160m"
+}
+
+def load_sae(model, act_fn, layer):
+    
+    path = "../saes/pythia_160m-jr/baseline/8/"
+
 
 def rectangle(x: torch.Tensor) -> torch.Tensor:
     return ((x > -0.5) & (x < 0.5)).to(x)
