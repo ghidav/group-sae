@@ -1,1 +1,0 @@
-{"expansion_factor": 16, "normalize_decoder": true, "num_latents": 0, "k": -1, "multi_topk": false, "jumprelu": true, "jumprelu_init_threshold": 0.001, "jumprelu_bandwidth": 0.001, "jumprelu_target_l0": 128, "init_enc_as_dec_transpose": true, "init_b_dec_as_zeros": false, "d_in": 768}
