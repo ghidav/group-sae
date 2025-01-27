@@ -81,7 +81,7 @@ for i, batch in tqdm(enumerate(dataloader), total=n_batches):
             outputs = outputs[0]
 
         name = module_to_name[module]
-        act_dict[name].append(outputs.cpu())
+        act_dict[name].append(outputs.cpu().reshape(-1, seq_len, d_model))
 
     handles = [mod.register_forward_hook(hook) for mod in name_to_module.values()]
     try:
@@ -94,7 +94,7 @@ for i, batch in tqdm(enumerate(dataloader), total=n_batches):
     if i == n_batches:
         break
 
-act_dict = {k: torch.cat(v, dim=0).reshape(-1, seq_len, d_model) for k, v in act_dict.items()}
+act_dict = {k: torch.cat(v, dim=0) for k, v in act_dict.items()}
 tokens = torch.cat(tokens, dim=0).reshape(-1, seq_len)
 
 
