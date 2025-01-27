@@ -14,16 +14,30 @@ from group_sae.hooks import forward_hook_wrapper
 if TYPE_CHECKING:
     from .config import TrainConfig
 
+from matplotlib.colors import LinearSegmentedColormap
+
+palette = ["#FFC533", "#f48c06", "#DD5703", "#d00000", "#6A040F"]
+cmap = LinearSegmentedColormap.from_list("paper", palette)
+
 T = TypeVar("T")
+
+CLUSTER_MAP = {
+    "pythia-160m-deduped": {}, 
+    "pythia-410m-deduped": {},           
+    "gemma-2-2b": {
+        "k6": [[0, 0], [1, 1, 1, 1], [2, 2, 2, 2, 2], [3, 3, 3, 3, 3, 3, 3], [4, 4, 4, 4, 4, 4], [5, 5]]
+    }
+}
 
 MODEL_MAP = {
     "pythia-160m-deduped": "pythia_160m",
     "pythia-410m-deduped": "pythia_410m",
-    "pythia-160m-deduped": "pythia_160m"
+    "gemma-2-2b": "gemma2_2b",
 }
 
+
 def load_sae(model, act_fn, layer):
-    
+
     path = "../saes/pythia_160m-jr/baseline/8/"
 
 
