@@ -4,4 +4,12 @@ from .trainer import SaeTrainer
 from .trainer_cluster import ClusterSaeTrainer
 from .utils import CLUSTER_MAP
 
-__all__ = ["Sae", "SaeConfig", "ClusterSaeTrainer", "RunConfig", "SaeTrainer", "TrainConfig"]
+__all__ = [
+    "Sae",
+    "SaeConfig",
+    "ClusterSaeTrainer",
+    "RunConfig",
+    "SaeTrainer",
+    "TrainConfig",
+    "CLUSTER_MAP",
+]
