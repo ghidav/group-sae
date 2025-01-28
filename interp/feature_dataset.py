@@ -1,18 +1,17 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from datasets import load_dataset
-from torch.utils.data import DataLoader
-import torch
-from tqdm import tqdm
-import numpy as np
-import random
+import gc
 import json
 import os
-import gc
-
-from group_sae.hooks import from_tokens
-from group_sae import Sae
-
+import random
 from argparse import ArgumentParser
+
+import torch
+from datasets import load_dataset
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+from group_sae import Sae
+from group_sae.hooks import from_tokens
 
 parser = ArgumentParser()
 parser.add_argument("--model", type=str, required=True)
@@ -93,7 +92,7 @@ def get_act_dict(module_names):
             for handle in handles:
                 handle.remove()
 
-        new_activations = torch.stack(list(act_dict.values())) # [M, B, P, D]
+        new_activations = torch.stack(list(act_dict.values()))  # [M, B, P, D]
         batch_sentences = batch_size * (1024 // seq_len)
         indices = torch.randint(0, len(module_names), (batch_sentences,))
         activations.append(new_activations[indices, torch.arange(batch_sentences)])
@@ -112,7 +111,9 @@ num_sentences = int(args.n_batches) * batch_size * (1024 // seq_len)
 sae_batch_size = 1024
 sae_n_batches = num_sentences // sae_batch_size
 
-print(f"Generating datasets from {num_sentences} sentences. In total, {num_sentences * seq_len / 1e6:.1f}M tokens will be processed...")
+print(
+    f"Generating datasets from {num_sentences} sentences. In total, {num_sentences * seq_len / 1e6:.1f}M tokens will be processed..."
+)
 
 
 def compute_feature_dataset(latents_generator, max_acts, f_ids, W_dec, tokens):
@@ -289,7 +290,9 @@ def process_sae_group(path, prefix, is_cluster=False):
 process_sae_group(f"../saes/{MODEL_MAP[args.model]}-jr/baseline/", "jr-baseline")
 process_sae_group(f"../saes/{MODEL_MAP[args.model]}-jr/cluster/", "jr-cluster", is_cluster=True)
 process_sae_group(f"../saes/{MODEL_MAP[args.model]}-topk/baseline/", "topk-baseline")
-process_sae_group(f"../saes/{MODEL_MAP[args.model]}-topk/cluster/", "topk-cluster", is_cluster=True)
+process_sae_group(
+    f"../saes/{MODEL_MAP[args.model]}-topk/cluster/", "topk-cluster", is_cluster=True
+)
 
 # Cleanup remaining resources
 gc.collect()

@@ -1,19 +1,17 @@
-import transformer_lens
+import os
+from argparse import ArgumentParser
+from functools import partial
+
 import numpy as np
 import torch
 import torch.nn.functional as F
-from tqdm import tqdm
-import os
-from functools import partial
-from transformer_lens.utils import get_act_name
-from group_sae.utils import MODEL_MAP
-
+import transformer_lens
 from datasets import load_dataset
 from torch.utils.data import DataLoader
-
 from tqdm import tqdm
-import numpy as np
-from argparse import ArgumentParser
+from transformer_lens.utils import get_act_name
+
+from group_sae.utils import MODEL_MAP
 
 parser = ArgumentParser()
 parser.add_argument("--model", type=str, required=True)
@@ -38,9 +36,7 @@ model = transformer_lens.HookedTransformer.from_pretrained(
     model_name, device=device, dtype=torch.bfloat16
 )
 
-dataset = load_dataset(
-    "EleutherAI/the_pile_deduplicated", split="train", streaming=True
-)
+dataset = load_dataset("EleutherAI/the_pile_deduplicated", split="train", streaming=True)
 dataloader = DataLoader(dataset, batch_size=4)
 
 
@@ -84,8 +80,7 @@ with torch.no_grad():
                 avg_batch = activations_batch.mean(dim=-1, keepdim=True)
             else:
                 avg_batch = (
-                    avg_batch * (1 - alpha)
-                    + activations_batch.mean(dim=-1, keepdim=True) * alpha
+                    avg_batch * (1 - alpha) + activations_batch.mean(dim=-1, keepdim=True) * alpha
                 )
 
             activations_batch = activations_batch - avg_batch
@@ -108,4 +103,6 @@ with torch.no_grad():
             if processed_tokens >= max_tokens:
                 break
 
-np.save(f"dist/{MODEL_MAP[args.model]}_{args.num_tokens}.npy", torch.stack(all_distances).cpu().numpy())
+np.save(
+    f"dist/{MODEL_MAP[args.model]}_{args.num_tokens}.npy", torch.stack(all_distances).cpu().numpy()
+)
