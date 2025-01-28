@@ -8,7 +8,7 @@ import numpy as np
 import torch
 from huggingface_hub import snapshot_download
 from natsort import natsorted
-from safetensors.torch import load_model, save_model, safe_open
+from safetensors.torch import safe_open, save_model
 from torch import Tensor, nn
 
 from .config import SaeConfig
@@ -228,14 +228,14 @@ class Sae(nn.Module):
         state_dict = safe_open(str(path / "sae.safetensors"), framework="torch")
         state_dict = {k: state_dict.get_tensor(k).squeeze() for k in state_dict.keys()}
         sae.load_state_dict(state_dict)
-        
-        #load_model(
+
+        # load_model(
         #    model=sae,
         #    filename=str(path / "sae.safetensors"),
         #    device=str(device),
         #    # TODO: Maybe be more fine-grained about this in the future?
         #    strict=decoder,
-        #)
+        # )
         return sae
 
     def save_to_disk(self, path: Path | str):

@@ -22,11 +22,18 @@ cmap = LinearSegmentedColormap.from_list("paper", palette)
 T = TypeVar("T")
 
 CLUSTER_MAP = {
-    "pythia-160m-deduped": {}, 
-    "pythia-410m-deduped": {},           
+    "pythia-160m-deduped": {},
+    "pythia-410m-deduped": {},
     "gemma-2-2b": {
-        "k6": [[0, 0], [1, 1, 1, 1], [2, 2, 2, 2, 2], [3, 3, 3, 3, 3, 3, 3], [4, 4, 4, 4, 4, 4], [5, 5]]
-    }
+        "k6": [
+            [0, 0],
+            [1, 1, 1, 1],
+            [2, 2, 2, 2, 2],
+            [3, 3, 3, 3, 3, 3, 3],
+            [4, 4, 4, 4, 4, 4],
+            [5, 5],
+        ]
+    },
 }
 
 MODEL_MAP = {
@@ -37,8 +44,7 @@ MODEL_MAP = {
 
 
 def load_sae(model, act_fn, layer):
-
-    path = "../saes/pythia_160m-jr/baseline/8/"
+    pass
 
 
 def get_lr_scheduler(
