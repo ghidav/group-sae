@@ -30,7 +30,7 @@ else:
     device = torch.device("cpu")
 
 os.environ["HF_TOKEN"] = args.hf_token
-
+os.makedirs("dist", exist_ok=True)
 
 # Load model and dataset
 model_name = "google/" + args.model if "gemma" in args.model else "EleutherAI/" + args.model
