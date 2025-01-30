@@ -112,7 +112,8 @@ sae_batch_size = 1024
 sae_n_batches = num_sentences // sae_batch_size
 
 print(
-    f"Generating datasets from {num_sentences} sentences. In total, {num_sentences * seq_len / 1e6:.1f}M tokens will be processed..."
+    f"Generating datasets from {num_sentences} sentences. "
+    f"In total, {num_sentences * seq_len / 1e6:.1f}M tokens will be processed..."
 )
 
 
@@ -220,8 +221,10 @@ def process_sae_group(path, prefix, is_cluster=False):
         [sae.to(device) for sae in saes.values()]
         layer_ranges = list(saes.keys())
 
-    for l in layer_ranges:
-        sae = saes[l]
+    for layer in layer_ranges:
+        sae = saes[layer]
+        if sae.W_dec is None:
+            raise RuntimeError(f"W_dec is not available for the SAE at layer {layer}")
         num_latents = sae.W_dec.size(0)
         f_ids = torch.randint(0, num_latents, (int(args.n_features),))
         W_dec = sae.W_dec.detach().clone()[f_ids]
@@ -229,11 +232,11 @@ def process_sae_group(path, prefix, is_cluster=False):
         # First pass: Compute max_acts
         max_acts_list = []
         if is_cluster:
-            l_start, l_end = map(int, l.split("-"))
+            l_start, l_end = map(int, layer.split("-"))
             layers = list(range(l_start, l_end + 1))
             selected_acts, tokens = get_act_dict([f"layers.{i}" for i in layers])
         else:
-            selected_acts, tokens = get_act_dict([f"layers.{l}"])
+            selected_acts, tokens = get_act_dict([f"layers.{layer}"])
 
         # Process in batches to compute max_acts
         for i in range(sae_n_batches + 1):
@@ -277,7 +280,7 @@ def process_sae_group(path, prefix, is_cluster=False):
             latents_generator(), max_acts[:, f_ids], f_ids, W_dec, tokens
         )
 
-        output_name = f"{prefix}-{l}" if is_cluster else f"{prefix}-{l}"
+        output_name = f"{prefix}-{layer}" if is_cluster else f"{prefix}-{layer}"
         with open(f"data/{MODEL_MAP[args.model]}/{output_name}.json", "w") as f:
             json.dump(feature_dataset, f)
 

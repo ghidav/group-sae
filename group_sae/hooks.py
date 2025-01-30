@@ -18,8 +18,7 @@ class HookWithKwargs(Protocol):
         *,
         module_to_name: Dict[Module, str],
         hidden_dict: Dict[str, Tensor],
-    ) -> None:
-        ...
+    ) -> None: ...
 
 
 def forward_hook_wrapper(
