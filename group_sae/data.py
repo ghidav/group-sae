@@ -187,7 +187,7 @@ def chunk_and_tokenize_streaming(
 
 
 def get_columns_all_equal(
-    dataset: Union[Dataset, DatasetDict, IterableDataset, IterableDatasetDict]
+    dataset: Union[Dataset, DatasetDict, IterableDataset, IterableDatasetDict],
 ) -> List[str]:
     """Get a single list of columns in a `Dataset` or `DatasetDict`.
 

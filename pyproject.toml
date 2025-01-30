@@ -21,7 +21,9 @@ dependencies = [
     "transformers",
     "numpy",
     "pandas",
-    "pre-commit"
+    "pre-commit",
+    "transformer_lens==2.11.0",
+    "sae_lens==5.3.3"
 ]
 version = "0.1.0"
 
