@@ -17,6 +17,7 @@ parser = ArgumentParser()
 parser.add_argument("--model", type=str, required=True)
 parser.add_argument("--num_tokens", type=float, required=True)
 parser.add_argument("--hf_token", type=str, required=True)
+parser.add_argument("--dtype", type=str, default="bfloat16")
 args = parser.parse_args()
 
 # Setup
@@ -33,7 +34,7 @@ os.makedirs("dist", exist_ok=True)
 # Load model and dataset
 model_name = "google/" + args.model if "gemma" in args.model else "EleutherAI/" + args.model
 model = transformer_lens.HookedTransformer.from_pretrained(
-    model_name, device=device, dtype=torch.bfloat16
+    model_name, device=device, dtype=args.dtype
 )
 
 dataset = load_dataset("EleutherAI/the_pile_deduplicated", split="train", streaming=True)
