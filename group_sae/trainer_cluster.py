@@ -360,6 +360,9 @@ class ClusterSaeTrainer:
                     running_mean_act_norm[name] = update_running_mean(
                         running_mean_act_norm[name], l2_norm, batch_idx + 1
                     )
+                running_mean_act_norm[name] = self.maybe_all_reduce(
+                    running_mean_act_norm[name], "mean"
+                )
 
             # For every cluster of layers, sample one activation per layer
             cluster_layers_dict = {}
