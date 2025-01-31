@@ -279,12 +279,7 @@ class Sae(nn.Module):
         # Encode, decode and compute residual
         feature_acts = self.pre_acts(x)
         if self.cfg.k <= 0:
-            if self.jumprelu:
-                # JumpReLU SAE
-                threshold = torch.exp(self.log_threshold)
-                feature_acts = cast(
-                    torch.Tensor, JumpReLU.apply(feature_acts, threshold, self.bandwidth)
-                )
+            # ReLU/JumpReLU SAE
             top_acts, top_indices = None, None
         else:
             # Top-k SAE
@@ -306,6 +301,12 @@ class Sae(nn.Module):
                 raise ValueError("`top_indices` must be provided if `top_acts` is provided.")
             y = decoder_impl(top_indices, top_acts.to(self.dtype), self.W_dec.mT)
             return y + self.b_dec
+        if self.jumprelu:
+            # JumpReLU SAE
+            threshold = torch.exp(self.log_threshold)
+            feature_acts = cast(
+                torch.Tensor, JumpReLU.apply(feature_acts, threshold, self.bandwidth)
+            )
         return feature_acts @ self.W_dec + self.b_dec
 
     def forward(self, x: Tensor, dead_mask: Tensor | None = None) -> ForwardOutput:
