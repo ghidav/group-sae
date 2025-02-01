@@ -39,6 +39,8 @@ CLUSTER_MAP = {
 MODEL_MAP = {
     "pythia-160m-deduped": "pythia_160m",
     "pythia-410m-deduped": "pythia_410m",
+    "pythia-1b-deduped": "pythia_1b",
+    "pythia-1.4b-deduped": "pythia_1.4b",
     "gemma-2-2b": "gemma2_2b",
 }
 
