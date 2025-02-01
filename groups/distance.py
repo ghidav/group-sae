@@ -10,6 +10,7 @@ from datasets import load_dataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from transformer_lens.utils import get_act_name
+import json
 
 from group_sae.utils import MODEL_MAP
 
@@ -17,7 +18,7 @@ parser = ArgumentParser()
 parser.add_argument("--model", type=str, required=True)
 parser.add_argument("--num_tokens", type=float, required=True)
 parser.add_argument("--method", type=str, required=True)
-parser.add_argument("--hf_token", type=str, required=True)
+parser.add_argument("--hf_token", type=str, default="")
 parser.add_argument("--dtype", type=str, default="bfloat16")
 args = parser.parse_args()
 
@@ -29,8 +30,19 @@ elif torch.backends.mps.is_available():
 else:
     device = torch.device("cpu")
 
-os.environ["HF_TOKEN"] = args.hf_token
+if args.hf_token != "":
+    os.environ["HF_TOKEN"] = args.hf_token
+else:
+    try:
+        with open("keys.json", "r") as f:
+            keys = json.load(f)
+        os.environ["HF_TOKEN"] = keys["huggingface"]
+    except FileNotFoundError:
+        raise ValueError("No Hugging Face token provided")
+    
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 os.makedirs("dist", exist_ok=True)
+print(BASE_DIR)
 
 # Distance functions
 def angular_distance(W1: torch.Tensor, W2: torch.Tensor) -> torch.Tensor:
@@ -40,7 +52,7 @@ def angular_distance(W1: torch.Tensor, W2: torch.Tensor) -> torch.Tensor:
 
 def cka(W1: torch.Tensor, W2: torch.Tensor) -> torch.Tensor:
     n = W1.size(0)
-    H = torch.eye(n, device=W1.device) - torch.ones((n, n), device=W1.device) / n
+    H = torch.eye(n, device=W1.device, dtype=W1.dtype) - torch.ones((n, n), device=W1.device, dtype=W1.dtype) / n
     K = W1 @ W1.T
     L = W2 @ W2.T
 
@@ -97,9 +109,9 @@ with torch.no_grad():
 
             # Center activations
             if avg_batch is None: # First iter
-                avg_batch = activations_batch.mean(dim=-1, keepdim=True).mean(dim=-1, keepdim=True) # [L, 1, 1]
+                avg_batch = activations_batch.mean(dim=1, keepdim=True) # [L, 1, D]
             else: # Update
-                avg_update = activations_batch.mean(dim=-1, keepdim=True).mean(dim=-1, keepdim=True)
+                avg_update = activations_batch.mean(dim=1, keepdim=True)
                 avg_batch = (
                     avg_batch * (1 - alpha) + avg_update * alpha
                 )
