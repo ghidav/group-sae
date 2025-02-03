@@ -438,6 +438,7 @@ class SaeTrainer:
                         + sparsity_loss
                         + self.cfg.auxk_alpha * out.auxk_loss
                         + out.multi_topk_fvu / 8
+                        + 3e-6 * out.pre_act_loss
                     )
                     loss.div(acc_steps).backward()
 

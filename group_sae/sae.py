@@ -42,6 +42,9 @@ class ForwardOutput(NamedTuple):
     l2_loss: Tensor
     """L2 loss over the reconstruction"""
 
+    pre_act_loss: Tensor
+    """Pre-activation loss for JumpReLU architectures"""
+
 
 def rectangle(x: torch.Tensor) -> torch.Tensor:
     return ((x > -0.5) & (x < 0.5)).to(x)
@@ -342,7 +345,7 @@ class Sae(nn.Module):
 
         sparsity_loss = sae_out.new_tensor(0.0)
         if self.cfg.k <= 0:
-            if self.jumprelu:
+            if self.jumprelu and not self.cfg.tanh_l1_loss:
                 pre_acts_thr = cast(
                     torch.Tensor,
                     Step.apply(pre_acts, torch.exp(self.log_threshold), self.bandwidth),
@@ -350,8 +353,24 @@ class Sae(nn.Module):
                 sparsity_loss = torch.sum(pre_acts_thr, dim=-1).mean()
             elif self.W_dec is not None:
                 # Scale features by the norm of their directions
-                weighted_feature_acts = feature_acts * self.W_dec.norm(dim=1)
-                sparsity_loss = weighted_feature_acts.norm(p=1, dim=-1).mean()
+                if self.cfg.tanh_l1_loss:
+                    weighted_feature_acts = 4 * feature_acts.abs() * self.W_dec.norm(dim=1)
+                    weighted_feature_acts = torch.tanh(weighted_feature_acts)
+                    sparsity_loss = weighted_feature_acts.sum(dim=-1).mean()
+                else:
+                    weighted_feature_acts = feature_acts * self.W_dec.norm(dim=1)
+                    sparsity_loss = weighted_feature_acts.norm(p=1, dim=-1).mean()
+
+        pre_act_loss = sae_out.new_tensor(0.0)
+        if self.jumprelu and self.cfg.pre_act_loss and self.W_dec is not None:
+            pre_act_loss = (
+                (
+                    torch.nn.functional.relu(self.log_threshold.exp() - feature_acts)
+                    * self.W_dec.norm(dim=1)
+                )
+                .sum(-1)
+                .mean()
+            )
 
         return ForwardOutput(
             sae_out,
@@ -363,6 +382,7 @@ class Sae(nn.Module):
             multi_topk_fvu,
             sparsity_loss,
             l2_loss,
+            pre_act_loss,
         )
 
     @torch.no_grad()

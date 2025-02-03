@@ -51,6 +51,12 @@ class SaeConfig(Serializable):
     """Whether to initialize the decoder bias as zeros.
     If False, it is initialized as the estimated geometric median."""
 
+    pre_act_loss: bool = False
+    """Whether to use the pre-activation loss or not"""
+
+    tanh_l1_loss: bool = False
+    """Whether to use the tanh L1 loss or not"""
+
 
 @dataclass
 class TrainConfig(Serializable):
