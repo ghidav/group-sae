@@ -183,3 +183,4 @@ cfg.json
 saes/*
 interp/data/*
 */**/wandb
+keys.json
