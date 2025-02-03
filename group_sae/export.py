@@ -1,3 +1,4 @@
+import copy
 import warnings
 
 import torch
@@ -18,6 +19,7 @@ def to_sae_lens(
     dataset_trust_remote_code: bool = True,
     dtype: str = "float32",
     device: str = "cuda",
+    sae_lens_version: str = "5.3.3",
 ) -> SAE:
     if sae_cfg.k > 0:
         architecture = "standard"
@@ -65,11 +67,11 @@ def to_sae_lens(
         normalize_activations=normalize_activations,
         dtype=dtype,
         device=device,
-        sae_lens_training_version="4.4.5",
+        sae_lens_training_version=sae_lens_version,
         activation_fn_kwargs={} if sae_cfg.k <= 0 else {"k": sae_cfg.k},
     )
     state_dict = sae.state_dict()
-    state_dict = {k: v.cpu() for k, v in state_dict.items()}
+    state_dict = {k: copy.deepcopy(v.cpu()) for k, v in state_dict.items()}
     state_dict["W_enc"] = state_dict.pop("encoder.weight").T.contiguous()
     state_dict["b_enc"] = state_dict.pop("encoder.bias")
     if "log_threshold" in state_dict:
