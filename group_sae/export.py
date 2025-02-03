@@ -80,4 +80,7 @@ def to_sae_lens(
         warnings.warn("No norm_scaling_factor provided. Using default value of 1.0", UserWarning)
         norm_scaling_factor = 1.0
     sae_lens_sae.fold_activation_norm_scaling_factor(norm_scaling_factor)
+    if sae.cfg.jumprelu:
+        # We do not apply ReLU before sending the activations to the JumpReLU function.
+        sae_lens_sae.activation_fn = torch.nn.Identity()
     return sae_lens_sae
