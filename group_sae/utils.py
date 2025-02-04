@@ -3,10 +3,13 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, Any, Dict, Iterable, Type, TypeVar, cast
 
+import numpy as np
 import torch
+import torch.nn as nn
 from accelerate.utils import send_to_device
-from torch import Tensor, nn
+from torch import Tensor
 from torch.utils.data import DataLoader
+from transformer_lens import HookedTransformerConfig
 from transformers import PreTrainedModel
 
 from group_sae.hooks import forward_hook_wrapper
@@ -294,3 +297,19 @@ else:
         decoder_impl = eager_decode
     else:
         decoder_impl = triton_decode
+
+
+def get_device_for_block(layer, cfg: HookedTransformerConfig, device: str | None = None):
+    """Equally and sequentially distribute the blocks across the devices"""
+    if device is None:
+        if cfg.device is None:
+            raise ValueError("No device specified in either the config or the function")
+        device = cfg.device
+    device = torch.device(device)
+    if device.type == "cpu":
+        return device
+    devices = list(range(cfg.n_devices))
+    layers_split = np.array_split(range(cfg.n_layers), cfg.n_devices)
+    for i, layers in enumerate(layers_split):
+        if layer in layers:
+            return torch.device(device.type, devices[i])

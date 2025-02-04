@@ -3,29 +3,11 @@ import os
 import random
 import re
 
-import numpy as np
-import torch
 import torch as t
 import torch.nn as nn
 import torch.nn.functional as F
 from sae_lens import SAE
 from transformer_lens import HookedTransformerConfig
-
-
-def get_device_for_block(layer, cfg: HookedTransformerConfig, device: str | None = None):
-    """Equally and sequentially distribute the blocks across the devices"""
-    if device is None:
-        if cfg.device is None:
-            raise ValueError("No device specified in either the config or the function")
-        device = cfg.device
-    device = torch.device(device)
-    if device.type == "cpu":
-        return device
-    devices = list(range(cfg.n_devices))
-    layers_split = np.array_split(range(cfg.n_layers), cfg.n_devices)
-    for i, layers in enumerate(layers_split):
-        if layer in layers:
-            return torch.device(device.type, devices[i])
 
 
 class IdentitySAE(nn.Module):
