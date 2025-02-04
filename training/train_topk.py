@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     dataset = load_dataset(
         "NeelNanda/pile-small-tokenized-2b",
-        streaming=True,
+        streaming=False,
         split="train",
         trust_remote_code=True,
     )
