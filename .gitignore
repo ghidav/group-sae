@@ -182,6 +182,7 @@ cython_debug/
 cfg.json
 saes/*
 interp/data/*
+wandb/
 */**/wandb
 keys.json
 */**/effects*/
