@@ -286,8 +286,6 @@ class Sae(nn.Module):
         """Decode the features back to the input space."""
         if self.W_dec is None:
             raise RuntimeError("Decoder weight was not initialized.")
-        if not ((feature_acts is None) ^ (top_acts is None)):
-            raise ValueError("Exactly one of `feature_acts` or `top_acts` should be provided.")
         if top_acts is not None:
             if top_indices is None:
                 raise ValueError("`top_indices` must be provided if `top_acts` is provided.")
