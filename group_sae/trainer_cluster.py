@@ -3,6 +3,7 @@ import os
 import shutil
 import warnings
 from collections import defaultdict
+from contextlib import nullcontext
 from dataclasses import asdict
 
 import torch
@@ -21,6 +22,7 @@ from .sae import Sae
 from .utils import (
     CycleIterator,
     L1Scheduler,
+    chunk_almost_equal_sum,
     geometric_median,
     get_layer_list,
     get_lr_scheduler,
@@ -38,11 +40,6 @@ class ClusterSaeTrainer:
         if cfg.hook is None:
             warnings.warn("No hook function specified, using the standard hook.")
             cfg.hook = standard_hook
-        if cfg.distribute_modules:
-            raise ValueError(
-                "Distributing modules is not supported in `SaeTrainer` with clusters. "
-                "Please set `distribute_modules=False`."
-            )
         if cfg.hookpoints or cfg.layers:
             raise ValueError(
                 "The `hookpoints` and `layers` parameters "
@@ -98,7 +95,7 @@ class ClusterSaeTrainer:
         device = model.device
         self.saes = {
             cluster_name: Sae(cluster_shapes[cluster_name][0][-1], cfg.sae, device)
-            for cluster_name in cfg.cluster_hookpoints
+            for cluster_name in self.local_hookpoints()
         }  # We suppose the input shapes are the same
 
         # Dataloader
@@ -342,9 +339,6 @@ class ClusterSaeTrainer:
                 for handle in handles:
                     handle.remove()
 
-            if self.cfg.distribute_modules:
-                hidden_dict = self.scatter_hiddens(hidden_dict)
-
             # Normalize the activations
             if self.cfg.normalize_activations:
                 with torch.no_grad():
@@ -370,7 +364,7 @@ class ClusterSaeTrainer:
             if self.cfg.clusters is not None:
                 # Collect the activations for each layer in a single tensor
                 activations_by_layer = torch.stack(
-                    [hidden_dict[hook] for hook in self.local_hookpoints()], dim=1
+                    [hidden_dict[hook] for hook in self.cfg.hookpoints], dim=1
                 )  # B x L x D
                 B, L, D = activations_by_layer.shape
 
@@ -382,7 +376,10 @@ class ClusterSaeTrainer:
                     sampled_cluster_activations = torch.gather(
                         cluster_activations, 1, indices
                     )  # B x 1 x D
-                    cluster_activations_dict[cluster_name] = sampled_cluster_activations
+                    cluster_activations_dict[cluster_name] = sampled_cluster_activations[:, 0, :]
+
+            if self.cfg.distribute_modules:
+                cluster_activations_dict = self.scatter_hiddens(cluster_activations_dict)
 
             for name, hiddens in cluster_activations_dict.items():
                 raw = self.saes[name]  # 'raw' never has a DDP wrapper
@@ -419,62 +416,68 @@ class ClusterSaeTrainer:
                 wrapped = maybe_wrapped[name]
 
                 # Save memory by chunking the activations
-                for chunk in hiddens.chunk(self.cfg.micro_acc_steps):
-                    out = wrapped(
-                        chunk,
-                        dead_mask=(
-                            self.num_tokens_since_fired[name] > self.cfg.dead_feature_threshold
-                            if self.cfg.auxk_alpha > 0
-                            else None
-                        ),
-                    )
+                with wrapped.join() if ddp else nullcontext():
+                    for chunk in hiddens.chunk(self.cfg.micro_acc_steps):
+                        out = wrapped(
+                            chunk,
+                            dead_mask=(
+                                self.num_tokens_since_fired[name] > self.cfg.dead_feature_threshold
+                                if self.cfg.auxk_alpha > 0
+                                else None
+                            ),
+                        )
 
-                    avg_fvu[name] += float(self.maybe_all_reduce(out.fvu.detach()) / denom)
-                    avg_l0[name] += float(
-                        self.maybe_all_reduce(
-                            (out.feature_acts.detach() > 0).float().sum(-1).mean()
+                        avg_fvu[name] += float(self.maybe_all_reduce(out.fvu.detach()) / denom)
+                        avg_l0[name] += float(
+                            self.maybe_all_reduce(
+                                (out.feature_acts.detach() > 0).float().sum(-1).mean()
+                            )
+                            / denom
                         )
-                        / denom
-                    )
-                    avg_l2[name] += float(self.maybe_all_reduce(out.l2_loss.detach()) / denom)
-                    if self.cfg.auxk_alpha > 0:
-                        avg_auxk_loss[name] += float(
-                            self.maybe_all_reduce(out.auxk_loss.detach()) / denom
-                        )
-                    if self.cfg.sae.multi_topk:
-                        avg_multi_topk_fvu[name] += float(
-                            self.maybe_all_reduce(out.multi_topk_fvu.detach()) / denom
-                        )
-                    if self.cfg.sae.k <= 0:
-                        avg_l1[name] += float(self.maybe_all_reduce(out.l1_loss.detach()) / denom)
+                        avg_l2[name] += float(self.maybe_all_reduce(out.l2_loss.detach()) / denom)
+                        if self.cfg.auxk_alpha > 0:
+                            avg_auxk_loss[name] += float(
+                                self.maybe_all_reduce(out.auxk_loss.detach()) / denom
+                            )
+                        if self.cfg.sae.multi_topk:
+                            avg_multi_topk_fvu[name] += float(
+                                self.maybe_all_reduce(out.multi_topk_fvu.detach()) / denom
+                            )
+                        if self.cfg.sae.k <= 0:
+                            avg_l1[name] += float(
+                                self.maybe_all_reduce(out.l1_loss.detach()) / denom
+                            )
 
-                    if self.cfg.use_l2_loss:
-                        recon_loss = out.l2_loss
-                    else:
-                        recon_loss = out.fvu
-                    if self.cfg.sae.k <= 0:
-                        if self.cfg.sae.jumprelu and self.cfg.sae.jumprelu_target_l0 is not None:
-                            l0 = (out.l1_loss / self.cfg.sae.jumprelu_target_l0 - 1) ** 2
+                        if self.cfg.use_l2_loss:
+                            recon_loss = out.l2_loss
                         else:
-                            l0 = out.l1_loss
-                        sparsity_loss = l0
-                        if self.l1_scheduler is not None:
-                            sparsity_loss *= self.l1_scheduler.current_l1_coefficient
-                    else:
-                        sparsity_loss = 0.0
+                            recon_loss = out.fvu
+                        if self.cfg.sae.k <= 0:
+                            if (
+                                self.cfg.sae.jumprelu
+                                and self.cfg.sae.jumprelu_target_l0 is not None
+                            ):
+                                l0 = (out.l1_loss / self.cfg.sae.jumprelu_target_l0 - 1) ** 2
+                            else:
+                                l0 = out.l1_loss
+                            sparsity_loss = l0
+                            if self.l1_scheduler is not None:
+                                sparsity_loss *= self.l1_scheduler.current_l1_coefficient
+                        else:
+                            sparsity_loss = 0.0
 
-                    loss = (
-                        recon_loss
-                        + sparsity_loss
-                        + self.cfg.auxk_alpha * out.auxk_loss
-                        + out.multi_topk_fvu / 8
-                    )
-                    loss.div(acc_steps).backward()
+                        loss = (
+                            recon_loss
+                            + sparsity_loss
+                            + self.cfg.auxk_alpha * out.auxk_loss
+                            + out.multi_topk_fvu / 8
+                        )
+                        loss.div(acc_steps).backward()
 
-                    # Update the did_fire mask
-                    if out.topk_indices is not None:
-                        did_fire[name][out.topk_indices.flatten()] = True
-                        self.maybe_all_reduce(did_fire[name], "max")  # max is boolean "any"
+                        # Update the did_fire mask
+                        if out.topk_indices is not None:
+                            did_fire[name][out.topk_indices.flatten()] = True
+                            self.maybe_all_reduce(did_fire[name], "max")  # max is boolean "any"
 
                 # Clip gradient norm independently for each SAE
                 torch.nn.utils.clip_grad_norm_(raw.parameters(), 1.0)
@@ -572,7 +575,11 @@ class ClusterSaeTrainer:
         pbar.close()
 
     def local_hookpoints(self) -> list[str]:
-        return self.module_plan[dist.get_rank()] if self.module_plan else self.cfg.hookpoints
+        return (
+            self.module_plan[dist.get_rank()]
+            if self.module_plan
+            else list(self.cfg.cluster_hookpoints.keys())
+        )
 
     def maybe_all_cat(self, x: Tensor) -> Tensor:
         """Concatenate a tensor across all processes."""
@@ -601,21 +608,35 @@ class ClusterSaeTrainer:
 
     def distribute_modules(self):
         """Prepare a plan for distributing modules across ranks."""
+        if self.cfg.cluster_hookpoints is None or not self.cfg.cluster_hookpoints:
+            raise ValueError(
+                "No clusters specified. Please specify the `cfg.clusters_hookpoints` parameter."
+            )
         if not self.cfg.distribute_modules:
             self.module_plan = []
             print(f"Training on modules: {self.cfg.hookpoints}")
             return
 
-        layers_per_rank, rem = divmod(len(self.cfg.hookpoints), dist.get_world_size())
-        assert rem == 0, "Number of modules must be divisible by world size"
+        len_to_cluster = defaultdict(list)
+        for k, v in self.cfg.cluster_hookpoints.items():
+            len_to_cluster[len(v)].append(k)
+        clusters_per_rank = chunk_almost_equal_sum(
+            list(len(v) for v in self.cfg.cluster_hookpoints.values()),
+            dist.get_world_size(),
+        )
 
         # Each rank gets a subset of the layers
-        self.module_plan = [
-            self.cfg.hookpoints[start : start + layers_per_rank]
-            for start in range(0, len(self.cfg.hookpoints), layers_per_rank)
-        ]
-        for rank, modules in enumerate(self.module_plan):
-            print(f"Rank {rank} modules: {modules}")
+        self.module_plan = []
+        for chunk in clusters_per_rank:
+            self.module_plan.append([len_to_cluster[v].pop(0) for v in chunk])
+
+        if dist.get_rank() == 0:
+            for rank, modules in enumerate(self.module_plan):
+                print(
+                    f"Rank {rank} modules: {modules}, "
+                    "layers to train on: "
+                    f"{sum(len(self.cfg.cluster_hookpoints[m]) for m in modules)}"
+                )
 
     def scatter_hiddens(self, hidden_dict: dict[str, Tensor]) -> dict[str, Tensor]:
         """Scatter & gather the hidden states across ranks."""

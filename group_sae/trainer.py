@@ -3,9 +3,11 @@ import os
 import shutil
 import warnings
 from collections import defaultdict
+from contextlib import nullcontext
 from dataclasses import asdict
 from fnmatch import fnmatchcase
 
+import numpy as np
 import torch
 import torch.distributed as dist
 from accelerate.utils import send_to_device
@@ -389,62 +391,68 @@ class SaeTrainer:
                 wrapped = maybe_wrapped[name]
 
                 # Save memory by chunking the activations
-                for chunk in hiddens.chunk(self.cfg.micro_acc_steps):
-                    out = wrapped(
-                        chunk,
-                        dead_mask=(
-                            self.num_tokens_since_fired[name] > self.cfg.dead_feature_threshold
-                            if self.cfg.auxk_alpha > 0
-                            else None
-                        ),
-                    )
+                with wrapped.join() if ddp else nullcontext():
+                    for chunk in hiddens.chunk(self.cfg.micro_acc_steps):
+                        out = wrapped(
+                            chunk,
+                            dead_mask=(
+                                self.num_tokens_since_fired[name] > self.cfg.dead_feature_threshold
+                                if self.cfg.auxk_alpha > 0
+                                else None
+                            ),
+                        )
 
-                    avg_fvu[name] += float(self.maybe_all_reduce(out.fvu.detach()) / denom)
-                    avg_l0[name] += float(
-                        self.maybe_all_reduce(
-                            (out.feature_acts.detach() > 0).float().sum(-1).mean()
+                        avg_fvu[name] += float(self.maybe_all_reduce(out.fvu.detach()) / denom)
+                        avg_l0[name] += float(
+                            self.maybe_all_reduce(
+                                (out.feature_acts.detach() > 0).float().sum(-1).mean()
+                            )
+                            / denom
                         )
-                        / denom
-                    )
-                    avg_l2[name] += float(self.maybe_all_reduce(out.l2_loss.detach()) / denom)
-                    if self.cfg.auxk_alpha > 0:
-                        avg_auxk_loss[name] += float(
-                            self.maybe_all_reduce(out.auxk_loss.detach()) / denom
-                        )
-                    if self.cfg.sae.multi_topk:
-                        avg_multi_topk_fvu[name] += float(
-                            self.maybe_all_reduce(out.multi_topk_fvu.detach()) / denom
-                        )
-                    if self.cfg.sae.k <= 0:
-                        avg_l1[name] += float(self.maybe_all_reduce(out.l1_loss.detach()) / denom)
+                        avg_l2[name] += float(self.maybe_all_reduce(out.l2_loss.detach()) / denom)
+                        if self.cfg.auxk_alpha > 0:
+                            avg_auxk_loss[name] += float(
+                                self.maybe_all_reduce(out.auxk_loss.detach()) / denom
+                            )
+                        if self.cfg.sae.multi_topk:
+                            avg_multi_topk_fvu[name] += float(
+                                self.maybe_all_reduce(out.multi_topk_fvu.detach()) / denom
+                            )
+                        if self.cfg.sae.k <= 0:
+                            avg_l1[name] += float(
+                                self.maybe_all_reduce(out.l1_loss.detach()) / denom
+                            )
 
-                    if self.cfg.use_l2_loss:
-                        recon_loss = out.l2_loss
-                    else:
-                        recon_loss = out.fvu
-                    if self.cfg.sae.k <= 0:
-                        if self.cfg.sae.jumprelu and self.cfg.sae.jumprelu_target_l0 is not None:
-                            l0 = (out.l1_loss / self.cfg.sae.jumprelu_target_l0 - 1) ** 2
+                        if self.cfg.use_l2_loss:
+                            recon_loss = out.l2_loss
                         else:
-                            l0 = out.l1_loss
-                        sparsity_loss = l0
-                        if self.l1_scheduler is not None:
-                            sparsity_loss *= self.l1_scheduler.current_l1_coefficient
-                    else:
-                        sparsity_loss = 0.0
+                            recon_loss = out.fvu
+                        if self.cfg.sae.k <= 0:
+                            if (
+                                self.cfg.sae.jumprelu
+                                and self.cfg.sae.jumprelu_target_l0 is not None
+                            ):
+                                l0 = (out.l1_loss / self.cfg.sae.jumprelu_target_l0 - 1) ** 2
+                            else:
+                                l0 = out.l1_loss
+                            sparsity_loss = l0
+                            if self.l1_scheduler is not None:
+                                sparsity_loss *= self.l1_scheduler.current_l1_coefficient
+                        else:
+                            sparsity_loss = 0.0
 
-                    loss = (
-                        recon_loss
-                        + sparsity_loss
-                        + self.cfg.auxk_alpha * out.auxk_loss
-                        + out.multi_topk_fvu / 8
-                    )
-                    loss.div(acc_steps).backward()
+                        loss = (
+                            recon_loss
+                            + sparsity_loss
+                            + self.cfg.auxk_alpha * out.auxk_loss
+                            + out.multi_topk_fvu / 8
+                        )
+                        loss.div(acc_steps).backward()
 
-                    # Update the did_fire mask
-                    if out.topk_indices is not None:
-                        did_fire[name][out.topk_indices.flatten()] = True
-                        self.maybe_all_reduce(did_fire[name], "max")  # max is boolean "any"
+                        # Update the did_fire mask
+                        if out.topk_indices is not None:
+                            did_fire[name][out.topk_indices.flatten()] = True
+                            self.maybe_all_reduce(did_fire[name], "max")  # max is boolean "any"
 
                 # Clip gradient norm independently for each SAE
                 torch.nn.utils.clip_grad_norm_(raw.parameters(), 1.0)
@@ -577,13 +585,11 @@ class SaeTrainer:
             print(f"Training on modules: {self.cfg.hookpoints}")
             return
 
-        layers_per_rank, rem = divmod(len(self.cfg.hookpoints), dist.get_world_size())
-        assert rem == 0, "Number of modules must be divisible by world size"
+        layers_per_rank = np.array_split(range(len(self.cfg.hookpoints)), dist.get_world_size())
 
         # Each rank gets a subset of the layers
         self.module_plan = [
-            self.cfg.hookpoints[start : start + layers_per_rank]
-            for start in range(0, len(self.cfg.hookpoints), layers_per_rank)
+            [self.cfg.hookpoints[i] for i in rank_layers] for rank_layers in layers_per_rank
         ]
         for rank, modules in enumerate(self.module_plan):
             print(f"Rank {rank} modules: {modules}")
