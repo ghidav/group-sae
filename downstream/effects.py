@@ -365,7 +365,7 @@ if __name__ == "__main__":
     if cluster:
         save_path += f"K{args.K}"
     else:
-        save_path += f"Baseline"
+        save_path += "Baseline"
     save_path += f"_{args.dataset}_n{num_examples}_{args.method}"
     if args.layer is not None:
         save_path += f"_layer{args.layer}"
