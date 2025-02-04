@@ -51,11 +51,6 @@ class IdentitySAE(nn.Module):
             return x
 
 
-########################
-### LOADING EXAMPLES ###
-########################
-
-
 def load_examples(dataset, num_examples, model, seed=12, pad_to_length=None, length=None):
     examples = []
     dataset_items = open(dataset).readlines()
@@ -134,11 +129,6 @@ def load_examples(dataset, num_examples, model, seed=12, pad_to_length=None, len
             break
 
     return examples
-
-
-####################
-### LOADING SAES ###
-####################
 
 
 def load_saes(

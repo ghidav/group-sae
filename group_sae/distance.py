@@ -13,7 +13,7 @@ class Distance:
     def update(self, *args, **kwargs):
         """Abstract method to update distance metrics."""
         raise NotImplementedError("Subclasses must implement this method.")
-    
+
     def value(self, *args, **kwargs):
         """Abstract method to return final distance value."""
         raise NotImplementedError("Subclasses must implement this method.")
@@ -49,7 +49,6 @@ class AngularDistance(Distance):
 
     def value(self) -> Tensor:
         return torch.stack(self.dist).mean()
-
 
 
 def linear_kernel(A: Tensor) -> Tensor:
@@ -116,9 +115,7 @@ class CKA(Distance):
         self_K = self.hisc_0(K, K)
         self_L = self.hisc_0(L, L)
 
-        cka = cross / torch.sqrt(
-            self_K * self_L + 1e-8
-        )  # Added epsilon for numerical stability
+        cka = cross / torch.sqrt(self_K * self_L + 1e-8)  # Added epsilon for numerical stability
         self.dist.append(1 - cka)
 
     def value(self) -> Tensor:
@@ -201,7 +198,9 @@ class ApproxCKA(Distance):
             B (Tensor): Second input tensor [N, D].
         """
         if A.shape != B.shape:
-            raise ValueError(f"Input tensors must have the same shape, got {A.shape} and {B.shape}")
+            raise ValueError(
+                f"Input tensors must have the same shape, got {A.shape} and {B.shape}"
+            )
 
         K = self.kernel_fn(A)
         L = self.kernel_fn(B)
@@ -219,27 +218,29 @@ class ApproxCKA(Distance):
             Tensor: The approximated CKA similarity measure.
         """
         if not self.cross:
-            raise RuntimeError("No stored HSIC_1 values. Call `update()` before computing `value()`.")
+            raise RuntimeError(
+                "No stored HSIC_1 values. Call `update()` before computing `value()`."
+            )
 
         cross = torch.stack(self.cross).mean()
         self_K = torch.stack(self.self_K).mean().sqrt()
         self_L = torch.stack(self.self_L).mean().sqrt()
 
         return 1 - cross / (self_K * self_L + 1e-8)  # Avoid division by zero
-    
+
 
 class SVCCA(Distance):
     """
     Singular Vector Canonical Correlation Analysis (SVCCA).
-    
+
     This method measures the similarity between two sets of representations
     based on the principal angles between their subspaces using Singular Value Decomposition (SVD).
-    
+
     Reference:
     - Golub, Gene H., and Charles F. Van Loan. "Matrix Computations." 3rd edition, Johns Hopkins University Press, 1996.
     """
 
-    def __init__(self, top_k: int = None):
+    def __init__(self, top_k: int | None = None):
         """
         Initializes the SVCAA class.
 
@@ -262,7 +263,9 @@ class SVCCA(Distance):
             Tensor: Cosines of the principal angles between subspaces.
         """
         if A.shape != B.shape:
-            raise ValueError(f"Input tensors must have the same shape, got {A.shape} and {B.shape}")
+            raise ValueError(
+                f"Input tensors must have the same shape, got {A.shape} and {B.shape}"
+            )
 
         # Compute SVD of both matrices
         U_A, _, _ = torch.linalg.svd(A, full_matrices=False)
@@ -270,8 +273,8 @@ class SVCCA(Distance):
 
         # Optionally truncate to top_k singular vectors
         if self.top_k is not None:
-            U_A = U_A[:, :self.top_k]
-            U_B = U_B[:, :self.top_k]
+            U_A = U_A[:, : self.top_k]
+            U_B = U_B[:, : self.top_k]
 
         # Compute singular values of U_A^T * U_B
         S = torch.linalg.svdvals(U_A.T @ U_B)
