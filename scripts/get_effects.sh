@@ -1,0 +1,1 @@
+python downstream/effects.py -d ioi -c resid_post -n 1024 -l 15 -m pythia-160m-deduped -mt attrib --sae_folder_path /home/fbelotti/group-sae/training/checkpoints/EleutherAI/pythia-160m-deduped-1024-jr-lambda-0.5-target-L0-128-lr-0.0007/step_139998 --device cuda --effects_dir effects_detach --batch_size 16 --n_devices 2
