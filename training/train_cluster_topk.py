@@ -1,4 +1,8 @@
+import os
+from datetime import timedelta
+
 import torch
+import torch.distributed as dist
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 from transformers import AutoModel
@@ -7,12 +11,22 @@ from group_sae import ClusterSaeTrainer, SaeConfig, TrainConfig
 from group_sae.hooks import from_tokens
 
 if __name__ == "__main__":
+    local_rank = os.environ.get("LOCAL_RANK")
+    ddp = local_rank is not None
+    rank = int(local_rank) if ddp else 0
+
+    if ddp:
+        torch.cuda.set_device(int(local_rank))
+        dist.init_process_group("nccl", timeout=timedelta(days=1))
+        if rank == 0:
+            print(f"Using DDP across {dist.get_world_size()} GPUs.")
+
     model_name = "EleutherAI/pythia-160m-deduped"
     l1_coefficient = 0.0
     max_seq_len = 1024
     target_l0 = None
     batch_size = 4
-    lr = 12e-4
+    lr = None
     k = 128
 
     # Define pythia-160m-clusters
@@ -56,7 +70,7 @@ if __name__ == "__main__":
 
     dataset = load_dataset(
         "NeelNanda/pile-small-tokenized-2b",
-        streaming=True,
+        streaming=False,
         split="train",
         trust_remote_code=True,
     )
@@ -73,10 +87,10 @@ if __name__ == "__main__":
     )
     cfg = TrainConfig(
         SaeConfig(
-            expansion_factor=16,
             k=k,
             jumprelu=False,
             multi_topk=False,
+            expansion_factor=16,
             init_b_dec_as_zeros=False,
             init_enc_as_dec_transpose=True,
         ),
@@ -87,19 +101,21 @@ if __name__ == "__main__":
         lr=lr,
         lr_scheduler_name="constant",
         lr_warmup_steps=0.0,
-        l1_coefficient=l1_coefficient,
         l1_warmup_steps=0.0,
+        l1_coefficient=l1_coefficient,
         max_seq_len=max_seq_len,
-        use_l2_loss=True,
+        use_l2_loss=False,
+        normalize_activations=1.0,
         num_training_tokens=1_000_000_000,
-        normalize_activations=1,
-        num_norm_estimation_tokens=2_000_000,
+        num_norm_estimation_tokens=5_000_000,
         run_name="checkpoints-clusters/{}-1024-topk-{}-lambda-{}-target-L0-{}-lr-{}".format(
             model_name, k, l1_coefficient, target_l0, lr
         ),
-        adam_betas=(0.9, 0.999),
         adam_epsilon=1e-8,
+        adam_betas=(0.9, 0.999),
+        keep_last_n_checkpoints=4,
         clusters=unique_cluster_flatten,
+        distribute_modules=ddp,
     )
     trainer = ClusterSaeTrainer(cfg, dataloader, model)
     trainer.fit()
