@@ -5,13 +5,14 @@ from functools import partial
 import numpy as np
 import torch
 import transformer_lens
+import transformer_lens.utilities
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from transformer_lens.utils import get_act_name
 
 from group_sae.distance import SVCCA, AngularDistance, ApproxCKA
-from group_sae.utils import MODEL_MAP
+from group_sae.utils import MODEL_MAP, get_device_for_block
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -22,6 +23,7 @@ if __name__ == "__main__":
     parser.add_argument("--dtype", type=str, default="bfloat16")
     parser.add_argument("--ctx_len", type=int, default=None)
     parser.add_argument("--batch_size", type=int, default=64)
+    parser.add_argument("--n_devices", type=int, default=1)
     args = parser.parse_args()
 
     # Setup
@@ -36,6 +38,9 @@ if __name__ == "__main__":
     os.makedirs("dist", exist_ok=True)
     print(BASE_DIR)
 
+    if args.n_devices > 1:
+        transformer_lens.utilities.devices.get_device_for_block_index = get_device_for_block
+
     # Load model and dataset
     model_name = "google/" + args.model if "gemma" in args.model else "EleutherAI/" + args.model
     model = transformer_lens.HookedTransformer.from_pretrained(
@@ -44,6 +49,7 @@ if __name__ == "__main__":
         dtype=args.dtype,
         default_prepend_bos=False,
         default_padding_side="right",
+        n_devices=args.n_devices,
     )
     d = model.cfg.d_model
 
@@ -89,7 +95,9 @@ if __name__ == "__main__":
                 _ = model.run_with_hooks(tokens, fwd_hooks=hooks)
 
                 cache = {k: torch.cat(v, dim=0) for k, v in cache.items()}
-                activations_batch = torch.stack([cache[k] for k in cache], dim=0)  # [L, N, D]
+                activations_batch = torch.stack(
+                    [cache[k].cpu() for k in cache], dim=0
+                )  # [L, N, D]
 
                 # Center activations
                 if avg_batch is None:  # First iter
