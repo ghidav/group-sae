@@ -33,8 +33,8 @@ if __name__ == "__main__":
         default=None,
         help="Path to the norm scaling factors. "
         "By default, the norm scaling factor are found in the checkpoint folder, e.g.: "
-        "'path/to/checkpoints/EleutherAI/pythia-160m-deduped/step_4999/scaling_factors.pt'. "
-        "If left unspecified, the norm scaling factor will be set to 1.0. ",
+        "'path/to/checkpoints/EleutherAI/pythia-160m-deduped/step_4999/scaling_factors.pt'."
+        " If left unspecified, the norm scaling factor will be set to 1.0. ",
     )
     parser.add_argument(
         "--hook_name",
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         raise ValueError(
             f"The hook layer {args.hook_layer} does not match the layer in the hook name {layer_in_hook_name}."
         )
-    
+
     current_sae_lens_version = version("sae_lens")
     if current_sae_lens_version != args.sae_lens_version:
         warnings.warn(

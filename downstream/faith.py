@@ -10,7 +10,7 @@ from hooks import sae_features_hook, sae_hook_pass_through
 from tqdm import tqdm
 from transformer_lens import HookedTransformer
 from transformer_lens.utils import get_act_name
-from utils import load_examples, load_saes, get_device_for_block
+from utils import get_device_for_block, load_examples, load_saes
 
 
 def test_circuit(
@@ -245,7 +245,7 @@ if __name__ == "__main__":
     if cluster:
         effects_path += f"K{args.K}"
     else:
-        effects_path += f"Baseline"
+        effects_path += "Baseline"
     effects_path += f"_{args.dataset}_n{n}_{args.method}"
     if args.layer is not None:
         effects_path += f"_layer{args.layer}"
@@ -263,9 +263,9 @@ if __name__ == "__main__":
         N = 0
         for i in range(0, len(test_tokens), args.batch_size):
             batch_score, batch_N = faithfulness(
-                test_tokens[i: i + args.batch_size],
-                clean_answers[i: i + args.batch_size],
-                patch_answers[i: i + args.batch_size],
+                test_tokens[i : i + args.batch_size],
+                clean_answers[i : i + args.batch_size],
+                patch_answers[i : i + args.batch_size],
                 effects,
                 dictionaries,
                 feature_avg=feature_avg,
@@ -275,7 +275,7 @@ if __name__ == "__main__":
             )
             # batch_score and batch_N are the mean faithfulness score and the number of active features in the current batch
             # Update them to the total score and the total number of active features
-            current_batch_len = len(test_tokens[i: i + args.batch_size])
+            current_batch_len = len(test_tokens[i : i + args.batch_size])
             score += batch_score * current_batch_len
             N += batch_N * current_batch_len
         score /= len(test_tokens)
@@ -289,9 +289,9 @@ if __name__ == "__main__":
     if cluster:
         faith_result_path += f"K{args.K}"
     else:
-        faith_result_path += f"Baseline"
+        faith_result_path += "Baseline"
     faith_result_path += f"_{args.dataset}_{args.method}_{args.what}"
     if args.layer is not None:
         faith_result_path += f"_layer{args.layer}"
-    faith_result_path += f".csv"
+    faith_result_path += ".csv"
     score_df.to_csv(faith_result_path, index=False)

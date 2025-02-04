@@ -1,10 +1,10 @@
 import json
 import os
 import random
+import re
 
 import numpy as np
 import torch
-import re
 import torch as t
 import torch.nn as nn
 import torch.nn.functional as F
