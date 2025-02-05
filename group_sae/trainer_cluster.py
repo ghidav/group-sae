@@ -478,7 +478,9 @@ class ClusterSaeTrainer:
                         # Update the did_fire mask
                         if out.topk_indices is not None:
                             did_fire[name][out.topk_indices.flatten()] = True
-                            self.maybe_all_reduce(did_fire[name], "max")  # max is boolean "any"
+                        else:
+                            did_fire[name][out.feature_acts.flatten() > 0] = True
+                        self.maybe_all_reduce(did_fire[name], "max")  # max is boolean "any"
 
                 # Clip gradient norm independently for each SAE
                 torch.nn.utils.clip_grad_norm_(raw.parameters(), 1.0)
