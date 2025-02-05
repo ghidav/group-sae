@@ -293,11 +293,6 @@ class Sae(nn.Module):
             return y + self.b_dec
         return feature_acts @ self.W_dec + self.b_dec
 
-    @torch.autocast(
-        device_type="cuda",
-        dtype=torch.bfloat16,
-        enabled=torch.cuda.is_bf16_supported() and torch.cuda.is_available(),
-    )
     def forward(self, x: Tensor, dead_mask: Tensor | None = None) -> ForwardOutput:
         # Encode, decode and compute residual
         pre_acts = self.encode(x)
