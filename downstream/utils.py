@@ -137,13 +137,13 @@ def load_saes(
         paths = []
         for path in os.listdir(sae_folder_path):
             sae_path = os.path.join(sae_folder_path, path, "sae_lens")
-            if not os.path.exists(sae_path):
-                raise FileNotFoundError(
-                    f"SAE path {sae_path} does not exist. "
-                    f"Please make sure that the every folder contains the folder `sae_lens`, where "
-                    "the converted SAE into the `sae_lens` format has to be found."
-                )
             if os.path.isdir(os.path.join(sae_folder_path, path)):
+                if not os.path.exists(sae_path):
+                    raise FileNotFoundError(
+                        f"SAE path {sae_path} does not exist. "
+                        f"Please make sure that the every folder contains the folder `sae_lens`, "
+                        "where the converted SAE into the `sae_lens` format has to be found."
+                    )
                 paths.append(sae_path)
         if layer is not None and layer > 0:
             paths = [path for path in paths if re.findall(r"\d+", path)[0] == str(layer)]

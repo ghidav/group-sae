@@ -22,11 +22,10 @@ logger = logging.getLogger(__name__)
 def patching_effect_attrib(
     clean, patch, model, modules, dictionaries, metric_fn, metric_kwargs=dict()
 ):
-    hidden_states_clean = {}
     grads = {}
+    hidden_states_clean = {}
 
     sae_hooks = []
-
     for i, module in enumerate(modules):
         dictionary = dictionaries[module]
         sae_hooks.append(
@@ -57,7 +56,7 @@ def patching_effect_attrib(
             )
 
         with t.no_grad():
-            corr_logits = model.run_with_hooks(patch, fwd_hooks=sae_hooks)
+            model.run_with_hooks(patch, fwd_hooks=sae_hooks)
 
     effects = {}
     deltas = {}
@@ -94,7 +93,7 @@ def patching_effect_ig(
         )
 
     # First pass to get clean logits and metric
-    logits_clean = model.run_with_hooks(clean, fwd_hooks=sae_hooks)
+    model.run_with_hooks(clean, fwd_hooks=sae_hooks)
 
     hidden_states_patch = {}
     sae_hooks_patch = []
@@ -105,7 +104,7 @@ def patching_effect_ig(
         )
 
     with t.no_grad():
-        logits_patch = model.run_with_hooks(patch, fwd_hooks=sae_hooks_patch)
+        model.run_with_hooks(patch, fwd_hooks=sae_hooks_patch)
 
     # Integrated gradients computation
     grads = {}
@@ -217,7 +216,10 @@ if __name__ == "__main__":
         "-l",
         type=int,
         default=15,
-        help="The max length (if using sum aggregation) or exact length (if not aggregating) of examples.",
+        help=(
+            "The max length (if using sum aggregation) or exact length "
+            "(if not aggregating) of examples."
+        ),
     )
     parser.add_argument(
         "--model",
@@ -231,6 +233,12 @@ if __name__ == "__main__":
         type=str,
         default="saes",
         help="Path to all dictionaries for your language model.",
+    )
+    parser.add_argument(
+        "--task_dir",
+        type=str,
+        default="tasks",
+        help="The directory to load the task dataset.",
     )
     parser.add_argument(
         "--batch_size",
@@ -294,7 +302,7 @@ if __name__ == "__main__":
         )
         modules = [k for k in modules if k in dictionaries.keys()]
 
-    data_path = f"tasks/{args.dataset}.json"
+    data_path = f"{args.task_dir}/{args.dataset}.json"
     examples = load_examples(data_path, args.num_examples, model, length=args.example_length)
     print(f"Loaded {len(examples)} examples from dataset {args.dataset}.")
 

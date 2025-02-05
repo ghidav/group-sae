@@ -54,8 +54,7 @@ def test_circuit(
         )
         masks.append(feature_mask.type(torch.int32))
 
-    # masks = [(m > 0).sum().item() for m in masks]
-    masks = [K for m in masks]
+    masks = [(m > 0).float().sum(-1).mean().int().item() for m in masks]
 
     with torch.no_grad():
         logits = model.run_with_hooks(
@@ -161,6 +160,9 @@ if __name__ == "__main__":
         "--faith_dir", type=str, default="faithfulness", help="The directory to save faithfulness."
     )
     parser.add_argument(
+        "--task_dir", type=str, default="tasks", help="The directory to load the task dataset."
+    )
+    parser.add_argument(
         "--sae_folder_path",
         type=str,
         default="saes",
@@ -200,12 +202,16 @@ if __name__ == "__main__":
         layer=args.layer,
     )
 
-    train_examples = load_examples(f"tasks/{task}.json", 2 * n, model, length=lengths[task])[:n]
-    test_examples = load_examples(f"tasks/{task}.json", 2 * n, model, length=lengths[task])[
-        n : 2 * n
-    ]
+    train_examples = load_examples(
+        f"{args.task_dir}/{task}.json", 2 * n, model, length=lengths[task]
+    )[:n]
+    test_examples = load_examples(
+        f"{args.task_dir}/{task}.json", 2 * n, model, length=lengths[task]
+    )[n : 2 * n]
     if len(test_examples) < 64:
-        test_examples = load_examples(f"tasks/{task}.json", 2 * n, model, length=lengths[task])
+        test_examples = load_examples(
+            f"{args.task_dir}/{task}.json", 2 * n, model, length=lengths[task]
+        )
 
     assert len(test_examples) > 64, (
         f"Not enough examples can be loaded, train length: ({len(train_examples)}), "
@@ -275,7 +281,8 @@ if __name__ == "__main__":
                 use_resid=True,
                 device=device,
             )
-            # batch_score and batch_N are the mean faithfulness score and the number of active features in the current batch
+            # batch_score and batch_N are the mean faithfulness score and
+            # the number of active features in the current batch
             # Update them to the total score and the total number of active features
             current_batch_len = len(test_tokens[i : i + args.batch_size])
             score += batch_score * current_batch_len
