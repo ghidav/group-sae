@@ -83,8 +83,8 @@ if __name__ == "__main__":
         num_training_tokens=1_000_000_000,
         normalize_activations=1.0,
         num_norm_estimation_tokens=5_000_000,
-        run_name="checkpoints/{}-1024-topk-{}-lambda-{}-target-L0-{}-lr-{}".format(
-            model_name, k, l1_coefficient, target_l0, lr
+        run_name="checkpoints/{}-{}-topk-{}-lambda-{}-target-L0-{}-lr-{}".format(
+            model_name, max_seq_len, k, l1_coefficient, target_l0, lr
         ),
         adam_betas=(0.9, 0.999),
         adam_epsilon=1e-8,
