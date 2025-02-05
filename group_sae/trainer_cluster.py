@@ -633,13 +633,23 @@ class ClusterSaeTrainer:
         for chunk in clusters_per_rank:
             self.module_plan.append([len_to_cluster[v].pop(0) for v in chunk])
 
-        if dist.get_rank() == 0:
-            for rank, modules in enumerate(self.module_plan):
-                print(
-                    f"Rank {rank} modules: {modules}, "
-                    "layers to train on: "
-                    f"{sum(len(self.cfg.cluster_hookpoints[m]) for m in modules)}"
+        if sum(len(v) for v in len_to_cluster.values()) > 0:
+            raise ValueError(
+                "Every cluster must be assigned to a rank. Unassigned clusters: "
+                f"{' '.join(str(v) for v in len_to_cluster.values() if len(v) > 0)}"
+            )
+
+        for rank, modules in enumerate(self.module_plan):
+            if len(modules) == 0:
+                raise ValueError(
+                    f"Rank-{rank} has no modules to train on. "
+                    "Consider reducing the number of parallel processes."
                 )
+            print(
+                f"Rank-{rank} modules: {modules}, "
+                "layers to train on: "
+                f"{sum(len(self.cfg.cluster_hookpoints[m]) for m in modules)}"
+            )
 
     def scatter_hiddens(self, hidden_dict: dict[str, Tensor]) -> dict[str, Tensor]:
         """Scatter & gather the hidden states across ranks."""

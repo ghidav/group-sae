@@ -588,6 +588,12 @@ class SaeTrainer:
             return
 
         layers_per_rank = np.array_split(range(len(self.cfg.hookpoints)), dist.get_world_size())
+        for rank, layers in enumerate(layers_per_rank):
+            if len(layers) == 0:
+                raise ValueError(
+                    f"Rank {rank} has no layers to train on. "
+                    f"Please reduce the number of ranks or increase the number of layers."
+                )
 
         # Each rank gets a subset of the layers
         self.module_plan = [
