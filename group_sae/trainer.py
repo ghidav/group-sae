@@ -524,9 +524,7 @@ class SaeTrainer:
                             for name in self.saes
                         }
                     )
-                    info.update(
-                        {"tokens/elapsed": elapsed_tokens * (dist.get_world_size() if ddp else 1)}
-                    )
+                    info.update({"tokens/elapsed": elapsed_tokens})
 
                     avg_auxk_loss.clear()
                     avg_fvu.clear()
