@@ -312,7 +312,9 @@ class SaeTrainer:
             hidden_dict.clear()
 
             # Bookkeeping for dead feature detection
-            tokens_in_batch = batch["input_ids"].numel() * (dist.get_world_size() if ddp else 1)
+            tokens_in_batch = batch["input_ids"].numel() * (
+                dist.get_world_size() if dist.is_initialized() else 1
+            )
             elapsed_tokens += tokens_in_batch
             num_tokens_in_step += tokens_in_batch
 
