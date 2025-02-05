@@ -118,6 +118,8 @@ if __name__ == "__main__":
         keep_last_n_checkpoints=4,
         clusters=unique_cluster_flatten,
         distribute_modules=ddp,
+        auxk_alpha=1 / 32,
+        dead_feature_threshold=10_000_000,
     )
     trainer = ClusterSaeTrainer(cfg, dataloader, model)
     trainer.fit()

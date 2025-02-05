@@ -25,7 +25,7 @@ if __name__ == "__main__":
     l1_coefficient = 0.0
     max_seq_len = 1024
     target_l0 = None
-    batch_size = 4
+    batch_size = 16
     # lr = 12e-4
     lr = None
     k = 128
@@ -90,6 +90,8 @@ if __name__ == "__main__":
         adam_epsilon=1e-8,
         keep_last_n_checkpoints=4,
         distribute_modules=ddp,
+        auxk_alpha=1 / 32,
+        dead_feature_threshold=10_000_000,
     )
     trainer = SaeTrainer(cfg, dataloader, model)
     trainer.fit()
