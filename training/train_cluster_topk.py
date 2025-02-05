@@ -58,6 +58,14 @@ if __name__ == "__main__":
         raise ValueError("JSON file does not contain the 'training_clusters' property.")
     # Convert the lists of string indices to lists of ints.
     clusters_flatten = data["training_clusters"]
+
+    # Convert each cluster's list of string indices to a list of ints.
+    clusters_flatten = {}
+    for key, value in data["training_clusters"].items():
+        try:
+            clusters_flatten[key] = [int(layer_str) for layer_str in value]
+        except ValueError as e:
+            raise ValueError(f"Error converting cluster '{key}' values to integers: {e}")
     print(clusters_flatten)
 
     # --- Training hyperparameters ---
@@ -95,7 +103,7 @@ if __name__ == "__main__":
         batch_size=batch_size,
     )
     model = AutoModel.from_pretrained(
-        model_name,
+        'EleutherAI/' + model_name,
         device_map={"": "cuda"},
         torch_dtype=torch.float32,
         trust_remote_code=True,
@@ -145,7 +153,7 @@ if __name__ == "__main__":
         normalize_activations=1.0,
         num_training_tokens=1_000_000_000,
         num_norm_estimation_tokens=5_000_000,
-        run_name="checkpoints-clusters/{model_name}-topk".format(
+        run_name="checkpoints-clusters/{}-topk".format(
             model_name
         ),
         adam_epsilon=1e-8,
@@ -153,6 +161,7 @@ if __name__ == "__main__":
         keep_last_n_checkpoints=4,
         clusters=clusters_flatten,
         distribute_modules=ddp,
+        log_to_wandb=True,
         auxk_alpha=1 / 32,
         dead_feature_threshold=10_000_000,
     )
