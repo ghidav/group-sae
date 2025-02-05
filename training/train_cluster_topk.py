@@ -110,8 +110,8 @@ if __name__ == "__main__":
         normalize_activations=1.0,
         num_training_tokens=1_000_000_000,
         num_norm_estimation_tokens=5_000_000,
-        run_name="checkpoints-clusters/{}-1024-topk-{}-lambda-{}-target-L0-{}-lr-{}".format(
-            model_name, k, l1_coefficient, target_l0, lr
+        run_name="checkpoints-clusters/{}-{}-topk-{}-lambda-{}-target-L0-{}-lr-{}".format(
+            model_name, max_seq_len, k, l1_coefficient, target_l0, lr
         ),
         adam_epsilon=1e-8,
         adam_betas=(0.9, 0.999),
