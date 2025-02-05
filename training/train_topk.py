@@ -48,6 +48,8 @@ if __name__ == "__main__":
         split="train",
         trust_remote_code=True,
     )
+    if ddp:
+        dataset = dataset.shard(dist.get_world_size(), rank)
     dataloader = DataLoader(
         dataset,
         collate_fn=from_tokens,
