@@ -322,7 +322,7 @@ class Sae(nn.Module):
 
             # Encourage the top ~50% of dead latents to predict the residual of the
             # top k living latents
-            e_hat = self.decode(auxk_acts, auxk_indices)
+            e_hat = self.decode(None, auxk_acts, auxk_indices)
             auxk_loss = (e_hat - e).pow(2).sum()
             auxk_loss = scale * auxk_loss / total_variance
         else:
