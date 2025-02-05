@@ -318,8 +318,8 @@ class ClusterSaeTrainer:
             hidden_dict.clear()
 
             # Bookkeeping for dead feature detection
-            tokens_in_batch = batch["input_ids"].numel()
-            elapsed_tokens += tokens_in_batch * (dist.get_world_size() if ddp else 1)
+            tokens_in_batch = batch["input_ids"].numel() * (dist.get_world_size() if ddp else 1)
+            elapsed_tokens += tokens_in_batch
             num_tokens_in_step += tokens_in_batch
 
             # Forward pass on the model to get the next batch of activations
@@ -479,7 +479,7 @@ class ClusterSaeTrainer:
                         if out.topk_indices is not None:
                             did_fire[name][out.topk_indices.flatten()] = True
                         else:
-                            did_fire[name][out.feature_acts.flatten() > 0] = True
+                            did_fire[name][torch.where(out.feature_acts > 0)[1]] = True
                         self.maybe_all_reduce(did_fire[name], "max")  # max is boolean "any"
 
                 # Clip gradient norm independently for each SAE
