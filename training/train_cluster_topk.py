@@ -1,4 +1,6 @@
 import os
+import argparse
+import json
 from datetime import timedelta
 
 import torch
@@ -11,6 +13,30 @@ from group_sae import ClusterSaeTrainer, SaeConfig, TrainConfig
 from group_sae.hooks import from_tokens
 
 if __name__ == "__main__":
+    # --- Command-line argument parsing ---
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--model_name",
+        type=str,
+        default="pythia-160m",
+        help="Name (or path) of the model to use. For example: 'EleutherAI/pythia-160m-deduped'.",
+    )
+    parser.add_argument(
+        "--batch",
+        type=int,
+        default=8,
+        help="batch size",
+    )
+    parser.add_argument(
+        "--layers",
+        type=int,
+        default=12,
+        help="number of layers",
+    )
+    args = parser.parse_args()
+    model_name = args.model_name
+
+    # --- Distributed data parallel setup (if applicable) ---
     local_rank = os.environ.get("LOCAL_RANK")
     ddp = local_rank is not None
     rank = int(local_rank) if ddp else 0
@@ -21,42 +47,29 @@ if __name__ == "__main__":
         if rank == 0:
             print(f"Using DDP across {dist.get_world_size()} GPUs.")
 
-    model_name = "EleutherAI/pythia-160m-deduped"
+    # --- Load clusters from JSON file ---
+    # Use only the last part of the model name (in case it contains a slash)
+    json_filename = f"{model_name}.json"
+    if not os.path.exists(json_filename):
+        raise FileNotFoundError(f"Cluster file '{json_filename}' not found in the current directory.")
+    with open(json_filename, "r") as f:
+        data = json.load(f)
+    if "training_clusters" not in data:
+        raise ValueError("JSON file does not contain the 'training_clusters' property.")
+    # Convert the lists of string indices to lists of ints.
+    clusters_flatten = data["training_clusters"]
+    print(clusters_flatten)
+
+    # --- Training hyperparameters ---
     l1_coefficient = 0.0
     max_seq_len = 1024
     target_l0 = None
-    batch_size = 4
+    batch_size = args.batch
     lr = None
     k = 128
 
-    # Define pythia-160m-clusters
-    clusters = {
-        "k1": [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]],
-        "k2": [[0, 1, 2, 3, 4, 5, 6], [7, 8, 9, 10]],
-        "k3": [[0, 1, 2], [3, 4, 5, 6], [7, 8, 9, 10]],
-        "k4": [[0, 1, 2], [3, 4, 5, 6], [7, 8], [9, 10]],
-        "k5": [[0, 1, 2], [3, 4], [5, 6], [7, 8], [9, 10]],
-    }
-    unique_clusters = {
-        "k1": [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]],
-        "k2": [[0, 1, 2, 3, 4, 5, 6], [7, 8, 9, 10]],
-        "k3": [[0, 1, 2], [3, 4, 5, 6]],
-        "k4": [[7, 8], [9, 10]],
-        "k5": [[3, 4], [5, 6]],
-    }
-    unique_cluster_flatten = {
-        "k1-c0": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        "k2-c0": [0, 1, 2, 3, 4, 5, 6],
-        "k2-c1": [7, 8, 9, 10],
-        "k3-c0": [0, 1, 2],
-        "k3-c1": [3, 4, 5, 6],
-        "k4-c2": [7, 8],
-        "k4-c3": [9, 10],
-        "k5-c1": [3, 4],
-        "k5-c2": [5, 6],
-    }
-
-    # Streaming dataset example
+    # --- Load dataset ---
+    # (The streaming dataset example is commented out below.)
     # dataset = load_dataset(
     #     "allenai/c4",
     #     "en",
@@ -87,6 +100,28 @@ if __name__ == "__main__":
         torch_dtype=torch.float32,
         trust_remote_code=True,
     )
+
+    # --- Add baseline singleton clusters ---
+    # For every layer in the model we want a cluster that consists of only that layer.
+    # If one already exists (even if its key is not "layers.{i}"), we rename it accordingly.
+    num_layers = args.layers
+
+    for i in range(num_layers):
+        # Look for any cluster that is exactly [i]
+        matching_keys = [
+            key for key, layers in clusters_flatten.items() if len(layers) == 1 and layers[0] == i
+        ]
+        if matching_keys:
+            # If one exists, rename the first one to "layers.i" if it isn’t already.
+            first_key = matching_keys[0]
+            if first_key != f"layers.{i}":
+                clusters_flatten[f"layers.{i}"] = clusters_flatten.pop(first_key)
+            # Remove any duplicates (if more than one singleton for the same layer exists)
+            for extra_key in matching_keys[1:]:
+                del clusters_flatten[extra_key]
+        else:
+            # If no singleton exists for this layer, add it.
+            clusters_flatten[f"layers.{i}"] = [i]
     cfg = TrainConfig(
         SaeConfig(
             k=k,
@@ -110,13 +145,13 @@ if __name__ == "__main__":
         normalize_activations=1.0,
         num_training_tokens=1_000_000_000,
         num_norm_estimation_tokens=5_000_000,
-        run_name="checkpoints-clusters/{}-{}-topk-{}-lambda-{}-target-L0-{}-lr-{}".format(
-            model_name, max_seq_len, k, l1_coefficient, target_l0, lr
+        run_name="checkpoints-clusters/{model_name}-topk".format(
+            model_name
         ),
         adam_epsilon=1e-8,
         adam_betas=(0.9, 0.999),
         keep_last_n_checkpoints=4,
-        clusters=unique_cluster_flatten,
+        clusters=clusters_flatten,
         distribute_modules=ddp,
         auxk_alpha=1 / 32,
         dead_feature_threshold=10_000_000,
