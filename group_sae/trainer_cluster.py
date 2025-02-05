@@ -8,6 +8,7 @@ from dataclasses import asdict
 
 import torch
 import torch.distributed as dist
+from accelerate.utils import send_to_device
 from safetensors.torch import load_model
 from torch import Tensor
 from torch.nn.parallel import DistributedDataParallel as DDP
@@ -334,7 +335,7 @@ class ClusterSaeTrainer:
             ]
             try:
                 with torch.no_grad():
-                    self.model(batch["input_ids"].to(device))
+                    self.model(**send_to_device(batch, device))
             finally:
                 for handle in handles:
                     handle.remove()
