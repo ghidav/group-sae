@@ -1,11 +1,12 @@
-python ../downstream/faith.py \
+CUDA_VISIBLE_DEVICES=1 python ./downstream/faith_thr.py \
 -d ioi \
 -c resid_post \
 -n 1024 \
 -mt attrib \
---model pythia-160m-deduped \
+--model pythia-160m \
 -w faithfulness \
---sae_folder_path /home/fbelotti/group-sae/training/checkpoints/EleutherAI/pythia-160m-deduped-1024-jr-lambda-0.5-target-L0-128-lr-0.0007/step_139998 \
---effects_dir /home/fbelotti/group-sae/downstream/effects \
+--sae_folder_path /home/fbelotti/group-sae/saes/pythia_160-topk \
+--effects_dir /home/fbelotti/group-sae/effects_pass_through \
 --task_dir /home/fbelotti/group-sae/downstream/tasks \
---n_devices 2
+--faith_dir /home/fbelotti/group-sae/faithfulness_pass_through_thr \
+--n_devices 1
