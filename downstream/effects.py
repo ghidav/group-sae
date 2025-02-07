@@ -3,6 +3,7 @@ import gc
 import logging
 import math
 import os
+import re
 from functools import partial
 
 import torch as t
@@ -225,7 +226,7 @@ if __name__ == "__main__":
         "--model",
         "-m",
         type=str,
-        default="pythia-160m-deduped",
+        default="pythia-160m",
         help="The Huggingface ID of the model you wish to test.",
     )
     parser.add_argument(
@@ -286,12 +287,18 @@ if __name__ == "__main__":
     # loading saes
     dictionaries = load_saes(
         args.sae_folder_path,
-        model.cfg,
-        modules,
         device=device,
         debug=True,
         layer=args.layer,
+        cluster=None if args.K == -1 else args.K,
+        load_from_sae_lens=False,
+        dtype="float32",
+        model_name=args.model,
     )
+    dictionaries = {
+        k: v.to(get_device_for_block(int(re.findall(r"\d+", k)[0]), model.cfg, device=device))
+        for k, v in dictionaries.items()
+    }
     logger.info(f"{len(dictionaries)} dictionaries loaded.")
     if len(dictionaries) == 0:
         raise ValueError("No dictionaries were loaded. Check the path to the dictionaries.")

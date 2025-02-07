@@ -970,7 +970,7 @@ else:
         decoder_impl = triton_decode
 
 
-def get_device_for_block(layer, cfg: HookedTransformerConfig, device: str | None = None):
+def get_device_for_block(layer: int, cfg: HookedTransformerConfig, device: str | None = None):
     """Equally and sequentially distribute the blocks across the devices"""
     if device is None:
         if cfg.device is None:

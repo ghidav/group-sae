@@ -1,5 +1,7 @@
 import argparse
+import logging
 import os
+import re
 from functools import partial
 
 import numpy as np
@@ -14,6 +16,9 @@ from utils import load_examples, load_saes
 
 from group_sae.utils import get_device_for_block
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
 
 def test_circuit(
     tokens,
@@ -22,39 +27,27 @@ def test_circuit(
     nodes,
     saes,
     feature_avg,
-    active_features=1,
+    feature_mask,
     use_resid=False,
     what="faithfulness",
     device="cuda",
 ):
 
     hooks = []
-    masks = []
-    K = active_features
-
     for hook_name in nodes.keys():
-
-        # feature_mask = (nodes[hook_name].abs() > node_threshold).sum(0) > 0
-        _, topk_idxes = torch.topk(nodes[hook_name], K, dim=1)
-        feature_mask = torch.zeros_like(nodes[hook_name], dtype=torch.bool)
-        feature_mask.scatter_(1, topk_idxes, 1)
-
         hooks.append(
             (
                 hook_name,
                 partial(
                     sae_features_hook,
                     sae=saes[hook_name],
-                    feature_mask=feature_mask,
+                    feature_mask=feature_mask[hook_name],
                     feature_avg=feature_avg[hook_name],
                     resid=use_resid,
                     ablation=what,
                 ),
             )
         )
-        masks.append(feature_mask.type(torch.int32))
-
-    masks = [(m > 0).float().sum(-1).mean().int().item() for m in masks]
 
     with torch.no_grad():
         logits = model.run_with_hooks(
@@ -65,8 +58,7 @@ def test_circuit(
 
     clean_ans_logits = torch.gather(logits, 1, clean_answers.unsqueeze(1))
     patch_ans_logits = torch.gather(logits, 1, patch_answers.unsqueeze(1))
-
-    return (clean_ans_logits - patch_ans_logits).squeeze(), np.mean(masks)
+    return (clean_ans_logits - patch_ans_logits).squeeze()
 
 
 def faithfulness(
@@ -76,7 +68,7 @@ def faithfulness(
     nodes,
     dictionaries,
     feature_avg,
-    active_features,
+    feature_mask,
     use_resid=False,
     device="cuda",
 ):
@@ -92,34 +84,34 @@ def faithfulness(
     M = (clean_ans_logits - patch_ans_logits).squeeze().mean().item()
 
     # Get the circuit's logit diff - m(C)
-    C, N = test_circuit(
+    C = test_circuit(
         tokens,
         clean_answers,
         patch_answers,
         nodes,
         dictionaries,
         feature_avg,
-        active_features=active_features,
+        feature_mask=feature_mask,
         use_resid=use_resid,
         what=args.what,
         device=device,
     )
 
     # Get the ablated circuit's logit diff - m(zero)
-    zero, _ = test_circuit(
+    zero = test_circuit(
         tokens,
         clean_answers,
         patch_answers,
         nodes,
         dictionaries,
         feature_avg,
-        active_features=active_features,
+        feature_mask=feature_mask,
         use_resid=use_resid,
         what="empty",
         device=device,
     )
 
-    return (C.mean().item() - zero.mean().item()) / (M - zero.mean().item() + 1e-7), N
+    return (C.mean().item() - zero.mean().item()) / (M - zero.mean().item() + 1e-7)
 
 
 ##########
@@ -195,12 +187,27 @@ if __name__ == "__main__":
     cluster = args.K != -1
     dictionaries = load_saes(
         args.sae_folder_path,
-        model.cfg,
-        modules,
         device=device,
         debug=True,
         layer=args.layer,
+        cluster=None if args.K == -1 else args.K,
+        load_from_sae_lens=False,
+        dtype="float32",
+        model_name=args.model,
     )
+    dictionaries = {
+        k: v.to(get_device_for_block(int(re.findall(r"\d+", k)[0]), model.cfg, device=device))
+        for k, v in dictionaries.items()
+    }
+    logger.info(f"{len(dictionaries)} dictionaries loaded.")
+    if len(dictionaries) == 0:
+        raise ValueError("No dictionaries were loaded. Check the path to the dictionaries.")
+    elif len(dictionaries) != len(modules):
+        logging.warning(
+            f"Loaded {len(dictionaries)} dictionaries, but expected {len(modules)}. "
+            "Some modules may not have been loaded."
+        )
+        modules = [k for k in modules if k in dictionaries.keys()]
 
     train_examples = load_examples(
         f"{args.task_dir}/{task}.json", 2 * n, model, length=lengths[task]
@@ -266,18 +273,22 @@ if __name__ == "__main__":
 
     scores = []
     Ns = []
-    for T in tqdm(args.active_features):
+    for T in tqdm(np.exp(np.linspace(-10, np.log(100), 64))):
+        feature_mask = {}
+        for hook_name in effects.keys():
+            feature_mask[hook_name] = (effects[hook_name].abs() > T).sum(0) > 0
+        N = np.mean([feature_mask[hook_name].sum().item() for hook_name in feature_mask.keys()])
+
         score = 0
-        N = 0
         for i in range(0, len(test_tokens), args.batch_size):
-            batch_score, batch_N = faithfulness(
+            batch_score = faithfulness(
                 test_tokens[i : i + args.batch_size],
                 clean_answers[i : i + args.batch_size],
                 patch_answers[i : i + args.batch_size],
                 effects,
                 dictionaries,
                 feature_avg=feature_avg,
-                active_features=T,
+                feature_mask=feature_mask,
                 use_resid=True,
                 device=device,
             )
@@ -286,9 +297,8 @@ if __name__ == "__main__":
             # Update them to the total score and the total number of active features
             current_batch_len = len(test_tokens[i : i + args.batch_size])
             score += batch_score * current_batch_len
-            N += batch_N * current_batch_len
         score /= len(test_tokens)
-        N /= len(test_tokens)
+        print(f"T: {T:.4f}, score: {score:.4f}, N: {N:.4f}")
         scores.append(score)
         Ns.append(N)
 

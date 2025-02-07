@@ -25,6 +25,7 @@ def sae_hook_pass_through(act, hook, sae, cache):
         x = act.reshape(act.shape[0], act.shape[1], -1).clone()
     else:
         x = act.clone()
+    x = x.to(sae.device)
 
     f = sae.encode(x)
     x_hat = sae.decode(f)
@@ -45,6 +46,7 @@ def sae_hook(act, hook, sae, cache):
         x = act.reshape(act.shape[0], act.shape[1], -1).clone()
     else:
         x = act.clone()
+    x = x.to(sae.device)
 
     f = sae.encode(x)
     x_hat = sae.decode(f)

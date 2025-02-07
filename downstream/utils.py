@@ -2,12 +2,17 @@ import json
 import os
 import random
 import re
+from importlib.metadata import version
 
-import torch as t
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from sae_lens import SAE
-from transformer_lens import HookedTransformerConfig
+
+from group_sae.config import TrainConfig
+from group_sae.export import to_sae_lens
+from group_sae.sae import Sae, SaeConfig
+from group_sae.utils import CLUSTER_MAP, MODEL_MAP
 
 
 class IdentitySAE(nn.Module):
@@ -82,17 +87,17 @@ def load_examples(dataset, num_examples, model, seed=12, pad_to_length=None, len
             if pad_length < 0:  # example too long
                 continue
             # left padding: reverse, right-pad, reverse
-            clean_prefix = t.flip(
+            clean_prefix = torch.flip(
                 F.pad(
-                    t.flip(clean_prefix, (1,)),
+                    torch.flip(clean_prefix, (1,)),
                     (0, pad_length),
                     value=model.tokenizer.pad_token_id,
                 ),
                 (1,),
             )
-            patch_prefix = t.flip(
+            patch_prefix = torch.flip(
                 F.pad(
-                    t.flip(patch_prefix, (1,)),
+                    torch.flip(patch_prefix, (1,)),
                     (0, pad_length),
                     value=model.tokenizer.pad_token_id,
                 ),
@@ -115,50 +120,91 @@ def load_examples(dataset, num_examples, model, seed=12, pad_to_length=None, len
 
 def load_saes(
     sae_folder_path: str,
-    cfg: HookedTransformerConfig,
-    modules: list[str],
     device: str = "cuda",
     debug: bool = False,
     layer: int | None = None,
+    cluster: str | None = None,
+    load_from_sae_lens: bool = False,
+    model_name: str | None = None,
+    dtype: str = "float32",
+    dataset_path: str = "NeelNanda/pile-small-tokenized-2b",
 ):
-
     dictionaries = {}
-    component = modules[0].split(".")[-1]
-    print(f"Loading {component} dictionaries...")
-
-    if "attn" in component:
-        dim = cfg.d_head * cfg.n_heads
-    else:
-        dim = cfg.d_model
 
     if not os.path.exists(sae_folder_path):
-        dictionaries = {module: IdentitySAE(dim) for module in modules}
+        raise ValueError(f"SAE path {sae_folder_path} does not existorch. ")
     else:
+        # Load all available SAEs in `sae_folder_path`
         paths = []
         for path in os.listdir(sae_folder_path):
-            sae_path = os.path.join(sae_folder_path, path, "sae_lens")
+            sae_path = os.path.join(sae_folder_path, path)
+            if load_from_sae_lens:
+                sae_path = os.path.join(sae_path, "sae_lens")
             if os.path.isdir(os.path.join(sae_folder_path, path)):
                 if not os.path.exists(sae_path):
-                    raise FileNotFoundError(
-                        f"SAE path {sae_path} does not exist. "
-                        f"Please make sure that the every folder contains the folder `sae_lens`, "
-                        "where the converted SAE into the `sae_lens` format has to be found."
-                    )
+                    raise FileNotFoundError(f"SAE path {sae_path} does not existorch. ")
                 paths.append(sae_path)
-        if layer is not None and layer > 0:
-            paths = [path for path in paths if re.findall(r"\d+", path)[0] == str(layer)]
-        saes = [SAE.load_from_pretrained(path, device=device, dtype="float32") for path in paths]
-        hooks = set()
-        dictionaries = {}
-        for i, sae in enumerate(saes):
-            hook = sae.cfg.hook_name
-            if debug:
-                print(hook, "->", paths[i])
-            dictionaries[hook] = sae
-            hooks.add(hook)
-        remaining_modules = set(modules) - hooks
-        print(
-            f"For the remaining modules {remaining_modules}, no SAE will be attached,"
-            " therefore no effects will be computed."
-        )
+
+        # Map modules to paths, converting paths to corresponding sae_lens hookpoints
+        if cluster is not None:
+            if model_name is None:
+                raise ValueError("model_name must be specified when cluster is not None")
+            cluster_layers = CLUSTER_MAP[MODEL_MAP[model_name]][cluster]
+            modules_to_paths = {}
+            for layer_num, cluster_layer in enumerate(cluster_layers):
+                for path in paths:
+                    if cluster_layer in path:
+                        modules_to_paths[f"blocks.{layer_num}.hook_resid_post"] = path
+                        break
+        else:
+            modules_to_paths = {}
+            for path in paths:
+                layer_num = re.findall(r"\d+", path.split(os.sep)[-1])[0]
+                if f"layers.{layer_num}" in path:
+                    modules_to_paths[f"blocks.{layer_num}.hook_resid_post"] = path
+
+        # Grab only the specified layer, if specified
+        if layer is not None:
+            modules_to_paths = {
+                hook_name: path
+                for hook_name, path in modules_to_paths.items()
+                if str(layer) in hook_name
+            }
+
+        # Load SAEs
+        if load_from_sae_lens:
+            for hook_name, path in modules_to_paths:
+                if debug:
+                    print(f"Loading SAE for {hook_name} from {path}")
+                dictionaries[hook_name] = SAE.load_from_pretrained(
+                    path, device=device, dtype=dtype
+                )
+        else:
+            if model_name is None:
+                raise ValueError("model_name must be specified when load_from_sae_lens is False")
+            for hook_name, path in modules_to_paths.items():
+                if debug:
+                    print(f"Loading SAE for {hook_name} from {path}")
+                sae = Sae.load_from_disk(path)
+                sae_cfg = SaeConfig.load_json(os.path.join(path, "cfg.json"))
+                cfg = TrainConfig.load_json(os.path.join(sae_folder_path, "config.json"))
+                norm_scaling_factors = torch.load(
+                    os.path.join(sae_folder_path, "scaling_factors.pt")
+                )
+                hookpoint = "layers." + re.findall(r"\d+", hook_name)[0]
+                norm_scaling_factor = norm_scaling_factors[hookpoint]
+                sae_lens = to_sae_lens(
+                    sae=sae,
+                    sae_cfg=sae_cfg,
+                    model_name=model_name,
+                    dataset_path=dataset_path,
+                    norm_scaling_factor=norm_scaling_factor,
+                    max_seq_len=cfg.max_seq_len,
+                    hook_name=hook_name,
+                    hook_layer=int(re.findall(r"\d+", hook_name)[0]),
+                    dtype=dtype,
+                    device=device,
+                    sae_lens_version=version("sae_lens"),
+                )
+                dictionaries[hook_name] = sae_lens
     return dictionaries

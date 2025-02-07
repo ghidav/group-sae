@@ -3,8 +3,24 @@ import warnings
 
 import torch
 from sae_lens import SAE, SAEConfig
+from torch import nn
 
 from . import Sae, SaeConfig
+
+
+class TopK(nn.Module):
+    def __init__(self, k: int):
+        super().__init__()
+        self.k = k
+
+    # TODO: Use a fused kernel to speed up topk decoding like https://github.com/EleutherAI/sae/blob/main/sae/kernels.py
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = torch.nn.functional.relu(x)
+        topk = torch.topk(x, k=self.k, dim=-1)
+        values = topk.values
+        result = torch.zeros_like(x)
+        result.scatter_(-1, topk.indices, values)
+        return result
 
 
 def to_sae_lens(
@@ -85,4 +101,6 @@ def to_sae_lens(
     if sae.cfg.jumprelu:
         # We do not apply ReLU before sending the activations to the JumpReLU function.
         sae_lens_sae.activation_fn = torch.nn.Identity()
+    if sae.cfg.k > 0:
+        sae_lens_sae.activation_fn = TopK(k=sae.cfg.k)
     return sae_lens_sae
