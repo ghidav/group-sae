@@ -1,11 +1,13 @@
 import copy
 import warnings
+from typing import TYPE_CHECKING
 
 import torch
 from sae_lens import SAE, SAEConfig
 from torch import nn
 
-from . import Sae, SaeConfig
+if TYPE_CHECKING:
+    from . import Sae, SaeConfig
 
 
 class TopK(nn.Module):
@@ -24,8 +26,8 @@ class TopK(nn.Module):
 
 
 def to_sae_lens(
-    sae_cfg: SaeConfig,
-    sae: Sae,
+    sae_cfg: "SaeConfig",
+    sae: "Sae",
     model_name: str,
     dataset_path: str,
     norm_scaling_factor: float | None = None,

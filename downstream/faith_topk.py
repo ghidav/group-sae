@@ -12,9 +12,9 @@ from hooks import sae_features_hook, sae_hook_pass_through
 from tqdm import tqdm
 from transformer_lens import HookedTransformer
 from transformer_lens.utils import get_act_name
-from utils import load_examples, load_saes
+from utils import load_examples
 
-from group_sae.utils import get_device_for_block
+from group_sae.utils import get_device_for_block, load_saes
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -277,7 +277,7 @@ if __name__ == "__main__":
     for T in tqdm(args.active_features):
         feature_mask = {}
         for hook_name in effects.keys():
-            _, topk_idxes = torch.topk(effects[hook_name].abs(), T, dim=1)
+            _, topk_idxes = torch.topk(effects[hook_name], T, dim=1)
             mask = torch.zeros_like(effects[hook_name], dtype=torch.bool)
             mask.scatter_(1, topk_idxes, 1)
             feature_mask[hook_name] = mask

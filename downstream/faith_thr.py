@@ -12,9 +12,9 @@ from hooks import sae_features_hook, sae_hook_pass_through
 from tqdm import tqdm
 from transformer_lens import HookedTransformer
 from transformer_lens.utils import get_act_name
-from utils import load_examples, load_saes
+from utils import load_examples
 
-from group_sae.utils import get_device_for_block
+from group_sae.utils import get_device_for_block, load_saes
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

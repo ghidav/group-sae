@@ -1,23 +1,24 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any, Dict, Iterable, Type, TypeVar, cast
+import re
+from importlib.metadata import version
+from typing import Any, Dict, Iterable, Type, TypeVar, cast
 
 import numpy as np
 import torch
 import torch.nn as nn
 from accelerate.utils import send_to_device
+from matplotlib.colors import LinearSegmentedColormap
+from sae_lens import SAE
 from torch import Tensor
 from torch.utils.data import DataLoader
 from transformer_lens import HookedTransformerConfig
 from transformers import PreTrainedModel
 
+from group_sae.config import TrainConfig
+from group_sae.export import to_sae_lens
 from group_sae.hooks import forward_hook_wrapper
-
-if TYPE_CHECKING:
-    from .config import TrainConfig
-
-from matplotlib.colors import LinearSegmentedColormap
 
 palette = ["#FFC533", "#f48c06", "#DD5703", "#d00000", "#6A040F"]
 cmap = LinearSegmentedColormap.from_list("paper", palette)
@@ -1012,3 +1013,97 @@ def chunk_almost_equal_sum(numbers: list[int], num_chunks: int) -> list[list[int
         chunk_sums[smallest_chunk_index] += num
 
     return chunks
+
+
+def load_saes(
+    sae_folder_path: str,
+    device: str = "cuda",
+    debug: bool = False,
+    layer: int | None = None,
+    cluster: str | None = None,
+    load_from_sae_lens: bool = False,
+    model_name: str | None = None,
+    dtype: str = "float32",
+    dataset_path: str = "NeelNanda/pile-small-tokenized-2b",
+):
+    from group_sae.sae import Sae, SaeConfig
+
+    dictionaries = {}
+
+    if not os.path.exists(sae_folder_path):
+        raise ValueError(f"SAE path {sae_folder_path} does not existorch. ")
+    else:
+        # Load all available SAEs in `sae_folder_path`
+        paths = []
+        for path in os.listdir(sae_folder_path):
+            sae_path = os.path.join(sae_folder_path, path)
+            if load_from_sae_lens:
+                sae_path = os.path.join(sae_path, "sae_lens")
+            if os.path.isdir(os.path.join(sae_folder_path, path)):
+                if not os.path.exists(sae_path):
+                    raise FileNotFoundError(f"SAE path {sae_path} does not existorch. ")
+                paths.append(sae_path)
+
+        # Map modules to paths, converting paths to corresponding sae_lens hookpoints
+        if cluster is not None:
+            if model_name is None:
+                raise ValueError("model_name must be specified when cluster is not None")
+            cluster_layers = CLUSTER_MAP[MODEL_MAP[model_name]][cluster]
+            modules_to_paths = {}
+            for layer_num, cluster_layer in enumerate(cluster_layers):
+                for path in paths:
+                    if cluster_layer in path:
+                        modules_to_paths[f"blocks.{layer_num}.hook_resid_post"] = path
+                        break
+        else:
+            modules_to_paths = {}
+            for path in paths:
+                layer_num = re.findall(r"\d+", path.split(os.sep)[-1])[0]
+                if f"layers.{layer_num}" in path:
+                    modules_to_paths[f"blocks.{layer_num}.hook_resid_post"] = path
+
+        # Grab only the specified layer, if specified
+        if layer is not None:
+            modules_to_paths = {
+                hook_name: path
+                for hook_name, path in modules_to_paths.items()
+                if str(layer) in hook_name
+            }
+
+        # Load SAEs
+        if load_from_sae_lens:
+            for hook_name, path in modules_to_paths:
+                if debug:
+                    print(f"Loading SAE for {hook_name} from {path}")
+                dictionaries[hook_name] = SAE.load_from_pretrained(
+                    path, device=device, dtype=dtype
+                )
+        else:
+            if model_name is None:
+                raise ValueError("model_name must be specified when load_from_sae_lens is False")
+            for hook_name, path in modules_to_paths.items():
+                if debug:
+                    print(f"Loading SAE for {hook_name} from {path}")
+                sae = Sae.load_from_disk(path)
+                sae_cfg = SaeConfig.load_json(os.path.join(path, "cfg.json"))
+                cfg = TrainConfig.load_json(os.path.join(sae_folder_path, "config.json"))
+                norm_scaling_factors = torch.load(
+                    os.path.join(sae_folder_path, "scaling_factors.pt")
+                )
+                hookpoint = "layers." + re.findall(r"\d+", hook_name)[0]
+                norm_scaling_factor = norm_scaling_factors[hookpoint]
+                sae_lens = to_sae_lens(
+                    sae=sae,
+                    sae_cfg=sae_cfg,
+                    model_name=model_name,
+                    dataset_path=dataset_path,
+                    norm_scaling_factor=norm_scaling_factor,
+                    max_seq_len=cfg.max_seq_len,
+                    hook_name=hook_name,
+                    hook_layer=int(re.findall(r"\d+", hook_name)[0]),
+                    dtype=dtype,
+                    device=device,
+                    sae_lens_version=version("sae_lens"),
+                )
+                dictionaries[hook_name] = sae_lens
+    return dictionaries
