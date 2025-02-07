@@ -277,10 +277,10 @@ if __name__ == "__main__":
     for T in tqdm(args.active_features):
         feature_mask = {}
         for hook_name in effects.keys():
-            _, topk_idxes = torch.topk(effects[hook_name].mean(0).abs(), T, dim=1)
-            mask = torch.zeros_like(effects[hook_name], dtype=torch.bool)
-            mask.scatter_(1, topk_idxes, 1)
-            feature_mask[hook_name] = (mask > 0).sum(0) > 0
+            _, topk_idxes = torch.topk(effects[hook_name].mean(0).abs(), T, dim=0)
+            mask = torch.zeros_like(effects[hook_name].shape[1], dtype=torch.bool)
+            mask.scatter_(0, topk_idxes, 1)
+            feature_mask[hook_name] = mask > 0
         N = np.mean([feature_mask[hook_name].sum().item() for hook_name in feature_mask.keys()])
 
         score = 0
