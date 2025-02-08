@@ -190,3 +190,5 @@ wandb/
 keys.json
 */**/effects*/
 */**/faithfulness*/
+checkpoints-clusters
+train
