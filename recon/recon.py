@@ -50,7 +50,7 @@ if __name__ == "__main__":
         help="Path to all dictionaries for your language model.",
     )
     parser.add_argument(
-        "--batch_size", type=int, default=64, help="The batch size to use for testing."
+        "--batch_size", type=int, default=4, help="The batch size to use for testing."
     )
     parser.add_argument("--n_devices", type=int, default=1)
     args = parser.parse_args()
@@ -68,14 +68,15 @@ if __name__ == "__main__":
     modules = [get_act_name(args.component, layer) for layer in layers]
     cluster = args.cluster
 
+    eval_batches = 1024 * 1024 * 5 // args.batch_size  # 5M samples
     eval_cfg = EvalConfig(
-        batch_size_prompts=4,
+        batch_size_prompts=args.batch_size,
         # Reconstruction metrics
-        n_eval_reconstruction_batches=4,
+        n_eval_reconstruction_batches=eval_batches,
         compute_kl=True,
         compute_ce_loss=True,
         # Sparsity and variance metrics
-        n_eval_sparsity_variance_batches=4,
+        n_eval_sparsity_variance_batches=eval_batches,
         compute_l2_norms=True,
         compute_sparsity_metrics=True,
         compute_variance_metrics=True,
@@ -116,8 +117,8 @@ if __name__ == "__main__":
                     sae,
                     dataset=dataset,
                     streaming=False,
-                    store_batch_size_prompts=4,
-                    n_batches_in_buffer=4,
+                    store_batch_size_prompts=1,
+                    n_batches_in_buffer=1,
                     device=device,
                 )
 
