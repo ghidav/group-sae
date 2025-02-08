@@ -81,7 +81,7 @@ def faithfulness(
     clean_ans_logits = torch.gather(logits, 1, clean_answers.unsqueeze(1))
     patch_ans_logits = torch.gather(logits, 1, patch_answers.unsqueeze(1))
 
-    M = (clean_ans_logits - patch_ans_logits).squeeze().mean().item()
+    M = clean_ans_logits - patch_ans_logits
 
     # Get the circuit's logit diff - m(C)
     C = test_circuit(
@@ -111,7 +111,7 @@ def faithfulness(
         device=device,
     )
 
-    return (C.mean().item() - zero.mean().item()) / (M - zero.mean().item() + 1e-7)
+    return ((C - zero) / (M - zero + 1e-7)).mean().item()
 
 
 ##########
@@ -276,7 +276,7 @@ if __name__ == "__main__":
     for T in tqdm(np.exp(np.linspace(-10, np.log(100), 64))):
         feature_mask = {}
         for hook_name in effects.keys():
-            feature_mask[hook_name] = (effects[hook_name].abs() > T).sum(0) > 0
+            feature_mask[hook_name] = effects[hook_name].abs() > T
         N = np.mean([feature_mask[hook_name].sum().item() for hook_name in feature_mask.keys()])
 
         score = 0

@@ -1031,7 +1031,7 @@ def load_saes(
     dictionaries = {}
 
     if not os.path.exists(sae_folder_path):
-        raise ValueError(f"SAE path {sae_folder_path} does not existorch. ")
+        raise ValueError(f"SAE path {sae_folder_path} does not exist. ")
     else:
         # Load all available SAEs in `sae_folder_path`
         paths = []
