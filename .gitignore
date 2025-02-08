@@ -127,6 +127,9 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
+# Ignore macOS system files
+.DS_Store
+
 # Environments
 .env
 .venv
