@@ -124,7 +124,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--K", "-k", type=int, default=-1, help="The number of cluster to be used."
     )
-    parser.add_argument("--active_features", nargs="+", default=[1, 32, 64, 128, 512, 1024])
+    parser.add_argument("--active_features", nargs="+", default=[32, 64, 128, 512, 1024, 2048])
     parser.add_argument("-c", "--component", type=str, default="resid_post")
     parser.add_argument("-n", "--n", type=int, default=1024)
     parser.add_argument("-mt", "--method", type=str, default="attrib")
@@ -274,10 +274,10 @@ if __name__ == "__main__":
 
     scores = []
     Ns = []
-    for T in tqdm(args.active_features):
+    for T in tqdm(np.unique(np.logspace(0, np.log10(2048), 64, endpoint=True).astype(int))):
         feature_mask = {}
         for hook_name in effects.keys():
-            _, topk_idxes = torch.topk(effects[hook_name], T, dim=1)
+            _, topk_idxes = torch.topk(effects[hook_name].abs(), T, dim=1)
             mask = torch.zeros_like(effects[hook_name], dtype=torch.bool)
             mask.scatter_(1, topk_idxes, 1)
             feature_mask[hook_name] = mask
