@@ -1067,7 +1067,7 @@ def load_saes(
             modules_to_paths = {
                 hook_name: path
                 for hook_name, path in modules_to_paths.items()
-                if str(layer) in hook_name
+                if str(layer) == re.findall(r"\d+", hook_name)[0]
             }
 
         # Load SAEs
