@@ -13,7 +13,7 @@ from tqdm import tqdm
 from transformer_lens import HookedTransformer
 from transformer_lens.utils import get_act_name
 
-from group_sae.utils import get_device_for_block, load_saes
+from group_sae.utils import CLUSTER_MAP, MODEL_MAP, get_device_for_block, load_saes
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--K", "-k", type=int, default=-1, help="The number of cluster to be used."
+        "--cluster", action="store_true", help="Whether to eval clusters or baselines."
     )
     parser.add_argument("-c", "--component", type=str, default="resid_post")
     parser.add_argument(
@@ -66,39 +66,16 @@ if __name__ == "__main__":
         model.cfg.device = device
     layers = list(range(model.cfg.n_layers))
     modules = [get_act_name(args.component, layer) for layer in layers]
-    cluster = args.K != -1
-    dictionaries = load_saes(
-        args.sae_folder_path,
-        device=device,
-        debug=True,
-        layer=None,
-        cluster=None if args.K == -1 else args.K,
-        load_from_sae_lens=False,
-        dtype="float32",
-        model_name=args.model,
-    )
-    dictionaries = {
-        k: v.to(get_device_for_block(int(re.findall(r"\d+", k)[0]), model.cfg, device=device))
-        for k, v in dictionaries.items()
-    }
-    logger.info(f"{len(dictionaries)} dictionaries loaded.")
-    if len(dictionaries) == 0:
-        raise ValueError("No dictionaries were loaded. Check the path to the dictionaries.")
-    elif len(dictionaries) != len(modules):
-        logging.warning(
-            f"Loaded {len(dictionaries)} dictionaries, but expected {len(modules)}. "
-            "Some modules may not have been loaded."
-        )
-        modules = [k for k in modules if k in dictionaries.keys()]
+    cluster = args.cluster
 
     eval_cfg = EvalConfig(
-        batch_size_prompts=args.batch_size,
+        batch_size_prompts=4,
         # Reconstruction metrics
-        n_eval_reconstruction_batches=128,
+        n_eval_reconstruction_batches=4,
         compute_kl=True,
         compute_ce_loss=True,
         # Sparsity and variance metrics
-        n_eval_sparsity_variance_batches=128,
+        n_eval_sparsity_variance_batches=4,
         compute_l2_norms=True,
         compute_sparsity_metrics=True,
         compute_variance_metrics=True,
@@ -108,98 +85,54 @@ if __name__ == "__main__":
     dataset = load_dataset(
         "NeelNanda/pile-small-tokenized-2b", streaming=False, split="train"
     ).shuffle(seed=42)
-    # elapsed_tokens = 0
-    # for index, batch in tqdm(enumerate(dataset), total=1_000_000_000 // 1024):
-    #     elapsed_tokens += len(batch["tokens"])
-    #     if elapsed_tokens >= 1_000_000_000:
-    #         break
-    # dataset = dataset.select(range(index, len(dataset)))
+    dataset = dataset.select(range(len(dataset) // 2, len(dataset)))
 
     with torch.no_grad():
-        print(f"Cluster: {args.K if cluster else 'Baseline'}")
-        cluster_df = []
+        df = []
+        for cluster_name in CLUSTER_MAP[MODEL_MAP[args.model]].keys() if cluster else ["baseline"]:
+            for layer in tqdm(range(model.cfg.n_layers)):
+                dictionaries = load_saes(
+                    args.sae_folder_path,
+                    device=device,
+                    debug=True,
+                    layer=layer,
+                    cluster=cluster_name if cluster else None,
+                    load_from_sae_lens=False,
+                    dtype="float32",
+                    model_name=args.model,
+                )
+                dictionaries = {
+                    k: v.to(
+                        get_device_for_block(
+                            int(re.findall(r"\d+", k)[0]), model.cfg, device=device
+                        )
+                    )
+                    for k, v in dictionaries.items()
+                }
+                hook_name = list(dictionaries.keys())[0]
+                sae = dictionaries[hook_name]
+                activations_store = ActivationsStore.from_sae(
+                    model,
+                    sae,
+                    dataset=dataset,
+                    streaming=False,
+                    store_batch_size_prompts=4,
+                    n_batches_in_buffer=4,
+                    device=device,
+                )
 
-        # Run evals for every act layer in the cluster
-        for layer in tqdm(layers):
-            # Select SAE
-            cluster_sae = None
-            for k, v in dictionaries.items():
-                if str(layer) == re.findall(r"\d+", k)[0]:
-                    cluster_sae = v
-                    break
-            if cluster_sae is None:
-                raise ValueError(f"No SAE found for layer {layer}")
+                # Run evals
+                metrics = run_evals(sae, activations_store, model, eval_cfg)
 
-            activations_store = ActivationsStore.from_sae(
-                model,
-                cluster_sae,
-                dataset=dataset,
-                streaming=False,
-                store_batch_size_prompts=args.batch_size,
-                n_batches_in_buffer=args.batch_size,
-                device=device,
-            )
-
-            # Run evals
-            cluster_metrics = run_evals(cluster_sae, activations_store, model, eval_cfg)
-
-            # Exclude feature_density stats (i.e. cluster_metrics[1])
-            cluster_metrics = {
-                k_inner: v_inner
-                for k in cluster_metrics[0].keys()
-                for k_inner, v_inner in cluster_metrics[0][k].items()
-            }
-            cluster_metrics["layer"] = layer
-            if cluster:
-                cluster_metrics["cluster"] = args.K if cluster else 0
-            cluster_df.append(pd.Series(cluster_metrics))
-            cluster_df = pd.concat(cluster_df, axis=1).T
-            cluster_df.to_csv(
-                f"{args.eval_dir}/{args.model}_{'cluster' if cluster else 'baseline'}.csv"
-            )
-
-        # if do_baseline:
-        #     baseline_df = []
-        #     for layer in tqdm(range(n_layers - 1)):
-        #         BASELINE_PATH = baseline_folder.format(layer=layer)
-        #         baseline_state_dict = load_file(f"{BASELINE_PATH}/sae.safetensors", device=device)
-        #         baseline_sae_cfg = json.load(open(f"{BASELINE_PATH}/cfg.json", "r"))
-        #         baseline_sae_cfg = SaeConfig.from_dict(baseline_sae_cfg)
-        #         baseline_sae_cfg_training = json.load(
-        #             open(f"{baseline_root_folder}/config.json", "r")
-        #         )
-        #         baseline_sae_cfg_training = TrainConfig.from_dict(baseline_sae_cfg_training)
-        #         eleuther_sae = Sae(1024, baseline_sae_cfg)
-        #         eleuther_sae.load_state_dict(
-        #             {k: v.squeeze() for k, v in baseline_state_dict.items()}
-        #         )
-        #         baseline_sae = to_sae_lens(
-        #             eleuther_sae.cfg,
-        #             baseline_sae_cfg_training,
-        #             eleuther_sae,
-        #             model_name,
-        #             "NeelNanda/pile-small-tokenized-2b",
-        #             scale_factors[f"layers.{layer}"] if scale_factors is not None else None,
-        #             hook_name=f"blocks.{layer}.hook_resid_post",
-        #             hook_layer=layer,
-        #         )
-
-        #         activations_store = ActivationsStore.from_config(
-        #             model, default_cfg, override_dataset=dataset
-        #         )
-
-        #         baseline_metrics = run_evals(baseline_sae, activations_store, model, eval_cfg)
-        #         # Exclude feature_density stats (i.e. baseline_metrics[1])
-        #         baseline_metrics = {
-        #             k_inner: v_inner
-        #             for k in baseline_metrics[0].keys()
-        #             for k_inner, v_inner in baseline_metrics[0][k].items()
-        #         }
-        #         print(baseline_metrics)
-        #         baseline_df.append(pd.Series(baseline_metrics, name=f"{layer}"))
-
-        #     activation_fn = "relu" if baseline_sae_cfg.k <= 0 else "topk"
-        #     if baseline_sae_cfg.jumprelu:
-        #         activation_fn = "jumprelu"
-        #     baseline_df = pd.concat(baseline_df, axis=1).T
-        #     baseline_df.to_csv(f"eval/pythia_410m_{activation_fn}_{component}_baseline.csv")
+                # Exclude feature_density stats (i.e. metrics[1])
+                metrics = {
+                    k_inner: v_inner
+                    for k in metrics[0].keys()
+                    for k_inner, v_inner in metrics[0][k].items()
+                }
+                metrics["layer"] = int(re.findall(r"\d+", hook_name)[0])
+                if cluster:
+                    metrics["G"] = cluster_name
+                df.append(metrics)
+        df = pd.DataFrame(df)
+        df.to_csv(f"{args.eval_dir}/{args.model}_{'cluster' if cluster else 'baseline'}.csv")
