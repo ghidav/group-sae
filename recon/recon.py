@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     with torch.no_grad():
         df = []
-        for cluster_name in CLUSTER_MAP[MODEL_MAP[args.model]].keys() if cluster else ["baseline"]:
+        for cluster_name in CLUSTER_MAP[MODEL_MAP[args.model]].keys() if cluster else ["0"]:
             for layer in tqdm(range(model.cfg.n_layers)):
                 dictionaries = load_saes(
                     args.sae_folder_path,
@@ -131,8 +131,7 @@ if __name__ == "__main__":
                     for k_inner, v_inner in metrics[0][k].items()
                 }
                 metrics["layer"] = int(re.findall(r"\d+", hook_name)[0])
-                if cluster:
-                    metrics["G"] = cluster_name
+                metrics["G"] = cluster_name
                 df.append(metrics)
         df = pd.DataFrame(df)
         df.to_csv(f"{args.eval_dir}/{args.model}_{'cluster' if cluster else 'baseline'}.csv")
