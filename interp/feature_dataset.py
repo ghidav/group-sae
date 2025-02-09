@@ -12,6 +12,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from group_sae import Sae
 from group_sae.hooks import from_tokens
+from group_sae.utils import MODEL_MAP
 
 parser = ArgumentParser()
 parser.add_argument("--model", type=str, required=True)
@@ -21,17 +22,12 @@ parser.add_argument("--n_features", type=str, required=True)
 args = parser.parse_args()
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
+short_name = MODEL_MAP[args.model]["short_name"]
 
-MODEL_MAP = {
-    "pythia-160m-deduped": "pythia_160m",
-    "pythia-410m-deduped": "pythia_410m",
-    "gemma-2-2b": "gemma2_2b",
-}
-
-os.makedirs(f"data/{MODEL_MAP[args.model]}", exist_ok=True)
+os.makedirs(f"data/{short_name}", exist_ok=True)
 
 # Load model
-model_name = "EleutherAI/" + args.model if "pythia" in args.model else "google/" + args.model
+model_name = "EleutherAI/" + args.model
 lm = AutoModelForCausalLM.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 lm.to(device)
@@ -290,12 +286,8 @@ def process_sae_group(path, prefix, is_cluster=False):
 
 
 # Process each SAE group
-process_sae_group(f"../saes/{MODEL_MAP[args.model]}-jr/baseline/", "jr-baseline")
-process_sae_group(f"../saes/{MODEL_MAP[args.model]}-jr/cluster/", "jr-cluster", is_cluster=True)
-process_sae_group(f"../saes/{MODEL_MAP[args.model]}-topk/baseline/", "topk-baseline")
-process_sae_group(
-    f"../saes/{MODEL_MAP[args.model]}-topk/cluster/", "topk-cluster", is_cluster=True
-)
+process_sae_group(f"../saes/{short_name}-topk/baseline/", "topk-baseline")
+process_sae_group(f"../saes/{short_name}-topk/cluster/", "topk-cluster", is_cluster=True)
 
 # Cleanup remaining resources
 gc.collect()
