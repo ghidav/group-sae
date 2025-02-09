@@ -13,7 +13,7 @@ from tqdm import tqdm
 from transformer_lens import HookedTransformer
 from transformer_lens.utils import get_act_name
 
-from group_sae.utils import CLUSTER_MAP, MODEL_MAP, get_device_for_block, load_saes
+from group_sae.utils import MODEL_MAP, get_device_for_block, load_saes, load_cluster_map
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -82,6 +82,8 @@ if __name__ == "__main__":
         compute_variance_metrics=True,
     )
 
+    CLUSTER_MAP = load_cluster_map(args.model.split('-')[-1])
+
     # Load dataset
     dataset = load_dataset(
         "NeelNanda/pile-small-tokenized-2b", streaming=False, split="train"
@@ -90,7 +92,7 @@ if __name__ == "__main__":
 
     with torch.no_grad():
         df = []
-        for cluster_name in CLUSTER_MAP[MODEL_MAP[args.model]].keys() if cluster else ["0"]:
+        for cluster_name in CLUSTER_MAP.keys() if cluster else ["0"]:
             for layer in tqdm(range(model.cfg.n_layers - 1)):
                 dictionaries = load_saes(
                     args.sae_folder_path,

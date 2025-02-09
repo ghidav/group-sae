@@ -9,7 +9,7 @@ from datasets import load_dataset
 from torch.utils.data import DataLoader
 from transformers import AutoModel
 
-from group_sae import ClusterSaeTrainer, SaeConfig, TrainConfig
+from group_sae import ClusterSaeTrainer, SaeConfig, TrainConfig, load_training_clusters
 from group_sae.hooks import from_tokens
 
 if __name__ == "__main__":
@@ -48,20 +48,11 @@ if __name__ == "__main__":
             print(f"Using DDP across {dist.get_world_size()} GPUs.")
 
     # --- Load clusters from JSON file ---
-    # Use only the last part of the model name (in case it contains a slash)
-    json_filename = f"{model_name}.json"
-    if not os.path.exists(json_filename):
-        raise FileNotFoundError(f"Cluster file '{json_filename}' not found in the current directory.")
-    with open(json_filename, "r") as f:
-        data = json.load(f)
-    if "training_clusters" not in data:
-        raise ValueError("JSON file does not contain the 'training_clusters' property.")
-    # Convert the lists of string indices to lists of ints.
-    clusters_flatten = data["training_clusters"]
+    training_clusters = load_training_clusters(args.model_name.split("-")[-1])
 
     # Convert each cluster's list of string indices to a list of ints.
     clusters_flatten = {}
-    for key, value in data["training_clusters"].items():
+    for key, value in training_clusters.items():
         try:
             clusters_flatten[key] = [int(layer_str) for layer_str in value]
         except ValueError as e:

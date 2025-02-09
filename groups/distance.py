@@ -127,6 +127,6 @@ if __name__ == "__main__":
 
     num_tokens_label = f"{float(args.num_tokens) / 1e6:.1f}M"
     np.save(
-        f"dist/{MODEL_MAP[args.model]}_{num_tokens_label}_{args.method}.npy",
+        f"dist/{MODEL_MAP[args.model]["short_name"]}_{num_tokens_label}_{args.method}.npy",
         final_distances.cpu().numpy(),
     )

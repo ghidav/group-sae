@@ -2,7 +2,7 @@ from .config import RunConfig, SaeConfig, TrainConfig
 from .sae import Sae
 from .trainer import SaeTrainer
 from .trainer_cluster import ClusterSaeTrainer
-from .utils import CLUSTER_MAP
+from .utils import MODEL_MAP
 
 __all__ = [
     "Sae",
@@ -11,5 +11,5 @@ __all__ = [
     "RunConfig",
     "SaeTrainer",
     "TrainConfig",
-    "CLUSTER_MAP",
+    "MODEL_MAP"
 ]
