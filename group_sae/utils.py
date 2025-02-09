@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import re
 from importlib.metadata import version
@@ -8,7 +9,6 @@ from typing import Any, Dict, Iterable, Type, TypeVar, cast
 import numpy as np
 import pandas as pd
 import torch
-import json
 import torch.nn as nn
 from accelerate.utils import send_to_device
 from matplotlib.colors import LinearSegmentedColormap
@@ -417,6 +417,7 @@ def load_saes(
         if cluster is not None:
             if model_name is None:
                 raise ValueError("model_name must be specified when cluster is not None")
+            CLUSTER_MAP = load_cluster_map(model_name.split("-")[1])
             cluster_layers = CLUSTER_MAP[MODEL_MAP[model_name]][cluster]
             modules_to_paths = {}
             for layer_num, cluster_layer in enumerate(cluster_layers):

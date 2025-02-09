@@ -11,5 +11,5 @@ __all__ = [
     "RunConfig",
     "SaeTrainer",
     "TrainConfig",
-    "MODEL_MAP"
+    "MODEL_MAP",
 ]

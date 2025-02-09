@@ -1,18 +1,16 @@
-from nnsight import LanguageModel
-from delphi.autoencoders import load_eai_autoencoders
+from argparse import ArgumentParser
+from functools import partial
 
+import torch
+from delphi.autoencoders.OpenAI.model import ACTIVATIONS_CLASSES, TopK
+from delphi.autoencoders.wrapper import AutoencoderLatents
 from delphi.config import CacheConfig
 from delphi.features import FeatureCache
 from delphi.utils import load_tokenized_data
-from delphi.autoencoders.wrapper import AutoencoderLatents
-from delphi.autoencoders.OpenAI.model import ACTIVATIONS_CLASSES, TopK
+from nnsight import LanguageModel
 
 from group_sae.sae import Sae
 from group_sae.utils import MODEL_MAP, load_cluster_map
-
-import torch
-from functools import partial
-from argparse import ArgumentParser
 
 parser = ArgumentParser()
 parser.add_argument("--model_name", type=str, default="pythia-160m-deduped")
@@ -37,19 +35,24 @@ if args.cluster:
     unique_mapping = {val: idx for idx, val in enumerate(sorted(set(map_)))}
     data = [unique_mapping[val] for val in map_]
     unique_values = sorted(set(data), key=lambda x: data.index(x))  # Preserve order of appearance
-    mapping = {val: f"{data.index(val)}-{len(data) - 1 - data[::-1].index(val)}" for val in unique_values}
+    mapping = {
+        val: f"{data.index(val)}-{len(data) - 1 - data[::-1].index(val)}" for val in unique_values
+    }
     CLUSTER_MAP = [mapping[val] for val in data]
+
     def fix_cluster(c):
         start, end = c.split("-")
         if start == end:
             return start
         else:
             return c
+
     CLUSTER_MAP = [fix_cluster(c) for c in CLUSTER_MAP]
     print(f"Cluster map loaded for G={G}")
     print(CLUSTER_MAP)
 
 print(f"Model {args.model_name} loaded")
+
 
 def load_saes(path, k):
     submodules = {}

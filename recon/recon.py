@@ -13,7 +13,7 @@ from tqdm import tqdm
 from transformer_lens import HookedTransformer
 from transformer_lens.utils import get_act_name
 
-from group_sae.utils import MODEL_MAP, get_device_for_block, load_saes, load_cluster_map
+from group_sae.utils import get_device_for_block, load_cluster_map, load_saes
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         compute_variance_metrics=True,
     )
 
-    CLUSTER_MAP = load_cluster_map(args.model.split('-')[-1])
+    CLUSTER_MAP = load_cluster_map(args.model.split("-")[-1])
 
     # Load dataset
     dataset = load_dataset(
