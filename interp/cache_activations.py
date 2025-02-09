@@ -94,7 +94,7 @@ def load_saes(path, k):
 
 
 submodule_dict, model = load_saes(args.sae_folder_path, k=128)
-raise ValueError("This script is not finished")
+
 cfg = CacheConfig(
     dataset_repo="EleutherAI/the_pile_deduplicated",
     dataset_split="train[:1%]",
@@ -128,5 +128,4 @@ cache.save_splits(
 )
 
 # The config of the cache should be saved with the results such that it can be loaded later.
-
-cache.save_config(save_dir="latents", cfg=cfg, model_name="google/gemma-2-9b")
+cache.save_config(save_dir="latents", cfg=cfg, model_name=full_model_name)
