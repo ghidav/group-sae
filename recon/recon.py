@@ -68,7 +68,7 @@ if __name__ == "__main__":
     modules = [get_act_name(args.component, layer) for layer in layers]
     cluster = args.cluster
 
-    eval_batches = 1024 * 1024 * 5 // args.batch_size  # 5M samples
+    eval_batches = 1024 // args.batch_size  # 5M samples
     eval_cfg = EvalConfig(
         batch_size_prompts=args.batch_size,
         # Reconstruction metrics
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     with torch.no_grad():
         df = []
         for cluster_name in CLUSTER_MAP[MODEL_MAP[args.model]].keys() if cluster else ["0"]:
-            for layer in tqdm(range(model.cfg.n_layers)):
+            for layer in tqdm(range(model.cfg.n_layers - 1)):
                 dictionaries = load_saes(
                     args.sae_folder_path,
                     device=device,
