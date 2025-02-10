@@ -71,6 +71,7 @@ def faithfulness(
     feature_mask,
     use_resid=False,
     device="cuda",
+    what="faithfulness",
 ):
 
     # Get the model's logit diff - m(M)
@@ -93,7 +94,7 @@ def faithfulness(
         feature_avg,
         feature_mask=feature_mask,
         use_resid=use_resid,
-        what=args.what,
+        what=what,
         device=device,
     )
 
@@ -111,7 +112,7 @@ def faithfulness(
         device=device,
     )
 
-    return ((C - zero) / (M - zero + 1e-7)).mean().item()
+    return C.sum().item(), zero.sum().item(), M.sum().item()
 
 
 ##########
@@ -274,15 +275,18 @@ if __name__ == "__main__":
 
     scores = []
     Ns = []
-    for T in tqdm(np.exp(np.linspace(-10, np.log(100), 64))):
+    for T in tqdm(np.exp(np.linspace(-10, np.log(100), 16))):
         feature_mask = {}
         for hook_name in effects.keys():
-            feature_mask[hook_name] = effects[hook_name].abs() > T
+            feature_mask[hook_name] = (effects[hook_name].abs() > T).sum(0) > 0
         N = np.mean([feature_mask[hook_name].sum().item() for hook_name in feature_mask.keys()])
 
+        C = 0
+        M = 0
+        zero = 0
         score = 0
         for i in range(0, len(test_tokens), args.batch_size):
-            batch_score = faithfulness(
+            C_batch, zero_batch, M_batch = faithfulness(
                 test_tokens[i : i + args.batch_size],
                 clean_answers[i : i + args.batch_size],
                 patch_answers[i : i + args.batch_size],
@@ -292,19 +296,21 @@ if __name__ == "__main__":
                 feature_mask=feature_mask,
                 use_resid=True,
                 device=device,
+                what=args.what,
             )
-            # batch_score and batch_N are the mean faithfulness score and
-            # the number of active features in the current batch
-            # Update them to the total score and the total number of active features
-            current_batch_len = len(test_tokens[i : i + args.batch_size])
-            score += batch_score * current_batch_len
-        score /= len(test_tokens)
+            C += C_batch
+            M += M_batch
+            zero += zero_batch
+        num_test_tokens = len(test_tokens)
+        score = (C / num_test_tokens - zero / num_test_tokens) / (
+            M / num_test_tokens - zero / num_test_tokens + 1e-7
+        )
         print(f"T: {T:.4f}, score: {score:.4f}, N: {N:.4f}")
         scores.append(score)
         Ns.append(N)
 
     score_df = pd.DataFrame({"score": scores, "N": Ns})
-    faith_result_path = f"{args.faith_dir}/"
+    faith_result_path = f"{args.faith_dir}/{args.model}_{args.dataset}_"
     os.makedirs(args.faith_dir, exist_ok=True)
     if cluster:
         faith_result_path += f"K{args.K}"

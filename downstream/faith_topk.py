@@ -72,6 +72,7 @@ def faithfulness(
     feature_mask,
     use_resid=False,
     device="cuda",
+    what="faithfulness",
 ):
 
     # Get the model's logit diff - m(M)
@@ -82,7 +83,7 @@ def faithfulness(
     clean_ans_logits = torch.gather(logits, 1, clean_answers.unsqueeze(1))
     patch_ans_logits = torch.gather(logits, 1, patch_answers.unsqueeze(1))
 
-    M = (clean_ans_logits - patch_ans_logits).squeeze().mean().item()
+    M = clean_ans_logits - patch_ans_logits
 
     # Get the circuit's logit diff - m(C)
     C = test_circuit(
@@ -94,7 +95,7 @@ def faithfulness(
         feature_avg,
         feature_mask=feature_mask,
         use_resid=use_resid,
-        what=args.what,
+        what=what,
         device=device,
     )
 
@@ -112,7 +113,7 @@ def faithfulness(
         device=device,
     )
 
-    return (C.mean().item() - zero.mean().item()) / (M - zero.mean().item() + 1e-7)
+    return C.sum().item(), zero.sum().item(), M.sum().item()
 
 
 ##########
@@ -273,12 +274,12 @@ if __name__ == "__main__":
 
     scores = []
     Ns = []
-    for T in tqdm(np.unique(np.linspace(122, 2048, 8, endpoint=True).astype(int))):
+    for T in tqdm(np.unique(np.linspace(122, 2048, 16, endpoint=True).astype(int))):
         feature_mask = {}
         for hook_name in effects.keys():
-            _, topk_idxes = torch.topk(effects[hook_name].abs(), T, dim=1)
-            mask = torch.zeros_like(effects[hook_name], dtype=torch.bool)
-            mask.scatter_(1, topk_idxes, 1)
+            _, topk_idxes = torch.topk(effects[hook_name].sum(0).abs(), T, dim=0)
+            mask = torch.zeros(effects[hook_name].shape[1], dtype=torch.bool, device=device)
+            mask.scatter_(0, topk_idxes, 1)
             feature_mask[hook_name] = mask
         N = np.mean(
             [
@@ -287,9 +288,12 @@ if __name__ == "__main__":
             ]
         )
 
+        C = 0
+        M = 0
+        zero = 0
         score = 0
         for i in range(0, len(test_tokens), args.batch_size):
-            batch_score = faithfulness(
+            C_batch, zero_batch, M_batch = faithfulness(
                 test_tokens[i : i + args.batch_size],
                 clean_answers[i : i + args.batch_size],
                 patch_answers[i : i + args.batch_size],
@@ -299,13 +303,15 @@ if __name__ == "__main__":
                 feature_mask=feature_mask,
                 use_resid=True,
                 device=device,
+                what=args.what,
             )
-            # batch_score and batch_N are the mean faithfulness score and
-            # the number of active features in the current batch
-            # Update them to the total score and the total number of active features
-            current_batch_len = len(test_tokens[i : i + args.batch_size])
-            score += batch_score * current_batch_len
-        score /= len(test_tokens)
+            C += C_batch
+            M += M_batch
+            zero += zero_batch
+        num_test_tokens = len(test_tokens)
+        score = (C / num_test_tokens - zero / num_test_tokens) / (
+            M / num_test_tokens - zero / num_test_tokens + 1e-7
+        )
         print(f"T: {T:.4f}, score: {score:.4f}, N: {N:.4f}")
         scores.append(score)
         Ns.append(N)
