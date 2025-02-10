@@ -1,4 +1,5 @@
 import os
+import json
 from argparse import ArgumentParser
 
 import torch
@@ -32,12 +33,6 @@ def parse_args():
         type=int,
         default=None,
         help="G parameter for clustering (required if --cluster is set).",
-    )
-    parser.add_argument(
-        "--n_splits",
-        type=int,
-        default=1,
-        help="Number of output file splits. Default is 1 (single file).",
     )
     parser.add_argument(
         "--n_tokens",
@@ -185,40 +180,35 @@ def main():
         save_dir = os.path.join(save_dir, "baseline")
 
     # Save the results for each submodule.
+    cfg_dict = {
+        "dataset_repo": "gngdb/subset_the_pile_deduplicated",
+        "dataset_split": "train[:1%]",
+        "dataset_name": "",
+        "dataset_row": "text",
+        "batch_size": args.batch_size,
+        "ctx_len": args.ctx_len,
+        "n_tokens": args.n_tokens,
+        "n_splits": 1,
+        "model_name": "EleutherAI/pythia-160m",
+    }
+
     for submodule, data in cache.items():
         submodule_folder = os.path.join(save_dir, f".gpt_neox.{submodule}")
         os.makedirs(submodule_folder, exist_ok=True)
-        if args.n_splits > 0:
-            # Flatten tokens so that splitting is done on the token level.
-            tokens_flat = processed_tokens.flatten()
-            total_tokens = tokens_flat.numel()
-            split_size = total_tokens // args.n_splits
-            for i in range(args.n_splits):
-                start = i * split_size
-                end = total_tokens if i == args.n_splits - 1 else (i + 1) * split_size
-                tokens_chunk = tokens_flat[start:end]
-                start_idx, end_idx = start * k, end * k
-                ids_chunk = data["ids"][start_idx:end_idx]
-                acts_chunk = data["acts"][start_idx:end_idx]
-                file_name = f"{start}_{end}.safetensors"
-                file_path = os.path.join(submodule_folder, file_name)
-                save_file(
-                    {"tokens": tokens_chunk, "locations": ids_chunk, "activations": acts_chunk},
-                    file_path,
-                )
-                print(f"Saved split: {file_path}")
-        else:
-            file_name = f"0_{token_counter}.safetensors"
-            file_path = os.path.join(submodule_folder, file_name)
-            save_file(
-                {
-                    "tokens": processed_tokens,
-                    "locations": data["ids"],
-                    "activations": data["acts"],
-                },
-                file_path,
-            )
-            print(f"Saved file: {file_path}")
+        file_name = f"0_{d_model * 16 - 1}.safetensors"
+        file_path = os.path.join(submodule_folder, file_name)
+        save_file(
+            {
+                "tokens": processed_tokens,
+                "locations": data["ids"],
+                "activations": data["acts"],
+            },
+            file_path,
+        )
+        with open(os.path.join(submodule_folder, "config.json"), "w") as f:
+            json.dump(cfg_dict, f)
+
+        print(f"Saved file: {file_path}")
 
 
 if __name__ == "__main__":
