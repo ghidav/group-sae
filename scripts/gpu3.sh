@@ -1,1 +1,3 @@
-python3.11 recon/recon.py --sae_folder_path training/checkpoints-clusters/pythia-1b-topk/step_30517 --model pythia-1b --cluster --batch_size 4
+python3.11 interp/cache_activations.py --model_name pythia-410m --n_tokens 100_000 --batch_size 8 --ctx_len 512 --cluster --G 4
+python3.11 interp/cache_activations.py --model_name pythia-410m --n_tokens 100_000 --batch_size 8 --ctx_len 512 --cluster --G 5
+python3.11 interp/cache_activations.py --model_name pythia-410m --n_tokens 100_000 --batch_size 8 --ctx_len 512 --cluster --G 6
