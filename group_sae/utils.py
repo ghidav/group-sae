@@ -385,7 +385,7 @@ def chunk_almost_equal_sum(numbers: list[int], num_chunks: int) -> list[list[int
 
 
 def load_saes(
-    sae_folder_path: str,
+    sae_root_folder: str,
     device: str = "cuda",
     debug: bool = False,
     layer: int | None = None,
@@ -398,6 +398,9 @@ def load_saes(
     from group_sae.sae import Sae, SaeConfig
 
     dictionaries = {}
+    sae_folder_path = os.path.join(
+        sae_root_folder, "cluster" if cluster is not None else "baseline"
+    )
 
     if not os.path.exists(sae_folder_path):
         raise ValueError(f"SAE path {sae_folder_path} does not exist. ")
@@ -418,7 +421,7 @@ def load_saes(
             if model_name is None:
                 raise ValueError("model_name must be specified when cluster is not None")
             CLUSTER_MAP = load_cluster_map(model_name.split("-")[1])
-            cluster_layers = CLUSTER_MAP[MODEL_MAP[model_name]][cluster]
+            cluster_layers = CLUSTER_MAP[cluster]
             modules_to_paths = {}
             for layer_num, cluster_layer in enumerate(cluster_layers):
                 for path in paths:
@@ -458,7 +461,7 @@ def load_saes(
                 sae_cfg = SaeConfig.load_json(os.path.join(path, "cfg.json"))
                 cfg = TrainConfig.load_json(os.path.join(sae_folder_path, "config.json"))
                 norm_scaling_factors = torch.load(
-                    os.path.join(sae_folder_path, "scaling_factors.pt")
+                    os.path.join(sae_root_folder, "scaling_factors.pt")
                 )
                 hookpoint = "layers." + re.findall(r"\d+", hook_name)[0]
                 norm_scaling_factor = norm_scaling_factors[hookpoint]

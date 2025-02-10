@@ -155,7 +155,7 @@ if __name__ == "__main__":
         "--task_dir", type=str, default="tasks", help="The directory to load the task dataset."
     )
     parser.add_argument(
-        "--sae_folder_path",
+        "--sae_root_folder",
         type=str,
         default="saes",
         help="Path to all dictionaries for your language model.",
@@ -180,17 +180,17 @@ if __name__ == "__main__":
         device = "cuda"
         model.cfg.device = device
     if args.layer is None:
-        layers = list(range(model.cfg.n_layers))
+        layers = list(range(model.cfg.n_layers - 1))
     else:
         layers = [args.layer]
     modules = [get_act_name(args.component, layer) for layer in layers]
     cluster = args.K != -1
     dictionaries = load_saes(
-        args.sae_folder_path,
+        args.sae_root_folder,
         device=device,
         debug=True,
         layer=args.layer,
-        cluster=None if args.K == -1 else args.K,
+        cluster=None if args.K == -1 else str(args.K),
         load_from_sae_lens=False,
         dtype="float32",
         model_name=args.model,

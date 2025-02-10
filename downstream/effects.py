@@ -230,7 +230,7 @@ if __name__ == "__main__":
         help="The Huggingface ID of the model you wish to test.",
     )
     parser.add_argument(
-        "--sae_folder_path",
+        "--sae_root_folder",
         type=str,
         default="saes",
         help="Path to all dictionaries for your language model.",
@@ -278,7 +278,7 @@ if __name__ == "__main__":
     d_head = model.cfg.d_head
 
     if args.layer is None:
-        layers = list(range(nl))
+        layers = list(range(nl - 1))
     else:
         layers = [args.layer]
     modules = [get_act_name(args.component, layer) for layer in layers]
@@ -286,11 +286,11 @@ if __name__ == "__main__":
 
     # loading saes
     dictionaries = load_saes(
-        args.sae_folder_path,
+        args.sae_root_folder,
         device=device,
         debug=True,
         layer=args.layer,
-        cluster=None if args.K == -1 else args.K,
+        cluster=None if args.K == -1 else str(args.K),
         load_from_sae_lens=False,
         dtype="float32",
         model_name=args.model,
