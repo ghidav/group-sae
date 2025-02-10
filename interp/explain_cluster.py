@@ -55,7 +55,7 @@ latent_cfg = LatentConfig(
     n_splits=1,  # How many splits was the cache split into
 )
 
-training_clusters = load_training_clusters(args.model_name)
+training_clusters = load_training_clusters(args.model_name.split("-")[-1])
 
 # Explanation loop
 number_of_parallel_latents = 4
@@ -102,31 +102,34 @@ async def run_pipeline_for_layer(layer, pipeline):
 async def main():
     tasks = []  # Store all pipeline tasks
 
-    for layer in range(n_layers - 1):  # Create a pipeline for each layer
-        module = f".gpt_neox.layers.{layer}"
-        feature_dict = {module: torch.arange(0, 128)}
+    for cid, cluster in training_clusters.items():
+        G = cid.split("-")[0][1:]
+        for layer in cluster:
+            # Create a pipeline for each layer
+            module = f".gpt_neox.layers.{layer}"
+            feature_dict = {module: torch.arange(0, 128)}
 
-        dataset = LatentDataset(
-            raw_dir=f"latents/{args.model_name}/baseline",
-            cfg=latent_cfg,
-            modules=[module],
-            latents=feature_dict,
-        )
+            dataset = LatentDataset(
+                raw_dir=f"latents/{args.model_name}/{G}",
+                cfg=latent_cfg,
+                modules=[module],
+                latents=feature_dict,
+            )
 
-        loader = LatentLoader(dataset, constructor=constructor, sampler=sampler)
+            loader = LatentLoader(dataset, constructor=constructor, sampler=sampler)
 
-        explainer_pipe = process_wrapper(
-            DefaultExplainer(
-                client,
-                tokenizer=dataset.tokenizer,
-            ),
-            postprocess=explainer_postprocess,
-        )
+            explainer_pipe = process_wrapper(
+                DefaultExplainer(
+                    client,
+                    tokenizer=dataset.tokenizer,
+                ),
+                postprocess=explainer_postprocess,
+            )
 
-        pipeline = Pipeline(loader, explainer_pipe)
+            pipeline = Pipeline(loader, explainer_pipe)
 
-        # Add pipeline to async task list
-        tasks.append(run_pipeline_for_layer(layer, pipeline))
+            # Add pipeline to async task list
+            tasks.append(run_pipeline_for_layer(layer, pipeline))
 
     # Run all pipelines concurrently
     await asyncio.gather(*tasks)
