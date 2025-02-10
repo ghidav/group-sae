@@ -1,20 +1,19 @@
-import asyncio
-import json
-import os
-from argparse import ArgumentParser
 from functools import partial
-
-import orjson
+import os
+import json
 import torch
-
+import orjson
+import asyncio
 from delphi.clients import OpenRouter
-from delphi.config import ExperimentConfig, FeatureConfig
+from delphi.config import ExperimentConfig, LatentConfig
+from delphi.latents import LatentDataset, LatentLoader
+from delphi.latents.constructors import default_constructor
 from delphi.explainers import DefaultExplainer
-from delphi.features import FeatureDataset, FeatureLoader
-from delphi.features.constructors import default_constructor
-from delphi.features.samplers import sample
+from delphi.latents.samplers import sample
 from delphi.pipeline import Pipeline, process_wrapper
+
 from group_sae.utils import MODEL_MAP
+from argparse import ArgumentParser
 
 
 def parse_args():
@@ -29,6 +28,12 @@ def parse_args():
         type=str,
         default="pythia-160m",
         help="Name of the model (e.g. 'pythia-160m').",
+    )
+    parser.add_argument(
+        "--layer",
+        type=int,
+        default=8,
+        help="Layer to select feature from.",
     )
     parser.add_argument(
         "--cluster",
@@ -52,64 +57,67 @@ G = str(args.G) if args.G else "baseline"
 script_dir = os.path.dirname(os.path.abspath(__file__))
 with open(f"{script_dir}/../keys.json", "r") as f:
     keys = json.load(f)
-API_KEY = os.getenv(keys["openrouter"])
-os.makedirs("explanations", exist_ok=True)
+API_KEY = keys["openrouter"]
+
+explain_dir = f"{script_dir}/results/explanations/{args.model_name}/{G}"
+os.makedirs(explain_dir, exist_ok=True)
 
 # Get model parameters from the mapping
 n_layers = MODEL_MAP[args.model_name]["n_layers"]
 d_model = MODEL_MAP[args.model_name]["d_model"]
 
 # Configurations
-feature_cfg = FeatureConfig(
+latent_cfg = LatentConfig(
     width=d_model * 16,  # The number of latents of your SAE
-    min_examples=200,    # The minimum number of examples to consider for the feature to be explained
+    min_examples=200,  # The minimum number of examples to consider for the feature to be explained
     max_examples=10000,  # The maximum number of examples to be sampled from
-    n_splits=1,          # How many splits was the cache split into
+    n_splits=1,  # How many splits was the cache split into
 )
 
 # Define module and feature dictionary
-module = ".gpt_neox.layers.10"  # The layer to explain
+module = f".gpt_neox.layers.{args.layer}"  # The layer to explain
 feature_dict = {module: torch.arange(0, 32)}  # The latents to explain
 
 # Create dataset
-dataset = FeatureDataset(
+dataset = LatentDataset(
     raw_dir=f"latents/{args.model_name}/{G}",  # The folder where the cache is stored
-    cfg=feature_cfg,
+    cfg=latent_cfg,
     modules=[module],
-    features=feature_dict,
+    latents=feature_dict,
 )
 
 # Experiment configuration
 experiment_cfg = ExperimentConfig(
-    n_examples_train=40,  # Number of examples to sample for training
-    example_ctx_len=32,   # Length of each example
-    train_type="random",  # Type of sampler to use for training.
+    n_examples_test=10,  # Number of examples to sample for testing
+    n_quantiles=10,  # Number of quantiles to divide the data into
+    test_type="quantiles",  # Type of sampler to use for testing.
+    n_non_activating=10,  # Number of non-activating examples to sample
+    example_ctx_len=32,  # Length of each example
 )
 
 # Create constructor and sampler for loading features
 constructor = partial(
     default_constructor,
-    n_random=experiment_cfg.n_random,
+    token_loader=None,
+    n_not_active=experiment_cfg.n_non_activating,
     ctx_len=experiment_cfg.example_ctx_len,
-    max_examples=feature_cfg.max_examples,
+    max_examples=latent_cfg.max_examples,
 )
 sampler = partial(sample, cfg=experiment_cfg)
-loader = FeatureLoader(dataset, constructor=constructor, sampler=sampler)
+loader = LatentLoader(dataset, constructor=constructor, sampler=sampler)
 
 # Initialize the client
 client = OpenRouter("google/gemini-2.0-flash-001", api_key=API_KEY)
 
 
+# Load the explanations already generated
 def explainer_postprocess(result):
-    """Post-process the explainer result."""
-    output_path = f"explanations/{result.record.feature}.txt"
-    with open(output_path, "wb") as f:
+    with open(f"{explain_dir}/{result.record.latent}.txt", "wb") as f:
         f.write(orjson.dumps(result.explanation))
     del result
     return None
 
 
-# Create the explainer pipeline
 explainer_pipe = process_wrapper(
     DefaultExplainer(
         client,
@@ -118,9 +126,15 @@ explainer_pipe = process_wrapper(
     postprocess=explainer_postprocess,
 )
 
-# Assemble the main pipeline
-pipeline = Pipeline(loader, explainer_pipe)
 
-# Run the pipeline asynchronously
+# Final pipeline
+pipeline = Pipeline(loader, explainer_pipe)
 number_of_parallel_latents = 4
-asyncio.run(pipeline.run(number_of_parallel_latents))
+
+
+async def main():
+    await pipeline.run(number_of_parallel_latents)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
