@@ -378,7 +378,7 @@ if __name__ == "__main__":
 
     nodes = {k: v.to(device) / num_examples for k, v in running_nodes.items()}
     save_dict = {"examples": examples, "nodes": nodes}
-    save_path = f"{args.effects_dir}/"
+    save_path = f"{args.effects_dir}/{args.model}_{args.dataset}_"
     if cluster:
         save_path += f"K{args.K}"
     else:

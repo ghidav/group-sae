@@ -256,7 +256,7 @@ if __name__ == "__main__":
             feature_avg[hook_name] /= len(train_tokens)
 
     cluster = args.K != -1
-    effects_path = f"{args.effects_dir}/"
+    effects_path = f"{args.effects_dir}/{args.model}_{args.dataset}_"
     if cluster:
         effects_path += f"K{args.K}"
     else:
@@ -304,7 +304,7 @@ if __name__ == "__main__":
 
     score_df = pd.DataFrame({"score": scores, "N": Ns})
     faith_result_path = f"{args.faith_dir}/"
-    os.makedirs(faith_result_path, exist_ok=True)
+    os.makedirs(args.faith_dir, exist_ok=True)
     if cluster:
         faith_result_path += f"K{args.K}"
     else:
