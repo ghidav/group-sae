@@ -78,12 +78,8 @@ constructor = partial(
 
 sampler = partial(sample, cfg=experiment_cfg)
 
-# Baselines
-explain_dir = f"{script_dir}/results/explanations/{args.model_name}/baseline"
-os.makedirs(explain_dir, exist_ok=True)  # Ensure directory exists
 
-
-def explainer_postprocess(result):
+def explainer_postprocess(explain_dir, result):
     """Post-processes and saves explanations"""
     output_file = os.path.join(explain_dir, f"{result.record.latent}.txt")
     with open(output_file, "wb") as f:
@@ -105,6 +101,11 @@ async def main():
     for cid, cluster in training_clusters.items():
         G = cid.split("-")[0][1:]
         for layer in cluster:
+
+            # Create directories
+            explain_dir = f"{script_dir}/results/explanations/{args.model_name}/{G}"
+            os.makedirs(explain_dir, exist_ok=True)  # Ensure directory exists
+
             # Create a pipeline for each layer
             module = f".gpt_neox.layers.{layer}"
             feature_dict = {module: torch.arange(0, 128)}
@@ -123,7 +124,7 @@ async def main():
                     client,
                     tokenizer=dataset.tokenizer,
                 ),
-                postprocess=explainer_postprocess,
+                postprocess=partial(explainer_postprocess, explain_dir),
             )
 
             pipeline = Pipeline(loader, explainer_pipe)
