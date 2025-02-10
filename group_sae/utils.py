@@ -29,21 +29,26 @@ T = TypeVar("T")
 
 
 MODEL_MAP = {
-    "pythia-160m": {"short_name": "pythia_160m", "n_layers": 12, "d_model": 768},
-    "pythia-410m": {"short_name": "pythia_410m", "n_layers": 24, "d_model": 1024},
-    "pythia-1b": {"short_name": "pythia_1b", "n_layers": 16, "d_model": 2048},
-    "pythia-1.4b": {"short_name": "pythia_1.4b", "n_layers": 32, "d_model": 2048},
+    "pythia-160m": {"short_name": "pythia_160m", "n_layers": 12, "d_model": 768, "A": 207.62, "T": 94.37},
+    "pythia-410m": {"short_name": "pythia_410m", "n_layers": 24, "d_model": 1024, "A": 704.64, "T": 167.77},
+    "pythia-1b": {"short_name": "pythia_1b", "n_layers": 16, "d_model": 2048, "A": 1744.83, "T": 671.09},
+    "pythia-1.4b": {"short_name": "pythia_1.4b", "n_layers": 32, "d_model": 2048, "A": None, "T": None},
 }
 
 
-def load_amds(size):
+def load_amds(size, include_baseline=False):
     package_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(package_dir, "groups", f"pythia-{size}.json")
     clusters = json.load(open(file_path))
-    nl = MODEL_MAP[f"pythia-{size}-deduped"]["n_layers"]
+    nl = MODEL_MAP[f"pythia-{size}"]["n_layers"]
+    A = MODEL_MAP[f"pythia-{size}"]["A"]
+    T = MODEL_MAP[f"pythia-{size}"]["T"]
     amd = pd.Series([clusters[str(i)]["amd"] for i in range(1, nl - 1)]).reset_index()
     amd.columns = ["G", "AMD"]
     amd["G"] += 1
+    if include_baseline:
+        amd = pd.concat([amd, pd.DataFrame([{"G": nl-1, "AMD": 0}])])
+    amd["C"] = A + T * amd["G"]
     return amd
 
 

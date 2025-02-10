@@ -1,4 +1,5 @@
 import os
+import re
 import torch
 from torch.utils.data import DataLoader
 from transformers import AutoModel, AutoTokenizer
@@ -9,7 +10,7 @@ from tqdm import tqdm
 
 from group_sae.sae import Sae
 from group_sae.hooks import from_tokens
-from group_sae.utils import MODEL_MAP, load_cluster_map
+from group_sae.utils import MODEL_MAP, load_cluster_map, load_saes
 
 
 def parse_args():
@@ -59,15 +60,16 @@ def parse_args():
     )
     return parser.parse_args()
 
-
+"""
 def load_saes(sae_folder_path, cluster_map, n_layers, args, device, model_dtype):
-    """
+    
     Loads the SAE models for each layer.
 
     If clustering is enabled, the appropriate sub-folder (either 'baseline' or 'cluster')
     is selected based on whether the cluster_map entry for a layer contains a '-' character.
-    """
+
     saes = {}
+    scaling_factor
     for layer in range(n_layers - 1):
         submodule = f"layers.{layer}"
         if args.cluster:
@@ -83,7 +85,7 @@ def load_saes(sae_folder_path, cluster_map, n_layers, args, device, model_dtype)
             sae = Sae.load_from_disk(sae_path, device=device).to(dtype=model_dtype)
         saes[submodule] = sae
     return saes
-
+"""
 
 def main():
     args = parse_args()
@@ -137,7 +139,9 @@ def main():
 
     # Load SAEs.
     sae_folder_path = os.path.join(script_dir, "../saes", MODEL_MAP[args.model_name]["short_name"] + "-topk")
-    saes = load_saes(sae_folder_path, cluster_map, n_layers, args, device, model.dtype)
+    G = str(args.G) if args.cluster else None
+    saes = load_saes(sae_folder_path, cluster=G, device=device, model_name=args.model_name)
+    saes = {f"layers.{int(re.findall(r'\d+', k)[0])}": v for k, v in saes.items()}
 
     # Get a mapping from submodule names to model modules.
     name_to_module = {name: model.get_submodule(name) for name in saes.keys()}
@@ -162,7 +166,8 @@ def main():
                 outputs_ = outputs
             outputs_flat = outputs_.reshape(-1, d_model)
             with torch.no_grad():
-                _, top_acts, top_indices = saes[name].activation(saes[name].encode(outputs_flat))
+                latents = saes[name].activation(saes[name].encode(outputs_flat))
+            top_acts, top_indices = torch.topk(latents, k, dim=1)
             # Concatenate the fixed locations with the top indices.
             ids = torch.cat([locations.to(device), top_indices.flatten()[:, None]], dim=1)
             cache[name]["ids"].append(ids.cpu())
