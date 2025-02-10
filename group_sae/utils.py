@@ -29,10 +29,34 @@ T = TypeVar("T")
 
 
 MODEL_MAP = {
-    "pythia-160m": {"short_name": "pythia_160m", "n_layers": 12, "d_model": 768, "A": 207.62, "T": 94.37},
-    "pythia-410m": {"short_name": "pythia_410m", "n_layers": 24, "d_model": 1024, "A": 704.64, "T": 167.77},
-    "pythia-1b": {"short_name": "pythia_1b", "n_layers": 16, "d_model": 2048, "A": 1744.83, "T": 671.09},
-    "pythia-1.4b": {"short_name": "pythia_1.4b", "n_layers": 32, "d_model": 2048, "A": None, "T": None},
+    "pythia-160m": {
+        "short_name": "pythia_160m",
+        "n_layers": 12,
+        "d_model": 768,
+        "A": 207.62,
+        "T": 94.37,
+    },
+    "pythia-410m": {
+        "short_name": "pythia_410m",
+        "n_layers": 24,
+        "d_model": 1024,
+        "A": 704.64,
+        "T": 167.77,
+    },
+    "pythia-1b": {
+        "short_name": "pythia_1b",
+        "n_layers": 16,
+        "d_model": 2048,
+        "A": 1744.83,
+        "T": 671.09,
+    },
+    "pythia-1.4b": {
+        "short_name": "pythia_1.4b",
+        "n_layers": 32,
+        "d_model": 2048,
+        "A": None,
+        "T": None,
+    },
 }
 
 
@@ -47,7 +71,7 @@ def load_amds(size, include_baseline=False):
     amd.columns = ["G", "AMD"]
     amd["G"] += 1
     if include_baseline:
-        amd = pd.concat([amd, pd.DataFrame([{"G": nl-1, "AMD": 0}])])
+        amd = pd.concat([amd, pd.DataFrame([{"G": nl - 1, "AMD": 0}])])
     amd["C"] = A + T * amd["G"]
     return amd
 
@@ -419,7 +443,7 @@ def load_saes(
                         raise FileNotFoundError(f"SAE path {sae_path} does not existorch. ")
                     paths.append(sae_path)
             return paths
-        
+
         baseline_paths = get_paths(sae_folder_path + "/baseline")
         cluster_paths = get_paths(sae_folder_path + "/cluster")
 
@@ -433,12 +457,12 @@ def load_saes(
             for layer_num, cluster_layer in enumerate(cluster_layers):
                 if "layers." in cluster_layer:
                     for path in baseline_paths:
-                        if cluster_layer in path:
+                        if cluster_layer == path:
                             modules_to_paths[f"blocks.{layer_num}.hook_resid_post"] = path
                             break
                 else:
                     for path in cluster_paths:
-                        if cluster_layer in path:
+                        if cluster_layer == path:
                             modules_to_paths[f"blocks.{layer_num}.hook_resid_post"] = path
                             break
         else:
@@ -472,7 +496,7 @@ def load_saes(
                     print(f"Loading SAE for {hook_name} from {path}")
                 sae = Sae.load_from_disk(path)
                 sae_cfg = SaeConfig.load_json(os.path.join(path, "cfg.json"))
-                cfg = TrainConfig.load_json(os.path.join(sae_folder_path, "config.json"))
+                cfg = TrainConfig.load_json(os.path.join(path, "..", "config.json"))
                 norm_scaling_factors = torch.load(
                     os.path.join(sae_folder_path, "scaling_factors.pt")
                 )
