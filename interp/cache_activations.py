@@ -139,7 +139,7 @@ def main():
                 outputs_ = outputs
             outputs_flat = outputs_.reshape(-1, d_model)
             with torch.no_grad():
-                latents = saes[name].activation(saes[name].encode(outputs_flat))
+                latents = saes[name].encode(outputs_flat)
             top_acts, top_indices = torch.topk(latents, k, dim=1)
             # Concatenate the fixed locations with the top indices.
             ids = torch.cat([locations.to(device), top_indices.flatten()[:, None]], dim=1)
