@@ -12,7 +12,7 @@ from delphi.explainers import DefaultExplainer
 from delphi.latents.samplers import sample
 from delphi.pipeline import Pipeline, process_wrapper
 
-from group_sae.utils import MODEL_MAP
+from group_sae.utils import MODEL_MAP, load_training_clusters
 from argparse import ArgumentParser
 
 
@@ -29,29 +29,11 @@ def parse_args():
         default="pythia-160m",
         help="Name of the model (e.g. 'pythia-160m').",
     )
-    parser.add_argument(
-        "--layer",
-        type=int,
-        default=8,
-        help="Layer to select feature from.",
-    )
-    parser.add_argument(
-        "--cluster",
-        action="store_true",
-        help="Use clustering when loading SAEs.",
-    )
-    parser.add_argument(
-        "--G",
-        type=int,
-        default=None,
-        help="G parameter for clustering (required if --cluster is set).",
-    )
     return parser.parse_args()
 
 
 # Parse command-line arguments
 args = parse_args()
-G = str(args.G) if args.G else "baseline"
 
 # Load API keys
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -59,8 +41,7 @@ with open(f"{script_dir}/../keys.json", "r") as f:
     keys = json.load(f)
 API_KEY = keys["openrouter"]
 
-explain_dir = f"{script_dir}/results/explanations/{args.model_name}/{G}"
-os.makedirs(explain_dir, exist_ok=True)
+client = OpenRouter("google/gemini-2.0-flash-001", api_key=API_KEY)
 
 # Get model parameters from the mapping
 n_layers = MODEL_MAP[args.model_name]["n_layers"]
@@ -74,19 +55,11 @@ latent_cfg = LatentConfig(
     n_splits=1,  # How many splits was the cache split into
 )
 
-# Define module and feature dictionary
-module = f".gpt_neox.layers.{args.layer}"  # The layer to explain
-feature_dict = {module: torch.arange(0, 32)}  # The latents to explain
+training_clusters = load_training_clusters(args.model_name)
 
-# Create dataset
-dataset = LatentDataset(
-    raw_dir=f"latents/{args.model_name}/{G}",  # The folder where the cache is stored
-    cfg=latent_cfg,
-    modules=[module],
-    latents=feature_dict,
-)
+# Explanation loop
+number_of_parallel_latents = 4
 
-# Experiment configuration
 experiment_cfg = ExperimentConfig(
     n_examples_test=10,  # Number of examples to sample for testing
     n_quantiles=10,  # Number of quantiles to divide the data into
@@ -95,7 +68,6 @@ experiment_cfg = ExperimentConfig(
     example_ctx_len=32,  # Length of each example
 )
 
-# Create constructor and sampler for loading features
 constructor = partial(
     default_constructor,
     token_loader=None,
@@ -103,37 +75,61 @@ constructor = partial(
     ctx_len=experiment_cfg.example_ctx_len,
     max_examples=latent_cfg.max_examples,
 )
+
 sampler = partial(sample, cfg=experiment_cfg)
-loader = LatentLoader(dataset, constructor=constructor, sampler=sampler)
 
-# Initialize the client
-client = OpenRouter("google/gemini-2.0-flash-001", api_key=API_KEY)
+# Baselines
+explain_dir = f"{script_dir}/results/explanations/{args.model_name}/baseline"
+os.makedirs(explain_dir, exist_ok=True)  # Ensure directory exists
 
 
-# Load the explanations already generated
 def explainer_postprocess(result):
-    with open(f"{explain_dir}/{result.record.latent}.txt", "wb") as f:
+    """Post-processes and saves explanations"""
+    output_file = os.path.join(explain_dir, f"{result.record.latent}.txt")
+    with open(output_file, "wb") as f:
         f.write(orjson.dumps(result.explanation))
     del result
     return None
 
 
-explainer_pipe = process_wrapper(
-    DefaultExplainer(
-        client,
-        tokenizer=dataset.tokenizer,
-    ),
-    postprocess=explainer_postprocess,
-)
-
-
-# Final pipeline
-pipeline = Pipeline(loader, explainer_pipe)
-number_of_parallel_latents = 4
+async def run_pipeline_for_layer(layer, pipeline):
+    """Runs the pipeline for a given layer asynchronously"""
+    print(f"Starting pipeline for layer {layer}...")
+    await pipeline.run(number_of_parallel_latents)
+    print(f"Finished pipeline for layer {layer}")
 
 
 async def main():
-    await pipeline.run(number_of_parallel_latents)
+    tasks = []  # Store all pipeline tasks
+
+    for layer in range(n_layers - 1):  # Create a pipeline for each layer
+        module = f".gpt_neox.layers.{layer}"
+        feature_dict = {module: torch.arange(0, 128)}
+
+        dataset = LatentDataset(
+            raw_dir=f"latents/{args.model_name}/baseline",
+            cfg=latent_cfg,
+            modules=[module],
+            latents=feature_dict,
+        )
+
+        loader = LatentLoader(dataset, constructor=constructor, sampler=sampler)
+
+        explainer_pipe = process_wrapper(
+            DefaultExplainer(
+                client,
+                tokenizer=dataset.tokenizer,
+            ),
+            postprocess=explainer_postprocess,
+        )
+
+        pipeline = Pipeline(loader, explainer_pipe)
+
+        # Add pipeline to async task list
+        tasks.append(run_pipeline_for_layer(layer, pipeline))
+
+    # Run all pipelines concurrently
+    await asyncio.gather(*tasks)
 
 
 if __name__ == "__main__":
