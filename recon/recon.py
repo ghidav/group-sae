@@ -44,7 +44,7 @@ if __name__ == "__main__":
         help="The Huggingface ID of the model you wish to test.",
     )
     parser.add_argument(
-        "--sae_folder_path",
+        "--sae_root_folder",
         type=str,
         default="/home/fbelotti/group-sae/saes/pythia_160-topk",
         help="Path to all dictionaries for your language model.",
@@ -95,7 +95,7 @@ if __name__ == "__main__":
         for cluster_name in CLUSTER_MAP.keys() if cluster else ["0"]:
             for layer in tqdm(range(model.cfg.n_layers - 1)):
                 dictionaries = load_saes(
-                    args.sae_folder_path,
+                    args.sae_root_folder,
                     device=device,
                     debug=True,
                     layer=layer,

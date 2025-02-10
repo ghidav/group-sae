@@ -124,7 +124,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--K", "-k", type=int, default=-1, help="The number of cluster to be used."
     )
-    parser.add_argument("--active_features", nargs="+", default=[32, 64, 128, 512, 1024, 2048])
     parser.add_argument("-c", "--component", type=str, default="resid_post")
     parser.add_argument("-n", "--n", type=int, default=1024)
     parser.add_argument("-mt", "--method", type=str, default="attrib")
@@ -156,7 +155,7 @@ if __name__ == "__main__":
         "--task_dir", type=str, default="tasks", help="The directory to load the task dataset."
     )
     parser.add_argument(
-        "--sae_folder_path",
+        "--sae_root_folder",
         type=str,
         default="saes",
         help="Path to all dictionaries for your language model.",
@@ -173,7 +172,6 @@ if __name__ == "__main__":
     n = args.n
     task = args.dataset
     lengths = {"ioi": 15, "greater_than": 12, "subject_verb": 6}
-    args.active_features = [int(k) for k in args.active_features]
 
     model = HookedTransformer.from_pretrained(args.model, device="cuda", n_devices=args.n_devices)
     device = model.cfg.device
@@ -181,17 +179,17 @@ if __name__ == "__main__":
         device = "cuda"
         model.cfg.device = device
     if args.layer is None:
-        layers = list(range(model.cfg.n_layers))
+        layers = list(range(model.cfg.n_layers - 1))
     else:
         layers = [args.layer]
     modules = [get_act_name(args.component, layer) for layer in layers]
     cluster = args.K != -1
     dictionaries = load_saes(
-        args.sae_folder_path,
+        args.sae_root_folder,
         device=device,
         debug=True,
         layer=args.layer,
-        cluster=None if args.K == -1 else args.K,
+        cluster=None if args.K == -1 else str(args.K),
         load_from_sae_lens=False,
         dtype="float32",
         model_name=args.model,
@@ -274,7 +272,7 @@ if __name__ == "__main__":
 
     scores = []
     Ns = []
-    for T in tqdm(np.unique(np.logspace(0, np.log10(2048), 64, endpoint=True).astype(int))):
+    for T in tqdm(np.unique(np.linspace(122, 2048, 8, endpoint=True).astype(int))):
         feature_mask = {}
         for hook_name in effects.keys():
             _, topk_idxes = torch.topk(effects[hook_name].abs(), T, dim=1)
