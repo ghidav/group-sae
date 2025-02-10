@@ -58,7 +58,7 @@ latent_cfg = LatentConfig(
 training_clusters = load_training_clusters(args.model_name.split("-")[-1])
 
 # Explanation loop
-number_of_parallel_latents = 4
+number_of_parallel_latents = 1
 
 experiment_cfg = ExperimentConfig(
     n_examples_test=10,  # Number of examples to sample for testing
@@ -111,7 +111,7 @@ async def main():
             feature_dict = {module: torch.arange(0, 128)}
 
             dataset = LatentDataset(
-                raw_dir=f"latents/{args.model_name}/{G}",
+                raw_dir=f"interp/latents/{args.model_name}/{G}",
                 cfg=latent_cfg,
                 modules=[module],
                 latents=feature_dict,
@@ -131,6 +131,7 @@ async def main():
 
             # Add pipeline to async task list
             tasks.append(run_pipeline_for_layer(layer, pipeline))
+            await asyncio.sleep(10)
 
     # Run all pipelines concurrently
     await asyncio.gather(*tasks)
