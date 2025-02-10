@@ -19,14 +19,8 @@ def parse_args():
     parser.add_argument(
         "--model_name",
         type=str,
-        default="pythia-160m-deduped",
-        help="Name of the model (e.g. 'pythia-160m-deduped').",
-    )
-    parser.add_argument(
-        "--sae_folder_path",
-        type=str,
-        default="../saes/pythia_160m-topk",
-        help="Path to the folder containing the SAEs.",
+        default="pythia-160m",
+        help="Name of the model (e.g. 'pythia-160m').",
     )
     parser.add_argument(
         "--cluster",
@@ -40,16 +34,28 @@ def parse_args():
         help="G parameter for clustering (required if --cluster is set).",
     )
     parser.add_argument(
-        "--n_features",
-        type=int,
-        default=1024,
-        help="Number of features to use in the SAE.",
-    )
-    parser.add_argument(
         "--n_splits",
         type=int,
         default=1,
         help="Number of output file splits. Default is 1 (single file).",
+    )
+    parser.add_argument(
+        "--n_tokens",
+        type=int,
+        default=1_000_000,
+        help="Number of tokens to process.",
+    )
+    parser.add_argument(
+        "--ctx_len",
+        type=int,
+        default=None,
+        help="Context length to use. Default is None (full context).",
+    )
+    parser.add_argument(
+        "--batch_size",
+        type=int,
+        default=8,
+        help="Batch size for processing.",
     )
     return parser.parse_args()
 
@@ -81,26 +87,30 @@ def load_saes(sae_folder_path, cluster_map, n_layers, args, device, model_dtype)
 
 def main():
     args = parse_args()
+    script_dir = os.path.dirname(os.path.abspath(__file__))
 
     # Choose device.
     device = "cuda" if torch.cuda.is_available() else "mps"
     if device != "cuda":
         print("Warning: Running on MPS, performance may be suboptimal.")
 
-    # Processing parameters.
-    batch_size = 8
-    ctx_len = 256
-    n_tokens = 10_000
-    # The activation hook produces a fixed number of outputs per token.
-    activation_factor = 128
-
     # Load the model and tokenizer.
     full_model_name = f"EleutherAI/{args.model_name}"
     model = AutoModel.from_pretrained(full_model_name, torch_dtype=torch.bfloat16).to(device)
     model.eval()
+    tokenizer = AutoTokenizer.from_pretrained(full_model_name)
 
     n_layers = MODEL_MAP[args.model_name]["n_layers"]
     d_model = MODEL_MAP[args.model_name]["d_model"]
+
+    # Processing parameters.
+    batch_size = args.batch_size
+    ctx_len = args.ctx_len or tokenizer.model_max_length
+    n_tokens = args.n_tokens
+    # The activation hook produces a fixed number of outputs per token.
+    k = 128
+
+    print(f"Running for {n_tokens} tokens with batch size {batch_size}, context length {ctx_len}.")
 
     # Load the dataset.
     dataset = load_dataset(
@@ -126,7 +136,8 @@ def main():
     print(f"Model {args.model_name} loaded.")
 
     # Load SAEs.
-    saes = load_saes(args.sae_folder_path, cluster_map, n_layers, args, device, model.dtype)
+    sae_folder_path = os.path.join(script_dir, "../saes", MODEL_MAP[args.model_name]["short_name"] + "-topk")
+    saes = load_saes(sae_folder_path, cluster_map, n_layers, args, device, model.dtype)
 
     # Get a mapping from submodule names to model modules.
     name_to_module = {name: model.get_submodule(name) for name in saes.keys()}
@@ -138,7 +149,7 @@ def main():
     X, Y = torch.meshgrid(torch.arange(batch_size), torch.arange(ctx_len), indexing="ij")
     locations = (
         torch.stack([X.flatten(), Y.flatten()], dim=1)
-        .repeat_interleave(activation_factor, dim=0)
+        .repeat_interleave(k, dim=0)
         .type(torch.int64)
     )
 
@@ -186,7 +197,8 @@ def main():
         cache[name]["acts"] = torch.cat(cache[name]["acts"])
 
     # Build the saving directory.
-    save_dir = os.path.join("latents", MODEL_MAP[args.model_name]["short_name"])
+    save_dir = os.path.join(script_dir, "latents")
+    save_dir = os.path.join(save_dir, MODEL_MAP[args.model_name]["short_name"])
     if args.cluster:
         save_dir = os.path.join(save_dir, str(args.G))
     else:
@@ -205,7 +217,7 @@ def main():
                 start = i * split_size
                 end = total_tokens if i == args.n_splits - 1 else (i + 1) * split_size
                 tokens_chunk = tokens_flat[start:end]
-                start_idx, end_idx = start * activation_factor, end * activation_factor
+                start_idx, end_idx = start * k, end * k
                 ids_chunk = data["ids"][start_idx:end_idx]
                 acts_chunk = data["acts"][start_idx:end_idx]
                 file_name = f"{start}_{end}.safetensors"
