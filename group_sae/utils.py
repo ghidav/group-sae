@@ -29,10 +29,10 @@ T = TypeVar("T")
 
 
 MODEL_MAP = {
-    "pythia-160m-deduped": {"short_name": "pythia_160m", "n_layers": 12, "d_model": 768},
-    "pythia-410m-deduped": {"short_name": "pythia_410m", "n_layers": 24, "d_model": 1024},
-    "pythia-1b-deduped": {"short_name": "pythia_1b", "n_layers": 16, "d_model": 2048},
-    "pythia-1.4b-deduped": {"short_name": "pythia_1.4b", "n_layers": 32, "d_model": 2048},
+    "pythia-160m": {"short_name": "pythia_160m", "n_layers": 12, "d_model": 768},
+    "pythia-410m": {"short_name": "pythia_410m", "n_layers": 24, "d_model": 1024},
+    "pythia-1b": {"short_name": "pythia_1b", "n_layers": 16, "d_model": 2048},
+    "pythia-1.4b": {"short_name": "pythia_1.4b", "n_layers": 32, "d_model": 2048},
 }
 
 
