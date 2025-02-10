@@ -1,14 +1,13 @@
 import os
-import re
+from argparse import ArgumentParser
+
 import torch
-from torch.utils.data import DataLoader
-from transformers import AutoModel, AutoTokenizer
 from datasets import load_dataset
 from safetensors.torch import save_file
-from argparse import ArgumentParser
+from torch.utils.data import DataLoader
 from tqdm import tqdm
+from transformers import AutoModel, AutoTokenizer
 
-from group_sae.sae import Sae
 from group_sae.hooks import from_tokens
 from group_sae.utils import MODEL_MAP, load_cluster_map, load_saes
 
@@ -60,6 +59,7 @@ def parse_args():
     )
     return parser.parse_args()
 
+
 def main():
     args = parse_args()
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -75,7 +75,7 @@ def main():
     model.eval()
     tokenizer = AutoTokenizer.from_pretrained(full_model_name)
 
-    n_layers = MODEL_MAP[args.model_name]["n_layers"]
+    MODEL_MAP[args.model_name]["n_layers"]
     d_model = MODEL_MAP[args.model_name]["d_model"]
 
     # Processing parameters.
@@ -111,7 +111,9 @@ def main():
     print(f"Model {args.model_name} loaded.")
 
     # Load SAEs.
-    sae_folder_path = os.path.join(script_dir, "../saes", MODEL_MAP[args.model_name]["short_name"] + "-topk")
+    sae_folder_path = os.path.join(
+        script_dir, "../saes", MODEL_MAP[args.model_name]["short_name"] + "-topk"
+    )
     G = str(args.G) if args.cluster else None
     saes = load_saes(sae_folder_path, cluster=G, device=device, model_name=args.model_name)
     saes = {f"layers.{k.split('.')[1]}": v for k, v in saes.items()}
