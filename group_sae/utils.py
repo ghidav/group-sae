@@ -457,12 +457,12 @@ def load_saes(
             for layer_num, cluster_layer in enumerate(cluster_layers):
                 if "layers." in cluster_layer:
                     for path in baseline_paths:
-                        if cluster_layer == path:
+                        if cluster_layer == path.split(os.sep)[-1]:
                             modules_to_paths[f"blocks.{layer_num}.hook_resid_post"] = path
                             break
                 else:
                     for path in cluster_paths:
-                        if cluster_layer == path:
+                        if cluster_layer == path.split(os.sep)[-1]:
                             modules_to_paths[f"blocks.{layer_num}.hook_resid_post"] = path
                             break
         else:
