@@ -308,6 +308,7 @@ if __name__ == "__main__":
             "Some modules may not have been loaded."
         )
         modules = [k for k in modules if k in dictionaries.keys()]
+        dictionaries = {k: v for k, v in dictionaries.items() if k in modules}
 
     data_path = f"{args.task_dir}/{args.dataset}.json"
     examples = load_examples(data_path, args.num_examples, model, length=args.example_length)
@@ -383,7 +384,7 @@ if __name__ == "__main__":
         save_path += f"K{args.K}"
     else:
         save_path += "Baseline"
-    save_path += f"_{args.dataset}_n{num_examples}_{args.method}"
+    save_path += f"_n{num_examples}_{args.method}"
     if args.layer is not None:
         save_path += f"_layer{args.layer}"
     save_path += ".pt"

@@ -208,6 +208,7 @@ if __name__ == "__main__":
             "Some modules may not have been loaded."
         )
         modules = [k for k in modules if k in dictionaries.keys()]
+        dictionaries = {k: v for k, v in dictionaries.items() if k in modules}
 
     train_examples = load_examples(
         f"{args.task_dir}/{task}.json", 2 * n, model, length=lengths[task]
@@ -261,7 +262,7 @@ if __name__ == "__main__":
         effects_path += f"K{args.K}"
     else:
         effects_path += "Baseline"
-    effects_path += f"_{args.dataset}_n{n}_{args.method}"
+    effects_path += f"_n{n}_{args.method}"
     if args.layer is not None:
         effects_path += f"_layer{args.layer}"
     effects_path += ".pt"
@@ -309,7 +310,7 @@ if __name__ == "__main__":
         faith_result_path += f"K{args.K}"
     else:
         faith_result_path += "Baseline"
-    faith_result_path += f"_{args.dataset}_{args.method}_{args.what}"
+    faith_result_path += f"_{args.method}_{args.what}"
     if args.layer is not None:
         faith_result_path += f"_layer{args.layer}"
     faith_result_path += ".csv"
