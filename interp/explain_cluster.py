@@ -64,7 +64,7 @@ latent_cfg = LatentConfig(
 training_clusters = load_training_clusters(args.model_name.split("-")[-1])
 
 # Explanation loop
-number_of_parallel_latents = 1
+number_of_parallel_latents = 4
 
 experiment_cfg = ExperimentConfig(
     n_examples_test=10,  # Number of examples to sample for testing

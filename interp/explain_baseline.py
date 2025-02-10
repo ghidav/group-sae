@@ -12,7 +12,7 @@ from delphi.explainers import DefaultExplainer
 from delphi.latents.samplers import sample
 from delphi.pipeline import Pipeline, process_wrapper
 
-from group_sae.utils import MODEL_MAP, load_training_clusters
+from group_sae.utils import MODEL_MAP
 from argparse import ArgumentParser
 
 
@@ -28,6 +28,12 @@ def parse_args():
         type=str,
         default="pythia-160m",
         help="Name of the model (e.g. 'pythia-160m').",
+    )
+    parser.add_argument(
+        "--max_pipelines",
+        type=int,
+        default=2,  # Change this default as needed.
+        help="Maximum number of pipelines to run concurrently.",
     )
     return parser.parse_args()
 
@@ -54,7 +60,6 @@ latent_cfg = LatentConfig(
     max_examples=10000,  # The maximum number of examples to be sampled from
     n_splits=1,  # How many splits was the cache split into
 )
-
 
 # Explanation loop
 number_of_parallel_latents = 4
@@ -91,15 +96,19 @@ def explainer_postprocess(result):
     return None
 
 
-async def run_pipeline_for_layer(layer, pipeline):
-    """Runs the pipeline for a given layer asynchronously"""
-    print(f"Starting pipeline for layer {layer}...")
-    await pipeline.run(number_of_parallel_latents)
-    print(f"Finished pipeline for layer {layer}")
+async def run_pipeline_for_layer(layer, pipeline, semaphore):
+    """Runs the pipeline for a given layer asynchronously with concurrency control."""
+    async with semaphore:
+        print(f"Starting pipeline for layer {layer}...")
+        await pipeline.run(number_of_parallel_latents)
+        print(f"Finished pipeline for layer {layer}")
 
 
 async def main():
     tasks = []  # Store all pipeline tasks
+
+    # Create a semaphore to limit concurrent pipelines.
+    semaphore = asyncio.Semaphore(args.max_pipelines)
 
     for layer in range(n_layers - 1):  # Create a pipeline for each layer
         module = f".gpt_neox.layers.{layer}"
@@ -124,10 +133,10 @@ async def main():
 
         pipeline = Pipeline(loader, explainer_pipe)
 
-        # Add pipeline to async task list
-        tasks.append(run_pipeline_for_layer(layer, pipeline))
+        # Add pipeline task with semaphore control to the async task list
+        tasks.append(run_pipeline_for_layer(layer, pipeline, semaphore))
 
-    # Run all pipelines concurrently
+    # Run all pipelines concurrently (with at most args.max_pipelines at a time)
     await asyncio.gather(*tasks)
 
 
