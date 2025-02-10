@@ -60,33 +60,6 @@ def parse_args():
     )
     return parser.parse_args()
 
-"""
-def load_saes(sae_folder_path, cluster_map, n_layers, args, device, model_dtype):
-    
-    Loads the SAE models for each layer.
-
-    If clustering is enabled, the appropriate sub-folder (either 'baseline' or 'cluster')
-    is selected based on whether the cluster_map entry for a layer contains a '-' character.
-
-    saes = {}
-    scaling_factor
-    for layer in range(n_layers - 1):
-        submodule = f"layers.{layer}"
-        if args.cluster:
-            to_load = cluster_map[layer]
-            if "-" not in str(to_load):
-                # Load from the baseline folder if the cluster map entry is simple.
-                sae_path = os.path.join(sae_folder_path, "baseline", submodule)
-            else:
-                sae_path = os.path.join(sae_folder_path, "cluster", str(cluster_map[layer]))
-            sae = Sae.load_from_disk(sae_path, device=device).to(dtype=model_dtype)
-        else:
-            sae_path = os.path.join(sae_folder_path, "baseline", submodule)
-            sae = Sae.load_from_disk(sae_path, device=device).to(dtype=model_dtype)
-        saes[submodule] = sae
-    return saes
-"""
-
 def main():
     args = parse_args()
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -141,7 +114,7 @@ def main():
     sae_folder_path = os.path.join(script_dir, "../saes", MODEL_MAP[args.model_name]["short_name"] + "-topk")
     G = str(args.G) if args.cluster else None
     saes = load_saes(sae_folder_path, cluster=G, device=device, model_name=args.model_name)
-    saes = {f"layers.{int(re.findall(r'\d+', k)[0])}": v for k, v in saes.items()}
+    saes = {f"layers.{k.split('.')[1]}": v for k, v in saes.items()}
 
     # Get a mapping from submodule names to model modules.
     name_to_module = {name: model.get_submodule(name) for name in saes.keys()}
