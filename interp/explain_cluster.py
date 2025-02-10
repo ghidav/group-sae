@@ -29,6 +29,12 @@ def parse_args():
         default="pythia-160m",
         help="Name of the model (e.g. 'pythia-160m').",
     )
+    parser.add_argument(
+        "--max_pipelines",
+        type=int,
+        default=2,  # Change this default as needed.
+        help="Maximum number of pipelines to run concurrently.",
+    )
     return parser.parse_args()
 
 
@@ -88,22 +94,26 @@ def explainer_postprocess(explain_dir, result):
     return None
 
 
-async def run_pipeline_for_layer(layer, pipeline):
-    """Runs the pipeline for a given layer asynchronously"""
-    print(f"Starting pipeline for layer {layer}...")
-    await pipeline.run(number_of_parallel_latents)
-    print(f"Finished pipeline for layer {layer}")
+async def run_pipeline_for_layer(layer, pipeline, semaphore):
+    """Runs the pipeline for a given layer asynchronously with concurrency control."""
+    async with semaphore:
+        print(f"Starting pipeline for layer {layer}...")
+        await pipeline.run(number_of_parallel_latents)
+        print(f"Finished pipeline for layer {layer}")
 
 
 async def main():
     tasks = []  # Store all pipeline tasks
+
+    # Create a semaphore to limit concurrent pipelines.
+    semaphore = asyncio.Semaphore(args.max_pipelines)
 
     for cid, cluster in training_clusters.items():
         G = cid.split("-")[0][1:]
         for layer in cluster:
 
             # Create directories
-            explain_dir = f"{script_dir}/results/explanations/{args.model_name}/{G}"
+            explain_dir = os.path.join(script_dir, "results", "explanations", args.model_name, G)
             os.makedirs(explain_dir, exist_ok=True)  # Ensure directory exists
 
             # Create a pipeline for each layer
@@ -129,11 +139,10 @@ async def main():
 
             pipeline = Pipeline(loader, explainer_pipe)
 
-            # Add pipeline to async task list
-            tasks.append(run_pipeline_for_layer(layer, pipeline))
-            await asyncio.sleep(10)
+            # Add pipeline task with semaphore control to the async task list
+            tasks.append(run_pipeline_for_layer(layer, pipeline, semaphore))
 
-    # Run all pipelines concurrently
+    # Run all pipelines concurrently (with at most args.max_pipelines at a time)
     await asyncio.gather(*tasks)
 
 
