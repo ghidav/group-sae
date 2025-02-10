@@ -401,7 +401,6 @@ def load_saes(
     dataset_path: str = "NeelNanda/pile-small-tokenized-2b",
 ):
     from group_sae.sae import Sae, SaeConfig
-    sae_folder_path = sae_folder_path + "/cluster" if cluster else sae_folder_path + "/baseline"
 
     dictionaries = {}
 
@@ -409,31 +408,42 @@ def load_saes(
         raise ValueError(f"SAE path {sae_folder_path} does not exist. ")
     else:
         # Load all available SAEs in `sae_folder_path`
-        paths = []
-        for path in os.listdir(sae_folder_path):
-            sae_path = os.path.join(sae_folder_path, path)
-            if load_from_sae_lens:
-                sae_path = os.path.join(sae_path, "sae_lens")
-            if os.path.isdir(os.path.join(sae_folder_path, path)):
-                if not os.path.exists(sae_path):
-                    raise FileNotFoundError(f"SAE path {sae_path} does not existorch. ")
-                paths.append(sae_path)
+        def get_paths(folder_path):
+            paths = []
+            for path in os.listdir(folder_path):
+                sae_path = os.path.join(folder_path, path)
+                if load_from_sae_lens:
+                    sae_path = os.path.join(sae_path, "sae_lens")
+                if os.path.isdir(os.path.join(folder_path, path)):
+                    if not os.path.exists(sae_path):
+                        raise FileNotFoundError(f"SAE path {sae_path} does not existorch. ")
+                    paths.append(sae_path)
+            return paths
+        
+        baseline_paths = get_paths(sae_folder_path + "/baseline")
+        cluster_paths = get_paths(sae_folder_path + "/cluster")
 
         # Map modules to paths, converting paths to corresponding sae_lens hookpoints
         if cluster is not None:
             if model_name is None:
                 raise ValueError("model_name must be specified when cluster is not None")
             CLUSTER_MAP = load_cluster_map(model_name.split("-")[1])
-            cluster_layers = CLUSTER_MAP[MODEL_MAP[model_name]][cluster]
+            cluster_layers = CLUSTER_MAP[cluster]
             modules_to_paths = {}
             for layer_num, cluster_layer in enumerate(cluster_layers):
-                for path in paths:
-                    if cluster_layer in path:
-                        modules_to_paths[f"blocks.{layer_num}.hook_resid_post"] = path
-                        break
+                if "layers." in cluster_layer:
+                    for path in baseline_paths:
+                        if cluster_layer in path:
+                            modules_to_paths[f"blocks.{layer_num}.hook_resid_post"] = path
+                            break
+                else:
+                    for path in cluster_paths:
+                        if cluster_layer in path:
+                            modules_to_paths[f"blocks.{layer_num}.hook_resid_post"] = path
+                            break
         else:
             modules_to_paths = {}
-            for path in paths:
+            for path in baseline_paths:
                 layer_num = re.findall(r"\d+", path.split(os.sep)[-1])[0]
                 if f"layers.{layer_num}" in path:
                     modules_to_paths[f"blocks.{layer_num}.hook_resid_post"] = path
