@@ -194,3 +194,4 @@ checkpoints-clusters
 train
 week
 final
+.gpt_neox.*
