@@ -195,7 +195,7 @@ def main():
     for submodule, data in cache.items():
         submodule_folder = os.path.join(save_dir, f".gpt_neox.{submodule}")
         os.makedirs(submodule_folder, exist_ok=True)
-        file_name = f"0_{d_model * 16}.safetensors"
+        file_name = f"0_{d_model * 16 - 1}.safetensors"
         file_path = os.path.join(submodule_folder, file_name)
         save_file(
             {
