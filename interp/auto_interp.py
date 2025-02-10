@@ -46,32 +46,34 @@ def parse_args():
 
 # Parse command-line arguments
 args = parse_args()
+G = str(args.G) if args.G else "baseline"
 
 # Load API keys
 script_dir = os.path.dirname(os.path.abspath(__file__))
 with open(f"{script_dir}/../keys.json", "r") as f:
     keys = json.load(f)
 API_KEY = os.getenv(keys["openrouter"])
+os.makedirs("explanations", exist_ok=True)
 
 # Get model parameters from the mapping
 n_layers = MODEL_MAP[args.model_name]["n_layers"]
 d_model = MODEL_MAP[args.model_name]["d_model"]
 
-# Feature configuration
+# Configurations
 feature_cfg = FeatureConfig(
     width=d_model * 16,  # The number of latents of your SAE
     min_examples=200,    # The minimum number of examples to consider for the feature to be explained
     max_examples=10000,  # The maximum number of examples to be sampled from
-    n_splits=5,          # How many splits was the cache split into
+    n_splits=1,          # How many splits was the cache split into
 )
 
 # Define module and feature dictionary
-module = ".model.layers.10"  # The layer to explain
-feature_dict = {module: torch.arange(0, 100)}  # The latents to explain
+module = ".gpt_neox.layers.10"  # The layer to explain
+feature_dict = {module: torch.arange(0, 32)}  # The latents to explain
 
 # Create dataset
 dataset = FeatureDataset(
-    raw_dir="latents",  # The folder where the cache is stored
+    raw_dir=f"latents/{args.model_name}/{G}",  # The folder where the cache is stored
     cfg=feature_cfg,
     modules=[module],
     features=feature_dict,
@@ -100,7 +102,7 @@ client = OpenRouter("google/gemini-2.0-flash-001", api_key=API_KEY)
 
 def explainer_postprocess(result):
     """Post-process the explainer result."""
-    output_path = f"results/explanations/{result.record.feature}.txt"
+    output_path = f"explanations/{result.record.feature}.txt"
     with open(output_path, "wb") as f:
         f.write(orjson.dumps(result.explanation))
     del result
@@ -120,5 +122,5 @@ explainer_pipe = process_wrapper(
 pipeline = Pipeline(loader, explainer_pipe)
 
 # Run the pipeline asynchronously
-number_of_parallel_latents = 10
+number_of_parallel_latents = 4
 asyncio.run(pipeline.run(number_of_parallel_latents))
