@@ -188,7 +188,7 @@ def main():
         "batch_size": args.batch_size,
         "ctx_len": args.ctx_len,
         "n_tokens": args.n_tokens,
-        "n_splits": args.n_splits,
+        "n_splits": 1,
         "model_name": "EleutherAI/pythia-160m",
     }
 
