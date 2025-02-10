@@ -1,37 +1,33 @@
 import asyncio
 import json
 import os
+import time
 from functools import partial
 
 import orjson
 import torch
-import time
-from simple_parsing import ArgumentParser
-
 from delphi.clients import Offline
 from delphi.config import ExperimentConfig, FeatureConfig
 from delphi.explainers import DefaultExplainer
-from delphi.features import (
-    FeatureDataset,
-    FeatureLoader
-)
+from delphi.features import FeatureDataset, FeatureLoader
 from delphi.features.constructors import default_constructor
 from delphi.features.samplers import sample
-from delphi.pipeline import Pipe,Pipeline, process_wrapper
-from delphi.scorers import FuzzingScorer, DetectionScorer
-
+from delphi.pipeline import Pipe, Pipeline, process_wrapper
+from delphi.scorers import DetectionScorer, FuzzingScorer
+from simple_parsing import ArgumentParser
 
 # run with python examples/example_script.py --model gemma/16k --module .model.layers.10 --features 100 --experiment_name test
+
 
 def main(args):
     module = args.module
     feature_cfg = args.feature_options
     experiment_cfg = args.experiment_options
     shown_examples = args.shown_examples
-    n_features = args.features  
+    n_features = args.features
     start_feature = 0
     sae_model = args.model
-    feature_dict = {f"{module}": torch.arange(start_feature,start_feature+n_features)}
+    feature_dict = {f"{module}": torch.arange(start_feature, start_feature + n_features)}
     dataset = FeatureDataset(
         raw_dir="latents/pythia_160m/3",
         cfg=feature_cfg,
@@ -39,42 +35,46 @@ def main(args):
         features=feature_dict,
     )
 
-    
-    constructor=partial(
-            default_constructor,
-            token_loader=lambda: dataset.load_tokens(),
-            n_random=experiment_cfg.n_random, 
-            ctx_len=experiment_cfg.example_ctx_len, 
-            max_examples=feature_cfg.max_examples
-        )
-    sampler=partial(sample,cfg=experiment_cfg)
+    constructor = partial(
+        default_constructor,
+        token_loader=lambda: dataset.load_tokens(),
+        n_random=experiment_cfg.n_random,
+        ctx_len=experiment_cfg.example_ctx_len,
+        max_examples=feature_cfg.max_examples,
+    )
+    sampler = partial(sample, cfg=experiment_cfg)
     loader = FeatureLoader(dataset, constructor=constructor, sampler=sampler)
     ### Load client ###
-    
+
     # "hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4"
-    client = Offline("pythia-160m-deduepd",max_memory=0.8,max_model_len=5120)
-    
+    client = Offline("pythia-160m-deduepd", max_memory=0.8, max_model_len=5120)
+
     ### Build Explainer pipe ###
     def explainer_postprocess(result):
 
-        with open(f"results/explanations/{sae_model}/{experiment_name}/{result.record.feature}.txt", "wb") as f:
+        with open(
+            f"results/explanations/{sae_model}/{experiment_name}/{result.record.feature}.txt", "wb"
+        ) as f:
             f.write(orjson.dumps(result.explanation))
 
         return result
-    #try making the directory if it doesn't exist
+
+    # try making the directory if it doesn't exist
     os.makedirs(f"results/explanations/{sae_model}/{experiment_name}", exist_ok=True)
 
     explainer_pipe = process_wrapper(
         DefaultExplainer(
-            client, 
+            client,
             tokenizer=dataset.tokenizer,
             threshold=0.3,
         ),
         postprocess=explainer_postprocess,
     )
 
-    #save the experiment config
-    with open(f"results/explanations/{sae_model}/{experiment_name}/experiment_config.json", "w") as f:
+    # save the experiment config
+    with open(
+        f"results/explanations/{sae_model}/{experiment_name}/experiment_config.json", "w"
+    ) as f:
         print(experiment_cfg.to_dict())
         f.write(json.dumps(experiment_cfg.to_dict()))
 
@@ -89,31 +89,48 @@ def main(args):
 
     def scorer_postprocess(result, score_dir):
         record = result.record
-        with open(f"results/scores/{sae_model}/{experiment_name}/{score_dir}/{record.feature}.txt", "wb") as f:
+        with open(
+            f"results/scores/{sae_model}/{experiment_name}/{score_dir}/{record.feature}.txt", "wb"
+        ) as f:
             f.write(orjson.dumps(result.score))
-        
 
     os.makedirs(f"results/scores/{sae_model}/{experiment_name}/detection", exist_ok=True)
     os.makedirs(f"results/scores/{sae_model}/{experiment_name}/fuzz", exist_ok=True)
 
-    #save the experiment config
-    with open(f"results/scores/{sae_model}/{experiment_name}/detection/experiment_config.json", "w") as f:
+    # save the experiment config
+    with open(
+        f"results/scores/{sae_model}/{experiment_name}/detection/experiment_config.json", "w"
+    ) as f:
         f.write(json.dumps(experiment_cfg.to_dict()))
 
-    with open(f"results/scores/{sae_model}/{experiment_name}/fuzz/experiment_config.json", "w") as f:
+    with open(
+        f"results/scores/{sae_model}/{experiment_name}/fuzz/experiment_config.json", "w"
+    ) as f:
         f.write(json.dumps(experiment_cfg.to_dict()))
 
-
-    scorer_pipe = Pipe(process_wrapper(
-            DetectionScorer(client, tokenizer=dataset.tokenizer, batch_size=shown_examples,verbose=False,log_prob=True),
+    scorer_pipe = Pipe(
+        process_wrapper(
+            DetectionScorer(
+                client,
+                tokenizer=dataset.tokenizer,
+                batch_size=shown_examples,
+                verbose=False,
+                log_prob=True,
+            ),
             preprocess=scorer_preprocess,
             postprocess=partial(scorer_postprocess, score_dir="detection"),
         ),
         process_wrapper(
-            FuzzingScorer(client, tokenizer=dataset.tokenizer, batch_size=shown_examples,verbose=False,log_prob=True),
+            FuzzingScorer(
+                client,
+                tokenizer=dataset.tokenizer,
+                batch_size=shown_examples,
+                verbose=False,
+                log_prob=True,
+            ),
             preprocess=scorer_preprocess,
             postprocess=partial(scorer_postprocess, score_dir="fuzz"),
-        )
+        ),
     )
 
     ### Build the pipeline ###
@@ -127,7 +144,7 @@ def main(args):
     asyncio.run(pipeline.run(50))
     end_time = time.time()
     print(f"Time taken: {end_time - start_time} seconds")
-    
+
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -140,7 +157,5 @@ if __name__ == "__main__":
     parser.add_arguments(FeatureConfig, dest="feature_options")
     args = parser.parse_args()
     experiment_name = args.experiment_name
-    
-
 
     main(args)
