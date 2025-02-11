@@ -1,5 +1,7 @@
-python3.11 interp/cache_activations.py --model_name pythia-160m --n_tokens 100_000 --batch_size 8 --ctx_len 512 --cluster --G 4
-python3.11 interp/cache_activations.py --model_name pythia-160m --n_tokens 100_000 --batch_size 8 --ctx_len 512 --cluster --G 5
-python3.11 interp/cache_activations.py --model_name pythia-160m --n_tokens 100_000 --batch_size 8 --ctx_len 512 --cluster --G 6
-
-python3.11 interp/cache_activations.py --model_name pythia-410m --n_tokens 100_000 --batch_size 8 --ctx_len 512
+for K in -1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22; do
+    python3.11 downstream/effects.py \
+    -d greater_than \
+    -l 12 \
+    -m pythia-410m \
+    --K $K
+done
