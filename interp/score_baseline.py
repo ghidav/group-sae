@@ -129,7 +129,7 @@ async def main():
             return int(latent), int(layer)
 
         layer_features = [extract_latent(f) for f in os.listdir(explain_dir) if f.endswith(".txt")]
-        layer_features = [f for f in layer_features if f[1] == layer]
+        layer_features = [f[0] for f in layer_features if int(f[1]) == int(layer)]
 
         feature_dict = {
             module: torch.tensor(
@@ -139,7 +139,7 @@ async def main():
         }
 
         dataset = LatentDataset(
-            raw_dir=f"latents/{args.model_name}/baseline",  # The folder where the cache is stored
+            raw_dir=f"interp/latents/{args.model_name}/baseline",  # The folder where the cache is stored
             cfg=latent_cfg,
             modules=[module],
             latents=feature_dict,
