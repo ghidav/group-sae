@@ -8,7 +8,7 @@ for K in -1 1 2 3 4 5 6 7 8 9 10; do
     -mt attrib \
     --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
     --device cuda \
-    --effects_dir /home/fbelotti/group-sae/effects_pass_through \
+    --effects_dir /home/fbelotti/group-sae/effects \
     --task_dir /home/fbelotti/group-sae/downstream/tasks \
     --batch_size 16 \
     --n_devices 2 \
@@ -25,7 +25,7 @@ for K in -1 1 2 3 4 5 6 7 8 9 10; do
     -mt attrib \
     --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
     --device cuda \
-    --effects_dir /home/fbelotti/group-sae/effects_pass_through \
+    --effects_dir /home/fbelotti/group-sae/effects \
     --task_dir /home/fbelotti/group-sae/downstream/tasks \
     --batch_size 16 \
     --n_devices 2 \
@@ -42,7 +42,7 @@ for K in -1 1 2 3 4 5 6 7 8 9 10; do
     -mt attrib \
     --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
     --device cuda \
-    --effects_dir /home/fbelotti/group-sae/effects_pass_through \
+    --effects_dir /home/fbelotti/group-sae/effects \
     --task_dir /home/fbelotti/group-sae/downstream/tasks \
     --batch_size 16 \
     --n_devices 2 \
