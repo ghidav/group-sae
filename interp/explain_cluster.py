@@ -29,6 +29,12 @@ def parse_args():
         default="pythia-160m",
         help="Name of the model (e.g. 'pythia-160m').",
     )
+    parser.add_argument(
+        "--max_pipelines",
+        type=int,
+        default=2,  # Change this default as needed.
+        help="Maximum number of pipelines to run concurrently.",
+    )
     return parser.parse_args()
 
 
@@ -55,7 +61,7 @@ latent_cfg = LatentConfig(
     n_splits=1,  # How many splits was the cache split into
 )
 
-training_clusters = load_training_clusters(args.model_name)
+training_clusters = load_training_clusters(args.model_name.split("-")[-1])
 
 # Explanation loop
 number_of_parallel_latents = 4
@@ -78,12 +84,8 @@ constructor = partial(
 
 sampler = partial(sample, cfg=experiment_cfg)
 
-# Baselines
-explain_dir = f"{script_dir}/results/explanations/{args.model_name}/baseline"
-os.makedirs(explain_dir, exist_ok=True)  # Ensure directory exists
 
-
-def explainer_postprocess(result):
+def explainer_postprocess(explain_dir, result):
     """Post-processes and saves explanations"""
     output_file = os.path.join(explain_dir, f"{result.record.latent}.txt")
     with open(output_file, "wb") as f:
@@ -92,43 +94,55 @@ def explainer_postprocess(result):
     return None
 
 
-async def run_pipeline_for_layer(layer, pipeline):
-    """Runs the pipeline for a given layer asynchronously"""
-    print(f"Starting pipeline for layer {layer}...")
-    await pipeline.run(number_of_parallel_latents)
-    print(f"Finished pipeline for layer {layer}")
+async def run_pipeline_for_layer(layer, pipeline, semaphore):
+    """Runs the pipeline for a given layer asynchronously with concurrency control."""
+    async with semaphore:
+        print(f"Starting pipeline for layer {layer}...")
+        await pipeline.run(number_of_parallel_latents)
+        print(f"Finished pipeline for layer {layer}")
 
 
 async def main():
     tasks = []  # Store all pipeline tasks
 
-    for layer in range(n_layers - 1):  # Create a pipeline for each layer
-        module = f".gpt_neox.layers.{layer}"
-        feature_dict = {module: torch.arange(0, 128)}
+    # Create a semaphore to limit concurrent pipelines.
+    semaphore = asyncio.Semaphore(args.max_pipelines)
 
-        dataset = LatentDataset(
-            raw_dir=f"latents/{args.model_name}/baseline",
-            cfg=latent_cfg,
-            modules=[module],
-            latents=feature_dict,
-        )
+    for cid, cluster in training_clusters.items():
+        G = cid.split("-")[0][1:]
+        for layer in cluster:
 
-        loader = LatentLoader(dataset, constructor=constructor, sampler=sampler)
+            # Create directories
+            explain_dir = os.path.join(script_dir, "results", "explanations", args.model_name, G)
+            os.makedirs(explain_dir, exist_ok=True)  # Ensure directory exists
 
-        explainer_pipe = process_wrapper(
-            DefaultExplainer(
-                client,
-                tokenizer=dataset.tokenizer,
-            ),
-            postprocess=explainer_postprocess,
-        )
+            # Create a pipeline for each layer
+            module = f".gpt_neox.layers.{layer}"
+            feature_dict = {module: torch.arange(0, 128)}
 
-        pipeline = Pipeline(loader, explainer_pipe)
+            dataset = LatentDataset(
+                raw_dir=f"interp/latents/{args.model_name}/{G}",
+                cfg=latent_cfg,
+                modules=[module],
+                latents=feature_dict,
+            )
 
-        # Add pipeline to async task list
-        tasks.append(run_pipeline_for_layer(layer, pipeline))
+            loader = LatentLoader(dataset, constructor=constructor, sampler=sampler)
 
-    # Run all pipelines concurrently
+            explainer_pipe = process_wrapper(
+                DefaultExplainer(
+                    client,
+                    tokenizer=dataset.tokenizer,
+                ),
+                postprocess=partial(explainer_postprocess, explain_dir),
+            )
+
+            pipeline = Pipeline(loader, explainer_pipe)
+
+            # Add pipeline task with semaphore control to the async task list
+            tasks.append(run_pipeline_for_layer(layer, pipeline, semaphore))
+
+    # Run all pipelines concurrently (with at most args.max_pipelines at a time)
     await asyncio.gather(*tasks)
 
 
