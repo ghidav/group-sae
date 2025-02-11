@@ -146,11 +146,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model",
         type=str,
-        default="pythia-160m-deduped",
+        default="pythia-160m",
         help="The Huggingface ID of the model you wish to test.",
     )
     parser.add_argument(
-        "--faith_dir", type=str, default="faithfulness", help="The directory to save faithfulness."
+        "--faith_dir",
+        type=str,
+        default="faithfulness_thr",
+        help="The directory to save faithfulness.",
     )
     parser.add_argument(
         "--task_dir", type=str, default="tasks", help="The directory to load the task dataset."
@@ -310,7 +313,7 @@ if __name__ == "__main__":
         Ns.append(N)
 
     score_df = pd.DataFrame({"score": scores, "N": Ns})
-    faith_result_path = f"{args.faith_dir}/{args.model}_{args.dataset}_"
+    faith_result_path = f"faithfulness/{args.model}_{args.faith_dir}/{args.model}_{args.dataset}_"
     os.makedirs(args.faith_dir, exist_ok=True)
     if cluster:
         faith_result_path += f"K{args.K}"
