@@ -195,3 +195,5 @@ train
 week
 final
 .gpt_neox.*
+*.pdf
+*.svg
