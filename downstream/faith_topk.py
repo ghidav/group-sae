@@ -167,6 +167,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--batch_size", type=int, default=64, help="The batch size to use for testing."
     )
+    parser.add_argument(
+        "--max_active_features",
+        type=float,
+        default=None,
+        help="The maximum number of active features, as a percentage of the d_sae.",
+    )
     parser.add_argument("--n_devices", type=int, default=1)
     args = parser.parse_args()
 
@@ -277,7 +283,23 @@ if __name__ == "__main__":
 
     scores = []
     Ns = []
-    for T in tqdm(np.unique(np.linspace(122, 2048, 16, endpoint=True).astype(int))):
+    if args.max_active_features is None:
+        if args.what == "faithfulness":
+            args.max_active_features = 0.2
+        elif args.what == "completeness":
+            args.max_active_features = 0.05
+        else:
+            raise ValueError(f"Unknown ablation method: {args.what}")
+    active_features = np.unique(
+        np.linspace(
+            4,
+            feature_avg[list(feature_avg.keys())[0]].shape[1] * args.max_active_features,
+            16,
+            endpoint=True,
+        ).astype(int)
+    )
+    print("Maximum number of active features:", args.max_active_features)
+    for T in tqdm(active_features):
         feature_mask = {}
         for hook_name in effects.keys():
             _, topk_idxes = torch.topk(effects[hook_name].sum(0).abs(), T, dim=0)
