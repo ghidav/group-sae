@@ -8,9 +8,9 @@ for W in faithfulness completeness; do
         --model pythia-160m \
         -w faithfulness \
         --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
-        --effects_dir /home/fbelotti/group-sae/effects_pass_through \
+        --effects_dir /home/fbelotti/group-sae/effects \
         --task_dir /home/fbelotti/group-sae/downstream/tasks \
-        --faith_dir /home/fbelotti/group-sae/faithfulness_pass_through_thr \
+        --faith_dir faithfulness_thr \
         --n_devices 2 \
         --batch_size 512 \
         --what $W \
@@ -26,9 +26,9 @@ for W in faithfulness completeness; do
         --model pythia-160m \
         -w faithfulness \
         --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
-        --effects_dir /home/fbelotti/group-sae/effects_pass_through \
+        --effects_dir /home/fbelotti/group-sae/effects \
         --task_dir /home/fbelotti/group-sae/downstream/tasks \
-        --faith_dir /home/fbelotti/group-sae/faithfulness_pass_through_thr \
+        --faith_dir faithfulness_thr \
         --n_devices 2 \
         --batch_size 512 \
         --what $W \
@@ -44,9 +44,9 @@ for W in faithfulness completeness; do
         --model pythia-160m \
         -w faithfulness \
         --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
-        --effects_dir /home/fbelotti/group-sae/effects_pass_through \
+        --effects_dir /home/fbelotti/group-sae/effects \
         --task_dir /home/fbelotti/group-sae/downstream/tasks \
-        --faith_dir /home/fbelotti/group-sae/faithfulness_pass_through_thr \
+        --faith_dir faithfulness_thr \
         --n_devices 2 \
         --batch_size 512 \
         --what $W \
@@ -62,9 +62,9 @@ for W in faithfulness completeness; do
         --model pythia-160m \
         -w faithfulness \
         --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
-        --effects_dir /home/fbelotti/group-sae/effects_pass_through \
+        --effects_dir /home/fbelotti/group-sae/effects \
         --task_dir /home/fbelotti/group-sae/downstream/tasks \
-        --faith_dir /home/fbelotti/group-sae/faithfulness_pass_through_topk \
+        --faith_dir faithfulness_topk \
         --n_devices 2 \
         --batch_size 512 \
         --what $W \
@@ -80,9 +80,9 @@ for W in faithfulness completeness; do
         --model pythia-160m \
         -w faithfulness \
         --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
-        --effects_dir /home/fbelotti/group-sae/effects_pass_through \
+        --effects_dir /home/fbelotti/group-sae/effects \
         --task_dir /home/fbelotti/group-sae/downstream/tasks \
-        --faith_dir /home/fbelotti/group-sae/faithfulness_pass_through_topk \
+        --faith_dir faithfulness_topk \
         --n_devices 2 \
         --batch_size 512 \
         --what $W \
@@ -98,9 +98,9 @@ for W in faithfulness completeness; do
         --model pythia-160m \
         -w faithfulness \
         --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
-        --effects_dir /home/fbelotti/group-sae/effects_pass_through \
+        --effects_dir /home/fbelotti/group-sae/effects \
         --task_dir /home/fbelotti/group-sae/downstream/tasks \
-        --faith_dir /home/fbelotti/group-sae/faithfulness_pass_through_topk \
+        --faith_dir faithfulness_topk \
         --n_devices 2 \
         --batch_size 512 \
         --what $W \
