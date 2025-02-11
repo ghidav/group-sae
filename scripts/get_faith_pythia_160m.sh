@@ -6,7 +6,6 @@ for W in faithfulness completeness; do
         -n 1024 \
         -mt attrib \
         --model pythia-160m \
-        -w faithfulness \
         --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
         --effects_dir /home/fbelotti/group-sae/effects \
         --task_dir /home/fbelotti/group-sae/downstream/tasks \
@@ -24,7 +23,6 @@ for W in faithfulness completeness; do
         -n 1024 \
         -mt attrib \
         --model pythia-160m \
-        -w faithfulness \
         --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
         --effects_dir /home/fbelotti/group-sae/effects \
         --task_dir /home/fbelotti/group-sae/downstream/tasks \
@@ -42,7 +40,6 @@ for W in faithfulness completeness; do
         -n 1024 \
         -mt attrib \
         --model pythia-160m \
-        -w faithfulness \
         --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
         --effects_dir /home/fbelotti/group-sae/effects \
         --task_dir /home/fbelotti/group-sae/downstream/tasks \
