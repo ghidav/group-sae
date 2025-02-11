@@ -321,7 +321,7 @@ if __name__ == "__main__":
 
     score_df = pd.DataFrame({"score": scores, "N": Ns})
     faith_result_path = f"faithfulness/{args.model}_{args.faith_dir}/{args.model}_{args.dataset}_"
-    os.makedirs(args.faith_dir, exist_ok=True)
+    os.makedirs(f"faithfulness/{args.model}_{args.faith_dir}", exist_ok=True)
     if cluster:
         faith_result_path += f"K{args.K}"
     else:

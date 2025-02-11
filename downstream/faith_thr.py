@@ -281,7 +281,7 @@ if __name__ == "__main__":
     for T in tqdm(np.exp(np.linspace(-10, np.log(100), 16))):
         feature_mask = {}
         for hook_name in effects.keys():
-            feature_mask[hook_name] = (effects[hook_name].abs() > T).sum(0) > 0
+            feature_mask[hook_name] = effects[hook_name].sum(0).abs() > T
         N = np.mean([feature_mask[hook_name].sum().item() for hook_name in feature_mask.keys()])
 
         C = 0
@@ -314,7 +314,7 @@ if __name__ == "__main__":
 
     score_df = pd.DataFrame({"score": scores, "N": Ns})
     faith_result_path = f"faithfulness/{args.model}_{args.faith_dir}/{args.model}_{args.dataset}_"
-    os.makedirs(args.faith_dir, exist_ok=True)
+    os.makedirs(f"faithfulness/{args.model}_{args.faith_dir}", exist_ok=True)
     if cluster:
         faith_result_path += f"K{args.K}"
     else:
