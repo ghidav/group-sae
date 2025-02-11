@@ -115,7 +115,7 @@ async def main():
         feature_dict = {module: torch.arange(0, 128)}
 
         dataset = LatentDataset(
-            raw_dir=f"latents/{args.model_name}/baseline",
+            raw_dir=f"interp/latents/{args.model_name}/baseline",
             cfg=latent_cfg,
             modules=[module],
             latents=feature_dict,
