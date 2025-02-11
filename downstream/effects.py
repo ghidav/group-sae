@@ -238,7 +238,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--task_dir",
         type=str,
-        default="tasks",
+        default="downstream/tasks",
         help="The directory to load the task dataset.",
     )
     parser.add_argument(
@@ -257,7 +257,7 @@ if __name__ == "__main__":
     parser.add_argument("--layer", type=int, default=None)
     parser.add_argument("--seed", type=int, default=12)
     parser.add_argument("--device", type=str, default="cuda")
-    parser.add_argument("--effects_dir", type=str, default="effects")
+    parser.add_argument("--effects_dir", type=str, default="downstream/effects")
     parser.add_argument("--n_devices", type=int, default=1)
 
     args = parser.parse_args()
@@ -286,7 +286,7 @@ if __name__ == "__main__":
 
     # loading saes
     dictionaries = load_saes(
-        args.sae_root_folder,
+        args.sae_root_folder + '/' + args.model,
         device=device,
         debug=True,
         layer=args.layer,
