@@ -8,8 +8,9 @@ from datasets import load_dataset
 from torch.utils.data import DataLoader
 from transformers import AutoModel
 
-from group_sae import ClusterSaeTrainer, SaeConfig, TrainConfig, load_training_clusters
+from group_sae import ClusterSaeTrainer, SaeConfig, TrainConfig
 from group_sae.hooks import from_tokens
+from group_sae.utils import load_training_clusters
 
 if __name__ == "__main__":
     # --- Command-line argument parsing ---
