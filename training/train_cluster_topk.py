@@ -126,7 +126,7 @@ if __name__ == "__main__":
             jumprelu=False,
             multi_topk=False,
             expansion_factor=16,
-            init_b_dec_as_zeros=False,
+            init_b_dec_as_zeros=True,
             init_enc_as_dec_transpose=True,
         ),
         batch_size=batch_size,
