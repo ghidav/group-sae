@@ -1,9 +1,11 @@
-import os
-import json
-import torch
-import orjson
 import asyncio
+import json
+import os
+from argparse import ArgumentParser
 from functools import partial
+
+import orjson
+import torch
 from delphi.clients import OpenRouter
 from delphi.config import ExperimentConfig, LatentConfig
 from delphi.explainers import explanation_loader
@@ -11,10 +13,9 @@ from delphi.latents import LatentDataset, LatentLoader
 from delphi.latents.constructors import default_constructor
 from delphi.latents.samplers import sample
 from delphi.pipeline import Pipeline, process_wrapper
-from delphi.scorers import FuzzingScorer, DetectionScorer
+from delphi.scorers import DetectionScorer, FuzzingScorer
 
 from group_sae.utils import MODEL_MAP, load_training_clusters
-from argparse import ArgumentParser
 
 
 def parse_args():
@@ -35,6 +36,11 @@ def parse_args():
         type=int,
         default=2,  # Change this default as needed.
         help="Maximum number of pipelines to run concurrently.",
+    )
+    parser.add_argument(
+        "--features_to_score",
+        type=int,
+        default=64,
     )
     return parser.parse_args()
 
@@ -115,16 +121,15 @@ async def main():
     semaphore = asyncio.Semaphore(args.max_pipelines)
 
     for cid, cluster in training_clusters.items():
-        G = cid.split("-")[0][1:]
         for layer in cluster:
-        
+
             # Create directories
-            explain_dir = f"{script_dir}/results/explanations/{args.model_name}/{G}"
-            fuzz_dir = f"{script_dir}/results/fuzzing/{args.model_name}/{G}"
-            detect_dir = f"{script_dir}/results/detection/{args.model_name}/{G}"
+            explain_dir = f"{script_dir}/results/explanations/{args.model_name}/{cid}"
+            fuzz_dir = f"{script_dir}/results/fuzzing/{args.model_name}/{cid}"
+            detect_dir = f"{script_dir}/results/detection/{args.model_name}/{cid}"
             os.makedirs(fuzz_dir, exist_ok=True)
             os.makedirs(detect_dir, exist_ok=True)
-            
+
             module = f".gpt_neox.layers.{layer}"
 
             def extract_latent(filename: str):
@@ -133,9 +138,12 @@ async def main():
                 layer = layer.split(".")[-1]
                 return int(latent), int(layer)
 
-            layer_features = [extract_latent(f) for f in os.listdir(explain_dir) if f.endswith(".txt")]
-
-            layer_features = [f[0] for f in layer_features if int(f[1]) == int(layer)]
+            layer_features = [
+                extract_latent(f) for f in os.listdir(explain_dir) if f.endswith(".txt")
+            ]
+            layer_features = [f[0] for f in layer_features if int(f[1]) == int(layer)][
+                : args.features_to_score
+            ]
 
             feature_dict = {
                 module: torch.tensor(
@@ -145,7 +153,7 @@ async def main():
             }
 
             dataset = LatentDataset(
-                raw_dir=f"interp/latents/{args.model_name}/{G}",  # The folder where the cache is stored
+                raw_dir=f"interp/latents/{args.model_name}/{cid}",  # The folder where the cache is stored
                 cfg=latent_cfg,
                 modules=[module],
                 latents=feature_dict,
