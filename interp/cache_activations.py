@@ -1,5 +1,5 @@
-import os
 import json
+import os
 from argparse import ArgumentParser
 
 import torch
@@ -10,12 +10,13 @@ from tqdm import tqdm
 from transformers import AutoModel, AutoTokenizer
 
 from group_sae.hooks import from_tokens
-from group_sae.utils import MODEL_MAP, load_cluster_map, load_saes
+from group_sae.utils import MODEL_MAP, load_saes_by_training_clusters
 
 
 def parse_args():
     parser = ArgumentParser(
-        description="Extract SAE activations from a model and save them as safetensors, optionally in token splits."
+        description="Extract SAE activations from a model and save them as safetensors, "
+        "optionally in token splits."
     )
     parser.add_argument(
         "--model_name",
@@ -27,12 +28,6 @@ def parse_args():
         "--cluster",
         action="store_true",
         help="Use clustering when loading SAEs.",
-    )
-    parser.add_argument(
-        "--G",
-        type=int,
-        default=None,
-        help="G parameter for clustering (required if --cluster is set).",
     )
     parser.add_argument(
         "--n_tokens",
@@ -69,6 +64,7 @@ def main():
     model = AutoModel.from_pretrained(full_model_name, torch_dtype=torch.bfloat16).to(device)
     model.eval()
     tokenizer = AutoTokenizer.from_pretrained(full_model_name)
+    print(f"Model {args.model_name} loaded.")
 
     MODEL_MAP[args.model_name]["n_layers"]
     d_model = MODEL_MAP[args.model_name]["d_model"]
@@ -95,29 +91,25 @@ def main():
         batch_size=batch_size,
     )
 
-    # If clustering is enabled, load the corresponding cluster map.
-    cluster_map = None
-    if args.cluster:
-        if args.G is None:
-            raise ValueError("If clustering, --G must be specified")
-        cluster_map = load_cluster_map(args.model_name.split("-")[1])[str(args.G)]
-        print("Cluster map:", cluster_map)
-
-    print(f"Model {args.model_name} loaded.")
-
     # Load SAEs.
     sae_folder_path = os.path.join(
         script_dir, "../saes", MODEL_MAP[args.model_name]["short_name"] + "-topk"
     )
-    G = str(args.G) if args.cluster else None
-    saes = load_saes(sae_folder_path, cluster=G, device=device, model_name=args.model_name)
-    saes = {f"layers.{k.split('.')[1]}": v for k, v in saes.items()}
-
-    # Get a mapping from submodule names to model modules.
-    name_to_module = {name: model.get_submodule(name) for name in saes.keys()}
+    saes = load_saes_by_training_clusters(
+        sae_folder_path, cluster=args.cluster, device=device, model_name=args.model_name
+    )
+    saes_mapping = {}
+    for cluster_id, cluster_data in saes.items():
+        saes_mapping[cluster_id] = {}
+        for layer in cluster_data["layers"]:
+            # `layer` is in `layers.layer_num` format
+            saes_mapping[cluster_id][layer] = cluster_data["sae"]
 
     # Prepare cache for storing hook outputs.
-    cache = {name: {"ids": [], "acts": []} for name in saes.keys()}
+    cache = {
+        cluster_id: {layer: {"ids": [], "acts": []} for layer in cluster_data["layers"]}
+        for cluster_id, cluster_data in saes.items()
+    }
 
     # Precompute a "locations" tensor (used in the hook) based on batch and context length.
     X, Y = torch.meshgrid(torch.arange(batch_size), torch.arange(ctx_len), indexing="ij")
@@ -128,7 +120,7 @@ def main():
     )
 
     # Define a factory for the forward hook.
-    def create_hook(name):
+    def create_hook(cluster_id, name):
         def hook(module, inputs, outputs):
             if isinstance(outputs, tuple):
                 outputs_ = outputs[0]
@@ -136,18 +128,20 @@ def main():
                 outputs_ = outputs
             outputs_flat = outputs_.reshape(-1, d_model)
             with torch.no_grad():
-                latents = saes[name].encode(outputs_flat)
+                latents = saes_mapping[cluster_id][name].encode(outputs_flat)
             top_acts, top_indices = torch.topk(latents, k, dim=1)
             # Concatenate the fixed locations with the top indices.
             ids = torch.cat([locations.to(device), top_indices.flatten()[:, None]], dim=1)
-            cache[name]["ids"].append(ids.cpu())
-            cache[name]["acts"].append(top_acts.cpu().flatten())
+            cache[cluster_id][name]["ids"].append(ids.cpu())
+            cache[cluster_id][name]["acts"].append(top_acts.cpu().flatten())
 
         return hook
 
     # Register the hook functions for each relevant module (only once).
-    for name, module in name_to_module.items():
-        module.register_forward_hook(create_hook(name))
+    for cluster_id, cluster_data in saes_mapping.items():
+        for name in cluster_data:
+            module = model.get_submodule(name)
+            module.register_forward_hook(create_hook(cluster_id, name))
 
     token_counter = 0
     processed_tokens_batches = []
@@ -167,15 +161,16 @@ def main():
 
     # Concatenate processed tokens and the cached hook outputs.
     processed_tokens = torch.cat(processed_tokens_batches)
-    for name in cache:
-        cache[name]["ids"] = torch.cat(cache[name]["ids"])
-        cache[name]["acts"] = torch.cat(cache[name]["acts"])
+    for cluster_id, cluster_data in cache.items():
+        for name in cluster_data:
+            cache[cluster_id][name]["ids"] = torch.cat(cache[cluster_id][name]["ids"])
+            cache[cluster_id][name]["acts"] = torch.cat(cache[cluster_id][name]["acts"])
 
     # Build the saving directory.
     save_dir = os.path.join(script_dir, "latents")
     save_dir = os.path.join(save_dir, MODEL_MAP[args.model_name]["short_name"])
     if args.cluster:
-        save_dir = os.path.join(save_dir, str(args.G))
+        save_dir = os.path.join(save_dir, "cluster")
     else:
         save_dir = os.path.join(save_dir, "baseline")
 
@@ -189,26 +184,27 @@ def main():
         "ctx_len": args.ctx_len,
         "n_tokens": args.n_tokens,
         "n_splits": 1,
-        "model_name": "EleutherAI/pythia-160m",
+        "model_name": f"EleutherAI/{args.model_name}",
     }
 
-    for submodule, data in cache.items():
-        submodule_folder = os.path.join(save_dir, f".gpt_neox.{submodule}")
-        os.makedirs(submodule_folder, exist_ok=True)
-        file_name = f"0_{d_model * 16 - 1}.safetensors"
-        file_path = os.path.join(submodule_folder, file_name)
-        save_file(
-            {
-                "tokens": processed_tokens,
-                "locations": data["ids"],
-                "activations": data["acts"],
-            },
-            file_path,
-        )
-        with open(os.path.join(submodule_folder, "config.json"), "w") as f:
-            json.dump(cfg_dict, f)
-
-        print(f"Saved file: {file_path}")
+    for cluster_id, cluster_data in cache.items():
+        cluster_save_dir = os.path.join(save_dir, f"{cluster_id}")
+        for submodule, data in cluster_data.items():
+            submodule_folder = os.path.join(cluster_save_dir, f".gpt_neox.{submodule}")
+            os.makedirs(submodule_folder, exist_ok=True)
+            file_name = f"0_{d_model * 16 - 1}.safetensors"
+            file_path = os.path.join(submodule_folder, file_name)
+            save_file(
+                {
+                    "tokens": processed_tokens,
+                    "locations": data["ids"],
+                    "activations": data["acts"],
+                },
+                file_path,
+            )
+            with open(os.path.join(submodule_folder, "config.json"), "w") as f:
+                json.dump(cfg_dict, f)
+            print(f"Saved file: {file_path}")
 
 
 if __name__ == "__main__":
