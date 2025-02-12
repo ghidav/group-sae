@@ -140,7 +140,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--effects_dir",
         type=str,
-        default="effects",
+        default="downstream/effects",
         help="The directory to load the effects.",
     )
     parser.add_argument(
@@ -152,11 +152,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--faith_dir",
         type=str,
-        default="faithfulness_topk",
+        default="downstream/faithfulness_topk",
         help="The directory to save faithfulness.",
     )
     parser.add_argument(
-        "--task_dir", type=str, default="tasks", help="The directory to load the task dataset."
+        "--task_dir", type=str, default="downstream/tasks", help="The directory to load the task dataset."
     )
     parser.add_argument(
         "--sae_root_folder",
@@ -165,7 +165,7 @@ if __name__ == "__main__":
         help="Path to all dictionaries for your language model.",
     )
     parser.add_argument(
-        "--batch_size", type=int, default=64, help="The batch size to use for testing."
+        "--batch_size", type=int, default=512, help="The batch size to use for testing."
     )
     parser.add_argument(
         "--max_active_features",
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     modules = [get_act_name(args.component, layer) for layer in layers]
     cluster = args.K != -1
     dictionaries = load_saes(
-        args.sae_root_folder,
+        args.sae_root_folder + '/' + args.model,
         device=device,
         debug=True,
         layer=args.layer,

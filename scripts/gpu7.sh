@@ -1,2 +1,2 @@
-python3.11 recon/recon.py --sae_root_folder training/checkpoints-clusters/pythia-410m-topk/step_15258 --model pythia-410m --cluster --batch_size 8
-python3.11 recon/recon.py --sae_root_folder training/checkpoints-clusters/pythia-1b-topk/step_30517 --model pythia-1b --cluster --batch_size 4
+python3.11 recon/recon.py --sae_root_folder saes --model pythia-410m --cluster --batch_size 8
+python3.11 recon/recon.py --sae_root_folder saes --model pythia-1b --cluster --batch_size 4
