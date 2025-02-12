@@ -190,10 +190,7 @@ def main():
     for cluster_id, cluster_data in cache.items():
         cluster_save_dir = os.path.join(save_dir, f"{cluster_id}")
         for submodule, data in cluster_data.items():
-            submodule_folder = os.path.join(
-                cluster_save_dir,
-                f"{MODEL_MAP[args.model_name]['short_name']}.gpt_neox.{submodule}",
-            )
+            submodule_folder = os.path.join(cluster_save_dir, f".gpt_neox.{submodule}")
             os.makedirs(submodule_folder, exist_ok=True)
             file_name = f"0_{d_model * 16 - 1}.safetensors"
             file_path = os.path.join(submodule_folder, file_name)
