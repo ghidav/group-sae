@@ -1,19 +1,20 @@
-from functools import partial
-import os
-import json
-import torch
-import orjson
 import asyncio
+import json
+import os
+from argparse import ArgumentParser
+from functools import partial
+
+import orjson
+import torch
 from delphi.clients import OpenRouter
 from delphi.config import ExperimentConfig, LatentConfig
+from delphi.explainers import DefaultExplainer
 from delphi.latents import LatentDataset, LatentLoader
 from delphi.latents.constructors import default_constructor
-from delphi.explainers import DefaultExplainer
 from delphi.latents.samplers import sample
 from delphi.pipeline import Pipeline, process_wrapper
 
 from group_sae.utils import MODEL_MAP
-from argparse import ArgumentParser
 
 
 def parse_args():
@@ -56,8 +57,8 @@ d_model = MODEL_MAP[args.model_name]["d_model"]
 # Configurations
 latent_cfg = LatentConfig(
     width=d_model * 16,  # The number of latents of your SAE
-    min_examples=200,  # The minimum number of examples to consider for the feature to be explained
-    max_examples=10000,  # The maximum number of examples to be sampled from
+    min_examples=100,  # The minimum number of examples to consider for the feature to be explained
+    max_examples=1000,  # The maximum number of examples to be sampled from
     n_splits=1,  # How many splits was the cache split into
 )
 
@@ -115,7 +116,7 @@ async def main():
         feature_dict = {module: torch.arange(0, 128)}
 
         dataset = LatentDataset(
-            raw_dir=f"interp/latents/{args.model_name}/baseline",
+            raw_dir=f"interp/latents/{args.model_name}/baseline/layers.{layer}",
             cfg=latent_cfg,
             modules=[module],
             latents=feature_dict,
