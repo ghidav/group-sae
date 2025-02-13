@@ -51,6 +51,13 @@ if __name__ == "__main__":
         help="Whether to run evals on clusters or baselines.",
     )
     parser.add_argument(
+        "--cluster_id",
+        type=str,
+        default=None,
+        help="The cluster id to use for testing. "
+        "If cluster is False, this argument is ignored.",
+    )
+    parser.add_argument(
         "--eval_steps",
         type=int,
         default=1024,
@@ -107,6 +114,8 @@ if __name__ == "__main__":
         }
         for i, (k, v) in enumerate(dictionaries.items())
     }
+    if args.cluster and args.cluster_id is not None:
+        dictionaries = {args.cluster_id: dictionaries[args.cluster_id]}
 
     # Load dataset
     dataset = load_dataset(
