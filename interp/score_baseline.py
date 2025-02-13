@@ -1,21 +1,21 @@
-import os
-import json
-import torch
-import orjson
 import asyncio
+import json
+import os
+from argparse import ArgumentParser
 from functools import partial
+
+import orjson
+import torch
 from delphi.clients import OpenRouter
 from delphi.config import ExperimentConfig, LatentConfig
 from delphi.explainers import explanation_loader
 from delphi.latents import LatentDataset, LatentLoader
 from delphi.latents.constructors import default_constructor
-from delphi.explainers import DefaultExplainer
 from delphi.latents.samplers import sample
 from delphi.pipeline import Pipeline, process_wrapper
-from delphi.scorers import FuzzingScorer, DetectionScorer
+from delphi.scorers import DetectionScorer, FuzzingScorer
 
 from group_sae.utils import MODEL_MAP
-from argparse import ArgumentParser
 
 
 def parse_args():
@@ -36,6 +36,11 @@ def parse_args():
         type=int,
         default=2,  # Change this default as needed.
         help="Maximum number of pipelines to run concurrently.",
+    )
+    parser.add_argument(
+        "--features_to_score",
+        type=int,
+        default=64,
     )
     return parser.parse_args()
 
@@ -129,7 +134,9 @@ async def main():
             return int(latent), int(layer)
 
         layer_features = [extract_latent(f) for f in os.listdir(explain_dir) if f.endswith(".txt")]
-        layer_features = [f[0] for f in layer_features if int(f[1]) == int(layer)]
+        layer_features = [f[0] for f in layer_features if int(f[1]) == int(layer)][
+            : args.features_to_score
+        ]
 
         feature_dict = {
             module: torch.tensor(
