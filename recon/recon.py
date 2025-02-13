@@ -1,7 +1,6 @@
 import argparse
 import logging
 import os
-import re
 
 import pandas as pd
 import torch
@@ -13,16 +12,13 @@ from tqdm import tqdm
 from transformer_lens import HookedTransformer
 from transformer_lens.utils import get_act_name
 
-from group_sae.utils import get_device_for_block, load_cluster_map, load_saes
+from group_sae.utils import get_device_for_block, load_saes_by_training_clusters
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--cluster", action="store_true", help="Whether to eval clusters or baselines."
-    )
     parser.add_argument("-c", "--component", type=str, default="resid_post")
     parser.add_argument(
         "--dataset",
@@ -46,8 +42,20 @@ if __name__ == "__main__":
     parser.add_argument(
         "--sae_root_folder",
         type=str,
-        default="/home/fbelotti/group-sae/saes/pythia_160-topk",
+        default="/home/fbelotti/group-sae/saes/pythia_160m-topk",
         help="Path to all dictionaries for your language model.",
+    )
+    parser.add_argument(
+        "--cluster",
+        action="store_true",
+        help="Whether to run evals on clusters or baselines.",
+    )
+    parser.add_argument(
+        "--eval_steps",
+        type=int,
+        default=1024,
+        help="The number of steps to use for testing. "
+        "The total number of tokens will be model.ctx_len * eval_steps.",
     )
     parser.add_argument(
         "--batch_size", type=int, default=4, help="The batch size to use for testing."
@@ -64,11 +72,9 @@ if __name__ == "__main__":
     if device is None:
         device = "cuda"
         model.cfg.device = device
-    layers = list(range(model.cfg.n_layers))
-    modules = [get_act_name(args.component, layer) for layer in layers]
     cluster = args.cluster
 
-    eval_batches = 1024 // args.batch_size  # 5M samples
+    eval_batches = args.eval_steps // args.batch_size  # 5M samples
     eval_cfg = EvalConfig(
         batch_size_prompts=args.batch_size,
         # Reconstruction metrics
@@ -82,7 +88,25 @@ if __name__ == "__main__":
         compute_variance_metrics=True,
     )
 
-    CLUSTER_MAP = load_cluster_map(args.model.split("-")[-1])
+    # Load SAEs by cluster-id
+    dictionaries = load_saes_by_training_clusters(
+        args.sae_root_folder,
+        device=device,
+        debug=True,
+        cluster=args.cluster,
+        load_from_sae_lens=False,
+        dtype="float32",
+        model_name=args.model,
+    )
+
+    # Split clusters across devices
+    dictionaries = {
+        k: {
+            "sae": v["sae"].to(get_device_for_block(i, model.cfg, device=device)),
+            "layers": v["layers"],
+        }
+        for i, (k, v) in enumerate(dictionaries.items())
+    }
 
     # Load dataset
     dataset = load_dataset(
@@ -92,28 +116,12 @@ if __name__ == "__main__":
 
     with torch.no_grad():
         df = []
-        for cluster_name in CLUSTER_MAP.keys() if cluster else ["0"]:
-            for layer in tqdm(range(model.cfg.n_layers - 1)):
-                dictionaries = load_saes(
-                    args.sae_root_folder + '/' + args.model,
-                    device=device,
-                    debug=True,
-                    layer=layer,
-                    cluster=cluster_name if cluster else None,
-                    load_from_sae_lens=False,
-                    dtype="float32",
-                    model_name=args.model,
-                )
-                dictionaries = {
-                    k: v.to(
-                        get_device_for_block(
-                            int(re.findall(r"\d+", k)[0]), model.cfg, device=device
-                        )
-                    )
-                    for k, v in dictionaries.items()
-                }
-                hook_name = list(dictionaries.keys())[0]
-                sae = dictionaries[hook_name]
+        for cid, sae_dict in dictionaries.items():
+            for layer in tqdm(sae_dict["layers"]):
+                # Prepare SAE
+                sae = sae_dict["sae"]
+                sae.cfg.hook_layer = int(layer.split(".")[1])
+                sae.cfg.hook_name = get_act_name(args.component, sae.cfg.hook_layer)
                 activations_store = ActivationsStore.from_sae(
                     model,
                     sae,
@@ -133,8 +141,8 @@ if __name__ == "__main__":
                     for k in metrics[0].keys()
                     for k_inner, v_inner in metrics[0][k].items()
                 }
-                metrics["layer"] = int(re.findall(r"\d+", hook_name)[0])
-                metrics["G"] = cluster_name
+                metrics["layer"] = sae.cfg.hook_layer
+                metrics["G"] = cid if args.cluster else "baseline"
                 df.append(metrics)
         df = pd.DataFrame(df)
         df.to_csv(f"{args.eval_dir}/{args.model}_{'cluster' if cluster else 'baseline'}.csv")

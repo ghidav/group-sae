@@ -517,3 +517,103 @@ def load_saes(
                 )
                 dictionaries[hook_name] = sae_lens
     return dictionaries
+
+
+def load_saes_by_training_clusters(
+    sae_folder_path: str,
+    device: str = "cuda",
+    debug: bool = False,
+    cluster: bool = False,
+    load_from_sae_lens: bool = False,
+    model_name: str | None = None,
+    dtype: str = "float32",
+    dataset_path: str = "NeelNanda/pile-small-tokenized-2b",
+):
+    from group_sae.sae import Sae, SaeConfig
+
+    dictionaries = {}
+
+    if not os.path.exists(sae_folder_path):
+        raise ValueError(f"SAE path {sae_folder_path} does not exist. ")
+    else:
+        # Load all available SAEs in `sae_folder_path`
+        def get_paths(folder_path):
+            paths = []
+            for path in os.listdir(folder_path):
+                sae_path = os.path.join(folder_path, path)
+                if load_from_sae_lens:
+                    sae_path = os.path.join(sae_path, "sae_lens")
+                if os.path.isdir(os.path.join(folder_path, path)):
+                    if not os.path.exists(sae_path):
+                        raise FileNotFoundError(f"SAE path {sae_path} does not existorch. ")
+                    paths.append(sae_path)
+            return paths
+
+        baseline_paths = get_paths(sae_folder_path + "/baseline")
+        cluster_paths = get_paths(sae_folder_path + "/cluster")
+
+        # Map modules to paths, converting paths to corresponding sae_lens hookpoints
+        if cluster:
+            if model_name is None:
+                raise ValueError("model_name must be specified when cluster is not None")
+            CLUSTER_MAP = load_training_clusters(model_name.split("-")[1])
+            modules_to_paths = {}
+            for cluster_id, cluster_layers in CLUSTER_MAP.items():
+                for path in cluster_paths:
+                    if cluster_id == path.split(os.sep)[-1]:
+                        modules_to_paths[cluster_id] = {
+                            "sae": path,
+                            "layers": ["layers." + layer for layer in cluster_layers],
+                        }
+                        break
+        else:
+            modules_to_paths = {}
+            for path in baseline_paths:
+                layer_num = re.findall(r"\d+", path.split(os.sep)[-1])[0]
+                if f"layers.{layer_num}" in path:
+                    modules_to_paths[f"layers.{layer_num}"] = {
+                        "sae": path,
+                        "layers": [f"layers.{layer_num}"],
+                    }
+
+        # Load SAEs
+        if load_from_sae_lens:
+            for cluster_id, sae_dict in modules_to_paths:
+                path = sae_dict["sae"]
+                if debug:
+                    print(f"Loading SAE for {cluster_id} from {path}")
+                dictionaries[cluster_id] = {
+                    "sae": SAE.load_from_pretrained(path, device=device, dtype=dtype),
+                    "layers": sae_dict["layers"],
+                }
+        else:
+            if model_name is None:
+                raise ValueError("model_name must be specified when load_from_sae_lens is False")
+            for cluster_id, sae_dict in modules_to_paths.items():
+                path = sae_dict["sae"]
+                hook_name = f"blocks.{sae_dict['layers'][0].split('.')[1]}.hook_resid_post"
+                if debug:
+                    print(f"Loading SAE for {cluster_id} from {path}")
+                sae = Sae.load_from_disk(path)
+                sae_cfg = SaeConfig.load_json(os.path.join(path, "cfg.json"))
+                cfg = TrainConfig.load_json(os.path.join(path, "..", "config.json"))
+                norm_scaling_factors = torch.load(
+                    os.path.join(sae_folder_path, "scaling_factors.pt")
+                )
+                hookpoint = "layers." + re.findall(r"\d+", hook_name)[0]
+                norm_scaling_factor = norm_scaling_factors[hookpoint]
+                sae_lens = to_sae_lens(
+                    sae=sae,
+                    sae_cfg=sae_cfg,
+                    model_name=model_name,
+                    dataset_path=dataset_path,
+                    norm_scaling_factor=norm_scaling_factor,
+                    max_seq_len=cfg.max_seq_len,
+                    hook_name=hook_name,
+                    hook_layer=int(re.findall(r"\d+", hook_name)[0]),
+                    dtype=dtype,
+                    device=device,
+                    sae_lens_version=version("sae_lens"),
+                )
+                dictionaries[cluster_id] = {"sae": sae_lens, "layers": sae_dict["layers"]}
+    return dictionaries
