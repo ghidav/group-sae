@@ -1,2 +1,4 @@
-python3.11 recon/recon.py --sae_root_folder saes --model pythia-410m --cluster --batch_size 8
-python3.11 recon/recon.py --sae_root_folder saes --model pythia-1b --cluster --batch_size 4
+python3.11 interp/cache_activations.py --model_name pythia-1b --cluster
+
+python3.11 interp/explain_cluster.py --model_name=pythia-1b
+python3.11 interp/score_cluster.py --model_name=pythia-1b
