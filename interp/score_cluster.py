@@ -145,7 +145,7 @@ async def main():
             }
 
             dataset = LatentDataset(
-                raw_dir=f"interp/latents/{args.model_name}/{G}",  # The folder where the cache is stored
+                raw_dir=f"interp/latents/{args.model_name.replace('-', '_')}/{G}",  # The folder where the cache is stored
                 cfg=latent_cfg,
                 modules=[module],
                 latents=feature_dict,
