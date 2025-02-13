@@ -47,6 +47,11 @@ def parse_args():
         default=8,
         help="Batch size for processing.",
     )
+    parser.add_argument(
+        "--latents_dir",
+        type=str,
+        default="interp/latents",
+    )
     return parser.parse_args()
 
 
@@ -92,9 +97,7 @@ def main():
     )
 
     # Load SAEs.
-    sae_folder_path = os.path.join(
-        script_dir, "../saes", MODEL_MAP[args.model_name]["short_name"]
-    )
+    sae_folder_path = os.path.join(script_dir, "../saes", MODEL_MAP[args.model_name]["short_name"])
     saes = load_saes_by_training_clusters(
         sae_folder_path, cluster=args.cluster, device=device, model_name=args.model_name
     )
@@ -167,7 +170,7 @@ def main():
             cache[cluster_id][name]["acts"] = torch.cat(cache[cluster_id][name]["acts"])
 
     # Build the saving directory.
-    save_dir = os.path.join(script_dir, "latents")
+    save_dir = args.latents_dir
     save_dir = os.path.join(save_dir, MODEL_MAP[args.model_name]["short_name"])
     if args.cluster:
         save_dir = os.path.join(save_dir, "cluster")
