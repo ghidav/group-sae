@@ -101,6 +101,7 @@ if __name__ == "__main__":
         device=device,
         debug=True,
         cluster=args.cluster,
+        cluster_id=args.cluster_id,
         load_from_sae_lens=False,
         dtype="float32",
         model_name=args.model,
@@ -114,8 +115,6 @@ if __name__ == "__main__":
         }
         for i, (k, v) in enumerate(dictionaries.items())
     }
-    if args.cluster and args.cluster_id is not None:
-        dictionaries = {args.cluster_id: dictionaries[args.cluster_id]}
 
     # Load dataset
     dataset = load_dataset(

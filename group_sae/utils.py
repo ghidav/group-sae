@@ -524,6 +524,7 @@ def load_saes_by_training_clusters(
     device: str = "cuda",
     debug: bool = False,
     cluster: bool = False,
+    cluster_id: str | None = None,
     load_from_sae_lens: bool = False,
     model_name: str | None = None,
     dtype: str = "float32",
@@ -575,6 +576,10 @@ def load_saes_by_training_clusters(
                         "sae": path,
                         "layers": [f"layers.{layer_num}"],
                     }
+
+        # Select a single cluster if specified
+        if cluster_id is not None:
+            modules_to_paths = {cluster_id: modules_to_paths[cluster_id]}
 
         # Load SAEs
         if load_from_sae_lens:
