@@ -1,15 +1,4 @@
-for K in -1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22; do
-    python3.11 ./downstream/faith_topk.py \
-    -d subject_verb \
-    --model pythia-410m \
-    --what completeness \
-    --K $K
-done
+python3.11 interp/cache_activations.py --model_name pythia-160m 
 
-for K in -1 1 2 3 4 5 6 7 8 9 10 11 12 13 14; do
-    python3.11 ./downstream/faith_topk.py \
-    -d subject_verb \
-    --model pythia-1b \
-    --what completeness \
-    --K $K
-done
+python3.11 interp/explain_baseline.py --model_name=pythia-160m
+python3.11 interp/score_baseline.py --model_name=pythia-160m
