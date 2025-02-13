@@ -36,6 +36,11 @@ def parse_args():
         default=2,  # Change this default as needed.
         help="Maximum number of pipelines to run concurrently.",
     )
+    parser.add_argument(
+        "--latents_dir",
+        type=str,
+        default="interp/latents",
+    )
     return parser.parse_args()
 
 
@@ -121,7 +126,7 @@ async def main():
             feature_dict = {module: torch.arange(0, 128)}
 
             dataset = LatentDataset(
-                raw_dir=f"interp/latents/{args.model_name.replace('-', '_')}/cluster/{cid}",
+                raw_dir=f"{args.latents_dir}/{args.model_name.replace('-', '_')}/cluster/{cid}",  # noqa
                 cfg=latent_cfg,
                 modules=[module],
                 latents=feature_dict,

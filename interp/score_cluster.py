@@ -42,6 +42,11 @@ def parse_args():
         type=int,
         default=64,
     )
+    parser.add_argument(
+        "--latents_dir",
+        type=str,
+        default="interp/latents",
+    )
     return parser.parse_args()
 
 
@@ -153,7 +158,7 @@ async def main():
             }
 
             dataset = LatentDataset(
-                raw_dir=f"interp/latents/{args.model_name.replace('-', '_')}/cluster/{cid}",  # The folder where the cache is stored
+                raw_dir=f"{args.latents_dir}/{args.model_name.replace('-', '_')}/cluster/{cid}",  # noqa
                 cfg=latent_cfg,
                 modules=[module],
                 latents=feature_dict,
