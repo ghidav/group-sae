@@ -95,7 +95,7 @@ if __name__ == "__main__":
         for cluster_name in CLUSTER_MAP.keys() if cluster else ["0"]:
             for layer in tqdm(range(model.cfg.n_layers - 1)):
                 dictionaries = load_saes(
-                    args.sae_root_folder + '/' + args.model,
+                    args.sae_root_folder,
                     device=device,
                     debug=True,
                     layer=layer,
