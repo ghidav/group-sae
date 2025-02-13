@@ -1,4 +1,4 @@
-for i in {4..7}; do
+for i in {0..7}; do
     session_name="gpu${i}"
     script_name="gpu${i}.sh"
 
