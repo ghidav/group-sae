@@ -559,10 +559,10 @@ def load_saes_by_training_clusters(
                 raise ValueError("model_name must be specified when cluster is not None")
             CLUSTER_MAP = load_training_clusters(model_name.split("-")[1])
             modules_to_paths = {}
-            for cluster_id, cluster_layers in CLUSTER_MAP.items():
+            for cid, cluster_layers in CLUSTER_MAP.items():
                 for path in cluster_paths:
-                    if cluster_id == path.split(os.sep)[-1]:
-                        modules_to_paths[cluster_id] = {
+                    if cid == path.split(os.sep)[-1]:
+                        modules_to_paths[cid] = {
                             "sae": path,
                             "layers": ["layers." + layer for layer in cluster_layers],
                         }
@@ -583,7 +583,7 @@ def load_saes_by_training_clusters(
 
         # Load SAEs
         if load_from_sae_lens:
-            for cluster_id, sae_dict in modules_to_paths:
+            for cid, sae_dict in modules_to_paths:
                 path = sae_dict["sae"]
                 if debug:
                     print(f"Loading SAE for {cluster_id} from {path}")
@@ -594,11 +594,11 @@ def load_saes_by_training_clusters(
         else:
             if model_name is None:
                 raise ValueError("model_name must be specified when load_from_sae_lens is False")
-            for cluster_id, sae_dict in modules_to_paths.items():
+            for cid, sae_dict in modules_to_paths.items():
                 path = sae_dict["sae"]
                 hook_name = f"blocks.{sae_dict['layers'][0].split('.')[1]}.hook_resid_post"
                 if debug:
-                    print(f"Loading SAE for {cluster_id} from {path}")
+                    print(f"Loading SAE for {cid} from {path}")
                 sae = Sae.load_from_disk(path)
                 sae_cfg = SaeConfig.load_json(os.path.join(path, "cfg.json"))
                 cfg = TrainConfig.load_json(os.path.join(path, "..", "config.json"))
@@ -620,5 +620,5 @@ def load_saes_by_training_clusters(
                     device=device,
                     sae_lens_version=version("sae_lens"),
                 )
-                dictionaries[cluster_id] = {"sae": sae_lens, "layers": sae_dict["layers"]}
+                dictionaries[cid] = {"sae": sae_lens, "layers": sae_dict["layers"]}
     return dictionaries
