@@ -52,12 +52,18 @@ def parse_args():
         type=str,
         default="interp/latents",
     )
+    parser.add_argument(
+        "--max_feature_id",
+        type=int,
+        default=64,
+    )
     return parser.parse_args()
 
 
+@torch.inference_mode()
 def main():
     args = parse_args()
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    os.path.dirname(os.path.abspath(__file__))
 
     # Choose device.
     device = "cuda" if torch.cuda.is_available() else "mps"
@@ -97,10 +103,12 @@ def main():
     )
 
     # Load SAEs.
-    sae_folder_path = os.path.join(script_dir, "../saes", MODEL_MAP[args.model_name]["short_name"])
+    # sae_folder_path = os.path.join(script_dir, "../saes", MODEL_MAP[args.model_name]["short_name"])
+    sae_folder_path = "/home/fbelotti/group-sae/saes/pythia_160m-topk"
     saes = load_saes_by_training_clusters(
         sae_folder_path, cluster=args.cluster, device=device, model_name=args.model_name
     )
+    print(saes.keys())
     saes_mapping = {}
     for cluster_id, cluster_data in saes.items():
         saes_mapping[cluster_id] = {}
@@ -114,14 +122,6 @@ def main():
         for cluster_id, cluster_data in saes.items()
     }
 
-    # Precompute a "locations" tensor (used in the hook) based on batch and context length.
-    X, Y = torch.meshgrid(torch.arange(batch_size), torch.arange(ctx_len), indexing="ij")
-    locations = (
-        torch.stack([X.flatten(), Y.flatten()], dim=1)
-        .repeat_interleave(k, dim=0)
-        .type(torch.int64)
-    )
-
     # Define a factory for the forward hook.
     def create_hook(cluster_id, name):
         def hook(module, inputs, outputs):
@@ -132,11 +132,14 @@ def main():
             outputs_flat = outputs_.reshape(-1, d_model)
             with torch.no_grad():
                 latents = saes_mapping[cluster_id][name].encode(outputs_flat)
-            top_acts, top_indices = torch.topk(latents, k, dim=1)
+            top_acts, top_indices = torch.topk(latents, k, dim=1)  # B*Pxk
+            mask = top_indices < args.max_feature_id
+            b, p, _ = torch.where(mask.view(-1, args.ctx_len, k))
+            l = top_indices[mask]
             # Concatenate the fixed locations with the top indices.
-            ids = torch.cat([locations.to(device), top_indices.flatten()[:, None]], dim=1)
-            cache[cluster_id][name]["ids"].append(ids.cpu())
-            cache[cluster_id][name]["acts"].append(top_acts.cpu().flatten())
+            ids = torch.stack([b, p, l], dim=-1)
+            cache[cluster_id][name]["ids"].append(ids.long().cpu())
+            cache[cluster_id][name]["acts"].append(top_acts[mask].cpu().flatten())
 
         return hook
 
