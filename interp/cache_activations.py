@@ -140,6 +140,7 @@ def main():
             b, p, _ = torch.where(mask.view(-1, args.ctx_len, k))
             l = top_indices[mask]
             # Concatenate the fixed locations with the top indices.
+            b += idx * args.batch_size
             ids = torch.stack([b, p, l], dim=-1)
             cache[cluster_id][name]["ids"].append(ids.long().cpu())
             cache[cluster_id][name]["acts"].append(top_acts[mask].cpu().flatten())
@@ -157,7 +158,7 @@ def main():
     pbar = tqdm(total=n_tokens, unit="tokens", desc="Processing tokens")
 
     # Process batches from the dataloader until at least n_tokens have been processed.
-    for batch in dataloader:
+    for idx, batch in enumerate(dataloader):
         tokens = batch["input_ids"][:, :ctx_len]
         with torch.no_grad():
             model(tokens.to(device))
