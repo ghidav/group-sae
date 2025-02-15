@@ -92,7 +92,7 @@ def main():
     # Load the dataset.
     dataset = load_dataset(
         "NeelNanda/pile-small-tokenized-2b",
-        streaming=False,
+        streaming=True,
         split="train",
         trust_remote_code=True,
     )
@@ -104,11 +104,14 @@ def main():
 
     # Load SAEs.
     # sae_folder_path = os.path.join(script_dir, "../saes", MODEL_MAP[args.model_name]["short_name"])
-    sae_folder_path = "/home/fbelotti/group-sae/saes/pythia_160m-topk"
+    sae_folder_path = "../saes/pythia_160m-topk"
     saes = load_saes_by_training_clusters(
         sae_folder_path, cluster=args.cluster, device=device, model_name=args.model_name
     )
-    print(saes.keys())
+    if len(saes) == 0:
+        raise ValueError("No SAEs found.")
+    else:
+        print(f"Loaded SAEs for: {list(saes.keys())}")
     saes_mapping = {}
     for cluster_id, cluster_data in saes.items():
         saes_mapping[cluster_id] = {}
