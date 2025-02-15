@@ -137,6 +137,7 @@ async def main():
     print(f"Running the following clusters: {cluster_ids}")
 
     for cid in cluster_ids:
+        cluster = training_clusters[cid]
         for layer in cluster:
 
             # Create directories
