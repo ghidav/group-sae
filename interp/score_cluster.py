@@ -47,6 +47,11 @@ def parse_args():
         type=str,
         default="interp/latents",
     )
+    parser.add_argument(
+        "--cluster_ids",
+        nargs="+",
+        default=[],
+    )
     return parser.parse_args()
 
 
@@ -125,7 +130,13 @@ async def main():
     # Create a semaphore to limit concurrent pipelines.
     semaphore = asyncio.Semaphore(args.max_pipelines)
 
-    for cid, cluster in training_clusters.items():
+    if len(args.cluster_ids) > 0:
+        cluster_ids = args.cluster_ids
+    else:
+        cluster_ids = list(training_clusters.keys())
+    print(f"Running the following clusters: {cluster_ids}")
+
+    for cid in cluster_ids:
         for layer in cluster:
 
             # Create directories
@@ -158,7 +169,7 @@ async def main():
             }
 
             dataset = LatentDataset(
-                raw_dir=f"{args.latents_dir}/{args.model_name.replace('-', '_')}/cluster/{cid}",  # noqa
+                raw_dir=f"{script_dir}/latents/{args.model_name.replace('-', '_')}/cluster/{cid}",  # noqa
                 cfg=latent_cfg,
                 modules=[module],
                 latents=feature_dict,

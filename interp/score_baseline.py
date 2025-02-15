@@ -47,6 +47,11 @@ def parse_args():
         type=str,
         default="interp/latents",
     )
+    parser.add_argument(
+        "--start_layer",
+        type=int,
+        default=0,
+    )
     return parser.parse_args()
 
 
@@ -129,7 +134,7 @@ async def main():
     # Create a semaphore to limit concurrent pipelines.
     semaphore = asyncio.Semaphore(args.max_pipelines)
 
-    for layer in range(n_layers - 1):  # Create a pipeline for each layer
+    for layer in range(args.start_layer, n_layers - 1):  # Create a pipeline for each layer
         module = f".gpt_neox.layers.{layer}"
 
         def extract_latent(filename: str):
@@ -151,7 +156,7 @@ async def main():
         }
 
         dataset = LatentDataset(
-            raw_dir=f"{args.latents_dir}/{args.model_name.replace('-', '_')}/baseline/layers.{layer}",  # noqa
+            raw_dir=f"{script_dir}/latents/{args.model_name.replace('-', '_')}/baseline/layers.{layer}",  # noqa
             cfg=latent_cfg,
             modules=[module],
             latents=feature_dict,

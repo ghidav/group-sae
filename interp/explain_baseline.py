@@ -41,6 +41,11 @@ def parse_args():
         type=str,
         default="interp/latents",
     )
+    parser.add_argument(
+        "--start_layer",
+        type=int,
+        default=0,
+    )
     return parser.parse_args()
 
 
@@ -68,7 +73,7 @@ latent_cfg = LatentConfig(
 )
 
 # Explanation loop
-number_of_parallel_latents = 4
+number_of_parallel_latents = 2
 
 experiment_cfg = ExperimentConfig(
     n_examples_test=10,  # Number of examples to sample for testing
@@ -116,12 +121,12 @@ async def main():
     # Create a semaphore to limit concurrent pipelines.
     semaphore = asyncio.Semaphore(args.max_pipelines)
 
-    for layer in range(n_layers - 1):  # Create a pipeline for each layer
+    for layer in range(args.start_layer, n_layers - 1):  # Create a pipeline for each layer
         module = f".gpt_neox.layers.{layer}"
         feature_dict = {module: torch.arange(0, 128)}
 
         dataset = LatentDataset(
-            raw_dir=f"{args.latents_dir}/{args.model_name.replace('-', '_')}/baseline/layers.{layer}",  # noqa
+            raw_dir=f"{script_dir}/latents/{args.model_name.replace('-', '_')}/baseline/layers.{layer}",  # noqa
             cfg=latent_cfg,
             modules=[module],
             latents=feature_dict,

@@ -103,8 +103,8 @@ def main():
     )
 
     # Load SAEs.
-    # sae_folder_path = os.path.join(script_dir, "../saes", MODEL_MAP[args.model_name]["short_name"])
-    sae_folder_path = "../saes/pythia_160m-topk"
+    #sae_folder_path = os.path.join(script_dir, "../saes", MODEL_MAP[args.model_name]["short_name"])
+    sae_folder_path = os.path.join("saes", MODEL_MAP[args.model_name]["short_name"] + "-topk")
     saes = load_saes_by_training_clusters(
         sae_folder_path, cluster=args.cluster, device=device, model_name=args.model_name
     )
