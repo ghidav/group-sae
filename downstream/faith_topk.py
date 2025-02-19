@@ -1,4 +1,5 @@
 import argparse
+import gc
 import logging
 import os
 import re
@@ -14,7 +15,7 @@ from transformer_lens import HookedTransformer
 from transformer_lens.utils import get_act_name
 from utils import load_examples
 
-from group_sae.utils import get_device_for_block, load_saes
+from group_sae.utils import MODEL_MAP, get_device_for_block, load_saes
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -156,7 +157,10 @@ if __name__ == "__main__":
         help="The directory to save faithfulness.",
     )
     parser.add_argument(
-        "--task_dir", type=str, default="downstream/tasks", help="The directory to load the task dataset."
+        "--task_dir",
+        type=str,
+        default="downstream/tasks",
+        help="The directory to load the task dataset.",
     )
     parser.add_argument(
         "--sae_root_folder",
@@ -175,6 +179,12 @@ if __name__ == "__main__":
     )
     parser.add_argument("--n_devices", type=int, default=1)
     args = parser.parse_args()
+
+    if MODEL_MAP[args.model]["short_name"] not in args.sae_root_folder:
+        raise ValueError(
+            f"Model name ({args.model_name}) does not match "
+            f"the SAE root folder ({args.sae_root_folder})."
+        )
 
     if args.n_devices > 1:
         transformer_lens.utilities.devices.get_device_for_block_index = get_device_for_block
@@ -195,7 +205,7 @@ if __name__ == "__main__":
     modules = [get_act_name(args.component, layer) for layer in layers]
     cluster = args.K != -1
     dictionaries = load_saes(
-        args.sae_root_folder + '/' + args.model,
+        args.sae_root_folder,
         device=device,
         debug=True,
         layer=args.layer,
@@ -353,3 +363,5 @@ if __name__ == "__main__":
         faith_result_path += f"_layer{args.layer}"
     faith_result_path += ".csv"
     score_df.to_csv(faith_result_path, index=False)
+    gc.collect()
+    torch.cuda.empty_cache()

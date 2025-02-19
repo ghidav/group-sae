@@ -14,7 +14,7 @@ from transformer_lens import HookedTransformer
 from transformer_lens.utils import get_act_name
 from utils import load_examples
 
-from group_sae.utils import get_device_for_block, load_saes
+from group_sae.utils import MODEL_MAP, get_device_for_block, load_saes
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -263,6 +263,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
     os.makedirs(args.effects_dir, exist_ok=True)
 
+    if MODEL_MAP[args.model]["short_name"] not in args.sae_root_folder:
+        raise ValueError(
+            f"Model name ({args.model_name}) does not match "
+            f"the SAE root folder ({args.sae_root_folder})."
+        )
+
     if args.n_devices > 1:
         transformer_lens.utilities.devices.get_device_for_block_index = get_device_for_block
 
@@ -286,7 +292,7 @@ if __name__ == "__main__":
 
     # loading saes
     dictionaries = load_saes(
-        args.sae_root_folder + '/' + args.model,
+        args.sae_root_folder,
         device=device,
         debug=True,
         layer=args.layer,
