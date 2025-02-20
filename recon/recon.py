@@ -19,14 +19,6 @@ logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--component", type=str, default="resid_post")
-    parser.add_argument(
-        "--dataset",
-        "-d",
-        type=str,
-        default="NeelNanda/pile-small-tokenized-2b",
-        help="The dataset to use for evaluation.",
-    )
     parser.add_argument(
         "--eval_dir",
         type=str,
@@ -87,7 +79,7 @@ if __name__ == "__main__":
         model.cfg.device = device
     cluster = args.cluster
 
-    eval_batches = args.eval_steps // args.batch_size  # 5M samples
+    eval_batches = args.eval_steps // args.batch_size
     eval_cfg = EvalConfig(
         batch_size_prompts=args.batch_size,
         # Reconstruction metrics
@@ -135,7 +127,7 @@ if __name__ == "__main__":
                 # Prepare SAE
                 sae = sae_dict["sae"]
                 sae.cfg.hook_layer = int(layer.split(".")[1])
-                sae.cfg.hook_name = get_act_name(args.component, sae.cfg.hook_layer)
+                sae.cfg.hook_name = get_act_name("resid_post", sae.cfg.hook_layer)
                 activations_store = ActivationsStore.from_sae(
                     model,
                     sae,
