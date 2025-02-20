@@ -103,7 +103,6 @@ def main():
     )
 
     # Load SAEs.
-    #sae_folder_path = os.path.join(script_dir, "../saes", MODEL_MAP[args.model_name]["short_name"])
     sae_folder_path = os.path.join("saes", MODEL_MAP[args.model_name]["short_name"] + "-topk")
     saes = load_saes_by_training_clusters(
         sae_folder_path, cluster=args.cluster, device=device, model_name=args.model_name
@@ -137,11 +136,11 @@ def main():
                 latents = saes_mapping[cluster_id][name].encode(outputs_flat)
             top_acts, top_indices = torch.topk(latents, k, dim=1)  # B*Pxk
             mask = top_indices < args.max_feature_id
-            b, p, _ = torch.where(mask.view(-1, args.ctx_len, k))
-            l = top_indices[mask]
+            batch, pos, _ = torch.where(mask.view(-1, args.ctx_len, k))
+            latent = top_indices[mask]
             # Concatenate the fixed locations with the top indices.
-            b += idx * args.batch_size
-            ids = torch.stack([b, p, l], dim=-1)
+            batch += idx * args.batch_size
+            ids = torch.stack([batch, pos, latent], dim=-1)
             cache[cluster_id][name]["ids"].append(ids.long().cpu())
             cache[cluster_id][name]["acts"].append(top_acts[mask].cpu().flatten())
 
