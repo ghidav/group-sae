@@ -1,15 +1,8 @@
+python recon/recon.py --model pythia-160m --batch_size 8
+python recon/recon.py --model pythia-160m --cluster --batch_size 8
 
-for i in {0..3}; do
-    session_name="gpu${i}"
-    script_name="gpu${i}.sh"
+python recon/recon.py --model pythia-410m --batch_size 8
+python recon/recon.py --model pythia-410m --cluster --batch_size 8
 
-    # Launch a detached tmux session that directly runs
-    # "CUDA_VISIBLE_DEVICES=$i ./$script_name" then waits in bash
-    tmux new-session -d -s "$session_name" \
-        "export CUDA_VISIBLE_DEVICES=$i; ./$script_name; bash"
-
-done
-
-echo
-echo "All 4 sessions created! Use 'tmux ls' to see them."
-echo "Attach to a session with: tmux attach -t gpuN (where N is 0..3)."
+python recon/recon.py --model pythia-1b --batch_size 8
+python recon/recon.py --model pythia-1b --cluster --batch_size 8
