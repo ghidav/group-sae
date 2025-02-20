@@ -9,8 +9,7 @@ for W in faithfulness completeness; do
         --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
         --effects_dir /home/fbelotti/group-sae/effects \
         --task_dir /home/fbelotti/group-sae/downstream/tasks \
-        --faith_dir faithfulness_topk \
-        --n_devices 2 \
+        --n_devices 1 \
         --batch_size 512 \
         --what $W \
         --K $K
@@ -26,8 +25,7 @@ for W in faithfulness completeness; do
         --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
         --effects_dir /home/fbelotti/group-sae/effects \
         --task_dir /home/fbelotti/group-sae/downstream/tasks \
-        --faith_dir faithfulness_topk \
-        --n_devices 2 \
+        --n_devices 1 \
         --batch_size 512 \
         --what $W \
         --K $K
@@ -43,8 +41,7 @@ for W in faithfulness completeness; do
         --sae_root_folder /home/fbelotti/group-sae/saes/pythia_160m-topk \
         --effects_dir /home/fbelotti/group-sae/effects \
         --task_dir /home/fbelotti/group-sae/downstream/tasks \
-        --faith_dir faithfulness_topk \
-        --n_devices 2 \
+        --n_devices 1 \
         --batch_size 512 \
         --what $W \
         --K $K
