@@ -62,7 +62,7 @@ MODEL_MAP = {
 
 def load_amds(size, include_baseline=False):
     package_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(package_dir, "groups", f"pythia-{size}.json")
+    file_path = os.path.join(package_dir, "groups", f"pythia_{size}_sequential.json")
     clusters = json.load(open(file_path))
     nl = MODEL_MAP[f"pythia-{size}"]["n_layers"]
     A = MODEL_MAP[f"pythia-{size}"]["A"]
@@ -78,7 +78,7 @@ def load_amds(size, include_baseline=False):
 
 def load_cluster_map(size):
     package_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(package_dir, "groups", f"pythia-{size}.json")
+    file_path = os.path.join(package_dir, "groups", f"pythia_{size}_sequential.json")
     clusters = json.load(open(file_path))
     training_clusters = clusters.pop("training_clusters")
 
@@ -117,7 +117,7 @@ def load_cluster_map(size):
 
 def load_training_clusters(size):
     package_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(package_dir, "groups", f"pythia-{size}.json")
+    file_path = os.path.join(package_dir, "groups", f"pythia_{size}_sequential.json")
     clusters = json.load(open(file_path))
     return clusters["training_clusters"]
 
