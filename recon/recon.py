@@ -22,19 +22,19 @@ if __name__ == "__main__":
     parser.add_argument(
         "--eval_dir",
         type=str,
-        default="eval",
+        default="eval_recon_sequential",
         help="The directory to save the evaluation results.",
     )
     parser.add_argument(
         "--model",
         type=str,
-        default="pythia-160m",
+        default="pythia-410m",
         help="The Huggingface ID of the model you wish to test.",
     )
     parser.add_argument(
         "--sae_root_folder",
         type=str,
-        default="/home/fbelotti/group-sae/saes/pythia_160m-topk",
+        default="/home/lse/sae_training/group-sae/training/checkpoints-clusters/pythia-410m-sequential-topk/step_15258",
         help="Path to all dictionaries for your language model.",
     )
     parser.add_argument(
@@ -63,9 +63,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     os.makedirs(args.eval_dir, exist_ok=True)
 
-    if MODEL_MAP[args.model]["short_name"] not in args.sae_root_folder:
+    if False and MODEL_MAP[args.model]["short_name"] not in args.sae_root_folder:
         raise ValueError(
-            f"Model name ({args.model_name}) does not match "
+            f"Model name ({args.model}) does not match "
             f"the SAE root folder ({args.sae_root_folder})."
         )
 

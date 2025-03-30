@@ -144,7 +144,7 @@ if __name__ == "__main__":
         normalize_activations=1.0,
         num_training_tokens=1_000_000_000,
         num_norm_estimation_tokens=5_000_000,
-        run_name="checkpoints-clusters/{}-topk".format(model_name),
+        run_name="checkpoints-clusters/{}-sequential-topk".format(model_name),
         adam_epsilon=1e-8,
         adam_betas=(0.9, 0.999),
         keep_last_n_checkpoints=4,

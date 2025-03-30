@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument(
         "--model_name",
         type=str,
-        default="pythia-160m",
+        default="pythia-410m",
         help="Name of the model (e.g. 'pythia-160m').",
     )
     parser.add_argument(
@@ -39,7 +39,7 @@ def parse_args():
     parser.add_argument(
         "--latents_dir",
         type=str,
-        default="interp/latents",
+         default="interp/latents_sequential",
     )
     parser.add_argument(
         "--cluster_ids",
@@ -129,7 +129,7 @@ async def main():
         for layer in cluster:
 
             # Create directories
-            explain_dir = os.path.join(script_dir, "results", "explanations", args.model_name, cid)
+            explain_dir = os.path.join(script_dir, "results", "explanations_sequential", args.model_name, cid)
             os.makedirs(explain_dir, exist_ok=True)  # Ensure directory exists
 
             # Create a pipeline for each layer
@@ -137,7 +137,7 @@ async def main():
             feature_dict = {module: torch.arange(0, 128)}
 
             dataset = LatentDataset(
-                raw_dir=f"{script_dir}/latents/{args.model_name.replace('-', '_')}/cluster/{cid}",  # noqa
+                raw_dir=f"{script_dir}/latents_sequential/{args.model_name.replace('-', '_')}/cluster/{cid}",  # noqa
                 cfg=latent_cfg,
                 modules=[module],
                 latents=feature_dict,

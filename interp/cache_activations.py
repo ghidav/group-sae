@@ -21,7 +21,7 @@ def parse_args():
     parser.add_argument(
         "--model_name",
         type=str,
-        default="pythia-160m",
+        default="pythia-410m",
         help="Name of the model (e.g. 'pythia-160m').",
     )
     parser.add_argument(
@@ -50,7 +50,7 @@ def parse_args():
     parser.add_argument(
         "--latents_dir",
         type=str,
-        default="interp/latents",
+        default="interp/latents_sequential",
     )
     parser.add_argument(
         "--max_feature_id",
@@ -103,7 +103,7 @@ def main():
     )
 
     # Load SAEs.
-    sae_folder_path = os.path.join("saes", MODEL_MAP[args.model_name]["short_name"] + "-topk")
+    sae_folder_path = os.path.join("/home/lse/sae_training/group-sae/training/checkpoints-clusters/", MODEL_MAP[args.model_name]["short_name"].replace('_', '-') + "-sequential-topk/step_15258")
     saes = load_saes_by_training_clusters(
         sae_folder_path, cluster=args.cluster, device=device, model_name=args.model_name
     )
