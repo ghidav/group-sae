@@ -76,10 +76,10 @@ def load_amds(size, include_baseline=False, which: str | None = None):
         [clusters[str(i)]["amd"] for i in range(1, nl - 1) if str(i) in clusters]
     ).reset_index()
     gs = pd.Series([i for i in range(1, nl - 1) if str(i) in clusters])
-    amd.columns = ["G", "AMD"]
+    amd.columns = ["G", "AMAD"]
     amd["G"] = gs
     if include_baseline:
-        amd = pd.concat([amd, pd.DataFrame([{"G": nl - 1, "AMD": 0}])])
+        amd = pd.concat([amd, pd.DataFrame([{"G": nl - 1, "AMAD": 0}])])
     amd["C"] = A + T * amd["G"]
     return amd
 
