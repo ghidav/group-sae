@@ -60,25 +60,38 @@ MODEL_MAP = {
 }
 
 
-def load_amds(size, include_baseline=False):
+def load_amds(size, include_baseline=False, which: str | None = None):
     package_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(package_dir, "groups", f"pythia_{size}_sequential.json")
+    if which == "sequential":
+        file_path = os.path.join(package_dir, "groups", f"pythia-{size}_sequential.json")
+    elif which == "random":
+        file_path = os.path.join(package_dir, "groups", f"pythia-{size}_random.json")
+    else:
+        file_path = os.path.join(package_dir, "groups", f"pythia-{size}.json")
     clusters = json.load(open(file_path))
     nl = MODEL_MAP[f"pythia-{size}"]["n_layers"]
     A = MODEL_MAP[f"pythia-{size}"]["A"]
     T = MODEL_MAP[f"pythia-{size}"]["T"]
-    amd = pd.Series([clusters[str(i)]["amd"] for i in range(1, nl - 1)]).reset_index()
+    amd = pd.Series(
+        [clusters[str(i)]["amd"] for i in range(1, nl - 1) if str(i) in clusters]
+    ).reset_index()
+    gs = pd.Series([i for i in range(1, nl - 1) if str(i) in clusters])
     amd.columns = ["G", "AMD"]
-    amd["G"] += 1
+    amd["G"] = gs
     if include_baseline:
         amd = pd.concat([amd, pd.DataFrame([{"G": nl - 1, "AMD": 0}])])
     amd["C"] = A + T * amd["G"]
     return amd
 
 
-def load_cluster_map(size):
+def load_cluster_map(size, which: str | None = None):
     package_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(package_dir, "groups", f"pythia_{size}_sequential.json")
+    if which == "sequential":
+        file_path = os.path.join(package_dir, "groups", f"pythia-{size}_sequential.json")
+    elif which == "random":
+        file_path = os.path.join(package_dir, "groups", f"pythia-{size}_random.json")
+    else:
+        file_path = os.path.join(package_dir, "groups", f"pythia-{size}.json")
     clusters = json.load(open(file_path))
     training_clusters = clusters.pop("training_clusters")
 
