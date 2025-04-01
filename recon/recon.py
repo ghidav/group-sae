@@ -28,13 +28,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model",
         type=str,
-        default="pythia-160m",
+        default="pythia-1b",
         help="The Huggingface ID of the model you wish to test.",
     )
     parser.add_argument(
         "--sae_root_folder",
         type=str,
-        default="/home/lse/sae_training/group-sae/training/checkpoints-clusters/pythia-160m-sequential-topk/step_20345",
+        default="/home/lse/sae_training/group-sae/training/checkpoints-clusters/pythia-1b-sequential-topk/step_20345",
         help="Path to all dictionaries for your language model.",
     )
     parser.add_argument(
