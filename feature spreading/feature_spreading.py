@@ -198,7 +198,7 @@ if __name__ == "__main__":
         processed_tokens += tokens["input_ids"].numel()
 
     # Process cluster mapping and normalization
-    cluster_map = load_cluster_map(args.model_name)
+    cluster_map = load_cluster_map(args.model_name.split("-")[1])
     cluster_ids = cluster_map[str(args.K)]
 
     plot_mat = torch.zeros_like(counter_mat).float()
@@ -215,5 +215,7 @@ if __name__ == "__main__":
         plot_mat[mask] = sub_mat[:, idx]
 
     plot_mat = plot_mat.cpu().numpy()
-    output_filename = os.path.join(f"counter_mat_{args.model_name}_{args.K}_{args.max_tokens}.npy")
+    output_filename = os.path.join(
+        f"counter_mat_{args.model_name}_K{args.K}_{args.max_tokens}.npy"
+    )
     np.save(output_filename, plot_mat)
