@@ -84,7 +84,7 @@ def load_amds(size, include_baseline=False, which: str | None = None):
     return amd
 
 
-def load_cluster_map(size, which: str | None = None):
+def load_cluster_map(size, which: str | None = None, replace_single_layer_cluster: bool = True):
     package_dir = os.path.dirname(os.path.abspath(__file__))
     if which == "sequential":
         file_path = os.path.join(package_dir, "groups", f"pythia-{size}_sequential.json")
@@ -117,7 +117,7 @@ def load_cluster_map(size, which: str | None = None):
     for cluster in clusters_grouped:
         saes = []
         for group in clusters_grouped[cluster]:
-            if len(group) == 1:
+            if replace_single_layer_cluster and len(group) == 1:
                 saes.extend([f"layers.{group[0]}"])
             for cluster_name, layers in training_clusters.items():
                 if group == layers:
