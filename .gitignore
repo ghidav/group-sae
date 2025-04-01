@@ -195,3 +195,5 @@ final
 .gpt_neox.*
 *.pdf
 *.svg
+/old_saes/
+/delphi/
