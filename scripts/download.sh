@@ -4,8 +4,6 @@ git clone https://huggingface.co/Group-SAE/pythia_160m-topk
 git clone https://huggingface.co/Group-SAE/pythia_410m-topk
 git clone https://huggingface.co/Group-SAE/pythia_1b-topk
 
-
-
 mkdir saes
 mv pythia_160m-topk saes/pythia_160m-topk
 cp saes/pythia_160m-topk/cluster/config.json saes/pythia_160m-topk/baseline
