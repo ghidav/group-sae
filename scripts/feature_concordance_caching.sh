@@ -13,7 +13,7 @@ model="pythia-160m"
 batch_size=32
 L=12
 echo "Running experiments for ${model} with L=${L}"
-for (( K=1; K<= $((L-2)); K++ )); do
+for (( K=1; K<=6; K++ )); do
     echo "Running ${model} with K=${K}"
     python /root/group-sae/feature_concordance/caching.py \
         --model_name "${model}" \
@@ -35,7 +35,7 @@ model="pythia-410m"
 batch_size=16
 L=24
 echo "Running experiments for ${model} with L=${L}"
-for (( K=1; K<= $((L-2)); K++ )); do
+for (( K=1; K<=9; K++ )); do
     echo "Running ${model} with K=${K}"
     python /root/group-sae/feature_concordance/caching.py --model_name "${model}" \
         --K "${K}" \
@@ -56,7 +56,7 @@ model="pythia-1b"
 batch_size=8
 L=16
 echo "Running experiments for ${model} with L=${L}"
-for (( K=1; K<= $((L-2)); K++ )); do
+for (( K=1; K<=6; K++ )); do
     echo "Running ${model} with K=${K}"
     python /root/group-sae/feature_concordance/caching.py --model_name "${model}" \
         --K "${K}" \
