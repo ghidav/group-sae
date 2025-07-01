@@ -175,17 +175,23 @@ if __name__ == "__main__":
             (hook_name, partial(sae_hook, sae=dictionaries[hook_name], cache=feature_cache))
         )
 
+    all_tokens = []
     processed_tokens = 0
     feature_save = {hook_name: [] for hook_name in dictionaries.keys()}
+    feature_vals_save = {hook_name: [] for hook_name in dictionaries.keys()}
     for tokens in tqdm(dl, total=args.max_tokens // (1024 * args.batch_size)):
         if processed_tokens >= args.max_tokens:
             break
         with torch.no_grad():
             model.run_with_hooks(tokens["input_ids"].to(device), fwd_hooks=hooks)
         for hook_name, features in feature_cache.items():
-            _, features_idxes = torch.topk(features, k=128, dim=-1)
+            feature_vals, features_idxes = torch.topk(features, k=128, dim=-1)
             feature_save[hook_name].append(features_idxes.view(-1).cpu().numpy().astype(np.int16))
+            feature_vals_save[hook_name].append(
+                feature_vals.view(-1).cpu().numpy().astype(np.float16)
+            )
         feature_cache.clear()
+        all_tokens.append(tokens["input_ids"].view(-1).cpu().numpy())
         processed_tokens += tokens["input_ids"].numel()
 
     # Save the features to disk
@@ -208,3 +214,44 @@ if __name__ == "__main__":
             ),
             features,
         )
+
+    # Save the features activations to disk
+    for hook_name, acts in feature_vals_save.items():
+        acts = np.concatenate(acts, axis=0)
+        os.makedirs(
+            os.path.join(
+                "activations",
+                args.model_name,
+                f"{args.K if args.K != -1 else 'baseline'}",
+            ),
+            exist_ok=True,
+        )
+        np.save(
+            os.path.join(
+                "activations",
+                args.model_name,
+                f"{args.K if args.K != -1 else 'baseline'}",
+                f"{hook_name}.npy",
+            ),
+            acts,
+        )
+
+    # Save all tokens to disk
+    all_tokens = np.concatenate(all_tokens, axis=0)
+    os.makedirs(
+        os.path.join(
+            "tokens",
+            args.model_name,
+            f"{args.K if args.K != -1 else 'baseline'}",
+        ),
+        exist_ok=True,
+    )
+    np.save(
+        os.path.join(
+            "tokens",
+            args.model_name,
+            f"{args.K if args.K != -1 else 'baseline'}",
+            "all_tokens.npy",
+        ),
+        all_tokens,
+    )
