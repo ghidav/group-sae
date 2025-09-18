@@ -10,11 +10,11 @@ requires-python = ">=3.10"
 keywords = ["interpretability", "explainable-ai"]
 license = {text = "MIT License"}
 dependencies = [
-    "accelerate",   # For device_map in from_pretrained
+    "accelerate", # For device_map in from_pretrained
     "datasets",
     "einops",
     "huggingface-hub",
-    "natsort",  # For sorting module names
+    "natsort", # For sorting module names
     "safetensors",
     "simple-parsing",
     "torch",
@@ -23,7 +23,8 @@ dependencies = [
     "pandas",
     "pre-commit",
     "transformer_lens==2.11.0",
-    "sae_lens==5.3.3"
+    "sae_lens==5.3.3",
+    "openai>=1.107.3",
 ]
 version = "0.1.0"
 

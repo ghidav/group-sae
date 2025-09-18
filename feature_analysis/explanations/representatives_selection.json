@@ -1,0 +1,5372 @@
+{
+  "bins": [
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.01
+  ],
+  "group_by": "pair",
+  "k_per_bin": 2,
+  "groups": {
+    "G13-B13": {
+      "[0.20,0.40)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 7,
+            "reason": "Clear, crisp contrast: the Group-SAE cleanly encodes the semantic concept of 'base' conversion prompts (e.g., 'What is X (base A) in base B?'), while the Baseline-SAE is noisier and mixes the same semantic contexts with LaTeX/formatting tokens (backslashes, braces). This example is highly informative for interpretability because it shows a clean concept detector versus an entangled/noisy baseline feature — useful for illustrating specialization vs artifact sensitivity."
+          },
+          {
+            "rank": 2,
+            "index": 3,
+            "reason": "Documents/formatting phenomenon with concrete behavioral split: both features detect newline tokens, but the Group-SAE prefers single-line breaks tied to sentence-level transitions, whereas the Baseline-SAE aligns with double newlines and explicit paragraph/section starts (e.g., '{¶4}'). This is a representative, non-lexical structural feature that complements the semantic example above and highlights granularity differences in formatting detection."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 1359,
+              "baseline_feat": 13837,
+              "similarity": 0.2111741602420807
+            },
+            "title": "Single-character multilingual tokens vs English function tokens",
+            "tags": [
+              "single-character",
+              "multilingual",
+              "punctuation",
+              "function-words"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 1559,
+              "baseline_feat": 3720,
+              "similarity": 0.35619717836380005
+            },
+            "title": "Group-SAE: structural/section tokens vs Baseline-SAE: legal named entities",
+            "tags": [
+              "document-structure",
+              "punctuation",
+              "named-entities"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 15367,
+              "baseline_feat": 4834,
+              "similarity": 0.38989168405532837
+            },
+            "title": "Newline / paragraph boundary marker",
+            "tags": [
+              "linebreak",
+              "paragraph-boundary",
+              "legal-formatting"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 9574,
+              "baseline_feat": 13156,
+              "similarity": 0.30594757199287415
+            },
+            "title": "Period token in numbering and section headings ('.')",
+            "tags": [
+              "punctuation",
+              "enumeration",
+              "document-structure",
+              "section-headings"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 15593,
+              "baseline_feat": 15922,
+              "similarity": 0.3142857253551483
+            },
+            "title": "Token-level detector for the word \"trust\"",
+            "tags": [
+              "lexical",
+              "polysemy",
+              "redundancy"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 15864,
+              "baseline_feat": 1602,
+              "similarity": 0.31994980573654175
+            },
+            "title": "Both features fire on \"security\" but with different senses",
+            "tags": [
+              "polysemy",
+              "institutional-vs-technical",
+              "semantic-specialization"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 8482,
+              "baseline_feat": 13578,
+              "similarity": 0.3459119498729706
+            },
+            "title": "Number-base conversion signal vs. LaTeX/formatting mix",
+            "tags": [
+              "number-bases",
+              "formatting-artifacts",
+              "interpretability"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 8323,
+              "baseline_feat": 9596,
+              "similarity": 0.3595406413078308
+            },
+            "title": "Numeric rate/count tokens (per‑100 / per‑1000)",
+            "tags": [
+              "numerical",
+              "units",
+              "tokenization",
+              "epidemiology"
+            ]
+          }
+        ]
+      },
+      "[0.40,0.60)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 5,
+            "reason": "Clear, crisp linguistic specialization: Group SAE detects Czech-specific subword/diacritic patterns (ř, č, ý and morphological endings), while Baseline captures short Slavic function tokens (single-letter prepositions). Together they illustrate orthographic/subword vs. boundary-level function-word distinctions in Slavic text — a concise, representative example of language-specific morphology detection."
+          },
+          {
+            "rank": 2,
+            "index": 6,
+            "reason": "Markup/formatting signal with concrete diagnostic value: both features target the inline reference punctuation for figures/tables, with Group biased toward repeated table/supplement references and Baseline covering a broader set of figure refs and domain-coded IDs. Good for showcasing document-structure and formatting-oriented features."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 3069,
+              "baseline_feat": 871,
+              "similarity": 0.4391275942325592
+            },
+            "title": "Star (*) token — exponentiation/multiplication in algebraic expressions",
+            "tags": [
+              "operator-token",
+              "exponentiation",
+              "algebraic-expansion"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 8304,
+              "baseline_feat": 9724,
+              "similarity": 0.4300653636455536
+            },
+            "title": "Both features detect the adversative 'but'; group leans narrative, baseline is broader",
+            "tags": [
+              "coordinating-conjunction",
+              "contrast",
+              "register"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 15430,
+              "baseline_feat": 5955,
+              "similarity": 0.41050854325294495
+            },
+            "title": "Named social platforms vs. generic discussion venues",
+            "tags": [
+              "social-media",
+              "forums",
+              "named-entities",
+              "discussion-structure"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 2135,
+              "baseline_feat": 16100,
+              "similarity": 0.45885714888572693
+            },
+            "title": "Possessive-pronoun specialist vs. broader function-word feature",
+            "tags": [
+              "possessive pronouns",
+              "function words",
+              "ownership",
+              "pronouns"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 3802,
+              "baseline_feat": 4069,
+              "similarity": 0.5607629418373108
+            },
+            "title": "Group: Czech subword/diacritic detector vs Baseline: short Slavic function tokens",
+            "tags": [
+              "subword-morphology",
+              "diacritics",
+              "Slavic-function-words"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 9183,
+              "baseline_feat": 2209,
+              "similarity": 0.45202770829200745
+            },
+            "title": "Detects inline figure/table reference markup (' ](# ')",
+            "tags": [
+              "markup",
+              "references",
+              "figures-tables"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 2764,
+              "baseline_feat": 14357,
+              "similarity": 0.48063015937805176
+            },
+            "title": "Period (.) token — file extensions, paths and diff/patch punctuation",
+            "tags": [
+              "punctuation",
+              "file-extensions",
+              "code-context"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 4381,
+              "baseline_feat": 871,
+              "similarity": 0.5830241441726685
+            },
+            "title": "Asterisk/operator detector in algebraic expressions",
+            "tags": [
+              "operator",
+              "exponentiation",
+              "algebra"
+            ]
+          }
+        ]
+      },
+      "[0.60,0.80)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 1,
+            "reason": "Clear, crisp numeric/token detector that reliably marks coordinates and tabular numbers (x/y, accuracy columns, short numeric fields). High overlap but a telling difference: Group feature covers a broader numeric range while Baseline focuses on a narrower set of repeated measurement values — making this pair useful to illustrate numeric-token specialization and subtle scope differences."
+          },
+          {
+            "rank": 2,
+            "index": 2,
+            "reason": "Pronoun-focused feature that cleanly captures 'he' variants and tokenizer/boundary artifacts (capitalization, attached punctuation, broken forms). Representative and distinct from numeric/morphological phenomena; useful to show how a model encodes personhood tokens plus sensitivity to tokenization and case."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 1228,
+              "baseline_feat": 11428,
+              "similarity": 0.781995952129364
+            },
+            "title": "Numeric/token detector: coordinates and tabular numbers",
+            "tags": [
+              "numeric",
+              "coordinates",
+              "tabular-data"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 12252,
+              "baseline_feat": 8232,
+              "similarity": 0.7515630722045898
+            },
+            "title": "Pronoun-focused feature capturing 'he' variants and tokenization artifacts",
+            "tags": [
+              "pronouns",
+              "capitalization",
+              "tokenization"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 11210,
+              "baseline_feat": 3575,
+              "similarity": 0.7029575109481812
+            },
+            "title": "Hyphen / hyphenation detector",
+            "tags": [
+              "punctuation",
+              "hyphenation",
+              "typography"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 14903,
+              "baseline_feat": 8862,
+              "similarity": 0.7002331614494324
+            },
+            "title": "Topical/section-heading technical nouns (scientific & networking)",
+            "tags": [
+              "topic-words",
+              "scientific-text",
+              "section-headings"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 3450,
+              "baseline_feat": 2325,
+              "similarity": 0.6455068588256836
+            },
+            "title": "Detector of nominalizing suffixes / abstract nouns",
+            "tags": [
+              "morphology",
+              "suffixes",
+              "nominalization",
+              "abstract-nouns"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 5377,
+              "baseline_feat": 15889,
+              "similarity": 0.6303972601890564
+            },
+            "title": "Both features detect the pronoun \"we\" (first‑person plural)",
+            "tags": [
+              "pronoun",
+              "first-person-plural",
+              "dialogue"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 14881,
+              "baseline_feat": 12988,
+              "similarity": 0.7865842580795288
+            },
+            "title": "Slash (/) as a separator/punctuation token",
+            "tags": [
+              "punctuation",
+              "separator",
+              "tokenization"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 3584,
+              "baseline_feat": 5622,
+              "similarity": 0.6373980641365051
+            },
+            "title": "Adjectival quality / sentiment detector (positive vs negative descriptors)",
+            "tags": [
+              "sentiment",
+              "adjectives",
+              "morphology",
+              "function-words"
+            ]
+          }
+        ]
+      },
+      "[0.80,1.01)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 1,
+            "reason": "Clear, high-confidence end-of-text / sequence-boundary detector: both units overwhelmingly activate on the <|endoftext|> token across diverse contexts (dialogue endings, math/LaTeX tails, citations, code/comments). Very high Jaccard (0.988) indicates near-redundant boundary-signal — a crisp, easily interpretable control token detector."
+          },
+          {
+            "rank": 2,
+            "index": 2,
+            "reason": "Distinct markup/metadata phenomenon: Group feature detects Wikipedia 'Category' lines but also broader bracketed-markup sequences ('.[]{', '[]{') used in Markdown/Pandoc figure/label annotations, while Baseline is a narrower 'Category' token detector. Good contrast between semantic metadata vs structural markup."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 12656,
+              "baseline_feat": 7929,
+              "similarity": 0.9884004592895508
+            },
+            "title": "End-of-text / sequence boundary detector",
+            "tags": [
+              "end-of-text",
+              "sequence-boundary",
+              "formatting"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 12889,
+              "baseline_feat": 15037,
+              "similarity": 0.8409090638160706
+            },
+            "title": "Wiki category token + bracketed markup (Group is broader)",
+            "tags": [
+              "wiki-category",
+              "markup",
+              "bracketed-punctuation"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 8171,
+              "baseline_feat": 15037,
+              "similarity": 0.809374988079071
+            },
+            "title": "LaTeX brace/matrix punctuation vs Wikipedia 'Category' metadata",
+            "tags": [
+              "LaTeX",
+              "punctuation",
+              "wiki",
+              "metadata"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 15256,
+              "baseline_feat": 799,
+              "similarity": 0.8901057243347168
+            },
+            "title": "Sentence-final period detector (near-identical)",
+            "tags": [
+              "punctuation",
+              "sentence-boundary",
+              "period"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 10680,
+              "baseline_feat": 7929,
+              "similarity": 0.9812121391296387
+            },
+            "title": "End-of-text / sequence-boundary detector",
+            "tags": [
+              "eos",
+              "sequence-boundary",
+              "surface-token"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 15016,
+              "baseline_feat": 7929,
+              "similarity": 0.9877974390983582
+            },
+            "title": "End-of-text / document-boundary detector",
+            "tags": [
+              "end-of-text",
+              "document-boundary",
+              "terminator"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 8512,
+              "baseline_feat": 7929,
+              "similarity": 0.9782477617263794
+            },
+            "title": "Document-boundary detector: <|endoftext|>",
+            "tags": [
+              "end-of-text",
+              "boundary-token",
+              "near-duplicate"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "13",
+              "group_feat": 14731,
+              "baseline_feat": 5555,
+              "similarity": 0.8653846383094788
+            },
+            "title": "Colon token detecting QA/formatting separators",
+            "tags": [
+              "punctuation",
+              "QA-separator",
+              "formatting"
+            ]
+          }
+        ]
+      }
+    },
+    "G13-B14": {
+      "[0.20,0.40)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 1,
+            "reason": "Clear, crisp subword/morphology phenomenon: the Group-SAE yields a compact detector for the subtoken \"an\" (lower- and uppercase) appearing as affix or interior substring across contexts and languages, while the Baseline conflates the core subtoken with longer fragments and varied capitalizations. This example cleanly illustrates improved disentangling of subtokens vs. entangled longer fragments."
+          },
+          {
+            "rank": 2,
+            "index": 7,
+            "reason": "Representative structural/tokenization pattern: both features detect bracketed numeric citations (e.g. [1], [2]), with the Group-SAE covering broader citation-like patterns (multi-digit markers, page/range formats) and the Baseline focusing more narrowly on common single-digit bracketed refs. This is a crisp, interpretable example of differing granularity and contextual breadth between features."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 13655,
+              "baseline_feat": 8955,
+              "similarity": 0.3041948080062866
+            },
+            "title": "Group feature isolates the subword \"an\"; Baseline mixes casing and longer substrings",
+            "tags": [
+              "subword",
+              "casing",
+              "morphology",
+              "tokenization"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 4152,
+              "baseline_feat": 135,
+              "similarity": 0.39762404561042786
+            },
+            "title": "Both features detect the common token \"home\" across senses",
+            "tags": [
+              "common-word",
+              "polysemy",
+              "capitalization",
+              "compound-usage"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 3980,
+              "baseline_feat": 15191,
+              "similarity": 0.3404322862625122
+            },
+            "title": "Period/dot detector (URLs, domains, emails)",
+            "tags": [
+              "punctuation",
+              "urls/domains",
+              "email"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 15434,
+              "baseline_feat": 1420,
+              "similarity": 0.20159366726875305
+            },
+            "title": "Discourse/connective tokens (Group) vs. complementizer \"that\" (Baseline)",
+            "tags": [
+              "discourse-markers",
+              "complementizer",
+              "punctuation",
+              "syntax"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 1066,
+              "baseline_feat": 6353,
+              "similarity": 0.2658621668815613
+            },
+            "title": "Structural/punctuation & code-like tokens vs. colloquial/UI tokens",
+            "tags": [
+              "punctuation",
+              "code",
+              "profanity",
+              "markup"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 15093,
+              "baseline_feat": 7881,
+              "similarity": 0.2865903079509735
+            },
+            "title": "Newline / section-break detector (Group vs Baseline)",
+            "tags": [
+              "newline",
+              "section-break",
+              "formatting"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 5131,
+              "baseline_feat": 8885,
+              "similarity": 0.30425962805747986
+            },
+            "title": "Bracketed numeric citation detector (Group vs Baseline)",
+            "tags": [
+              "citation-markers",
+              "legal-text",
+              "tokenization"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 724,
+              "baseline_feat": 709,
+              "similarity": 0.3416095972061157
+            },
+            "title": "'.' token — URL/domain and sentence-boundary detector",
+            "tags": [
+              "punctuation",
+              "URL",
+              "boundary",
+              "domain"
+            ]
+          }
+        ]
+      },
+      "[0.40,0.60)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 1,
+            "reason": "Clear, crisp detector of paragraph/newline boundaries: both features strongly activate on newline tokens marking paragraph breaks, blank lines, and formatting boundaries. This is a canonical structural/whitespace phenomenon (non-semantic) that is highly interpretable and broadly useful as a representative example of layout/structure signals."
+          },
+          {
+            "rank": 2,
+            "index": 3,
+            "reason": "Distinct and complementary phenomenon: a focused detector for single-letter variable/function tokens in symbolic-math contexts. It cleanly captures mathematical variable usage and nested-call/derivative contexts (versus baseline's narrower letter set), making it a representative example of semantic/formal-token detection rather than surface formatting."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 8458,
+              "baseline_feat": 4372,
+              "similarity": 0.5098644495010376
+            },
+            "title": "Newline / Paragraph-boundary detector",
+            "tags": [
+              "newline",
+              "formatting",
+              "whitespace",
+              "structure"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 7098,
+              "baseline_feat": 1031,
+              "similarity": 0.4137284457683563
+            },
+            "title": "Period token ('.') — punctuation in code/import/member-access contexts",
+            "tags": [
+              "punctuation",
+              "code",
+              "imports",
+              "dot_operator"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 14896,
+              "baseline_feat": 9915,
+              "similarity": 0.48148149251937866
+            },
+            "title": "Activations on single-letter variable/function tokens in symbolic math",
+            "tags": [
+              "single-letter-variables",
+              "symbolic-math",
+              "function-calls"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 1016,
+              "baseline_feat": 12871,
+              "similarity": 0.5495049357414246
+            },
+            "title": "Both features detect the surface token “Start/start” across UI, command, and code contexts",
+            "tags": [
+              "token-identity",
+              "UI/command",
+              "redundant",
+              "orthography"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 10688,
+              "baseline_feat": 723,
+              "similarity": 0.5535668134689331
+            },
+            "title": "Comma usage: clause-boundary and discourse-marker punctuation",
+            "tags": [
+              "punctuation",
+              "discourse",
+              "clause-boundary",
+              "syntax"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 6901,
+              "baseline_feat": 2910,
+              "similarity": 0.47252747416496277
+            },
+            "title": "Equals-plus-quote pattern (=\" ) in markup/attributes",
+            "tags": [
+              "markup",
+              "punctuation",
+              "references",
+              "formatting"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 10910,
+              "baseline_feat": 10458,
+              "similarity": 0.5512304902076721
+            },
+            "title": "Short-character / subword fragment detector (suffixes, small function tokens)",
+            "tags": [
+              "subword",
+              "morphology",
+              "multilingual"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 1365,
+              "baseline_feat": 9436,
+              "similarity": 0.47750818729400635
+            },
+            "title": "Group-SAE: broad lexical/orthographic cluster vs Baseline-SAE: domain-specific topical cluster",
+            "tags": [
+              "semantic-clustering",
+              "morphological-fragments",
+              "domain-specific"
+            ]
+          }
+        ]
+      },
+      "[0.60,0.80)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 8,
+            "reason": "Clear, crisp contrast: the Group feature yields a semantically coherent topical-noun detector (starvation, elderly, cisplatin, diameter, law) while the Baseline mixes content with noisy abbreviations and single-letter tokens. This example neatly illustrates how group-training can produce focused, interpretable semantic features and is representative of content-noun / semantic-coherence phenomena important for high-level model analysis."
+          },
+          {
+            "rank": 2,
+            "index": 6,
+            "reason": "Complementary phenomenon showing specialization vs distributed encoding: the Group neuron is narrowly specialized on the token 'pone' (PLOS ONE) whereas the Baseline covers multiple journal abbreviations (pbio, pcbi, pone). This candidate is a crisp, domain-specific token detector (citation/journal tokens) that highlights tradeoffs between sparsity/specialization and spread representations, providing a different and informative interpretability signal than the topical-noun case."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 913,
+              "baseline_feat": 10650,
+              "similarity": 0.643688440322876
+            },
+            "title": "Opening bracket '[' — marker for links, citations, and inline metadata",
+            "tags": [
+              "brackets",
+              "markup",
+              "references"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 10859,
+              "baseline_feat": 634,
+              "similarity": 0.6572622656822205
+            },
+            "title": "Lowercase variable token detector (math/algebra)",
+            "tags": [
+              "single-letter variables",
+              "math/algebra",
+              "function-arguments",
+              "equations"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 3815,
+              "baseline_feat": 232,
+              "similarity": 0.756078839302063
+            },
+            "title": "Subword / single-letter token detector (I, i, ir, Ind, fil, ins)",
+            "tags": [
+              "subword",
+              "orthography",
+              "abbreviation"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 3787,
+              "baseline_feat": 5052,
+              "similarity": 0.6197729706764221
+            },
+            "title": "Discourse/temporal determiners (this/that/some/very/a)",
+            "tags": [
+              "discourse-marker",
+              "temporal",
+              "determiner"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 5743,
+              "baseline_feat": 3583,
+              "similarity": 0.6077347993850708
+            },
+            "title": "Android/encoding vs. LaTeX label contexts",
+            "tags": [
+              "android",
+              "encoding",
+              "latex",
+              "math"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 8886,
+              "baseline_feat": 2274,
+              "similarity": 0.7061994671821594
+            },
+            "title": "Citation/journal-token detector — group feature is PONE‑specialized, baseline is more general",
+            "tags": [
+              "citation-tokens",
+              "journal-abbreviation",
+              "specialization",
+              "sparsity"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 379,
+              "baseline_feat": 8884,
+              "similarity": 0.6338028311729431
+            },
+            "title": "Colon token — Q/A delimiter (Group) vs general punctuation (Baseline)",
+            "tags": [
+              "punctuation",
+              "Q/A-format",
+              "context-specific"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 2983,
+              "baseline_feat": 3485,
+              "similarity": 0.7362277507781982
+            },
+            "title": "Group feature picks up coherent topical nouns; baseline mixes content with noisy/abbreviations",
+            "tags": [
+              "semantic-coherence",
+              "content-nouns",
+              "abbreviation-noise"
+            ]
+          }
+        ]
+      },
+      "[0.80,1.01)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 2,
+            "reason": "Clear sentence/document-boundary detector: Group feature is dominated by the explicit <|endoftext|> token while the Baseline feature responds to sentence-final punctuation, closing quotes, newlines and other terminal symbols. High Jaccard (0.988) shows they capture the same end-of-unit signal useful for segmentation and generation termination."
+          },
+          {
+            "rank": 2,
+            "index": 6,
+            "reason": "Markup/reference token detector: Both features reliably fire on inline 'ref' markup (e.g., {ref -type=\"fig\"}, media/ref tags). High overlap (Jaccard 0.858) and the explanation highlights a subtle specificity difference—baseline includes more media/ref variants while the Group feature focuses tightly on figure/citation markup—making it a crisp, interpretable unit."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 436,
+              "baseline_feat": 16218,
+              "similarity": 0.8839285969734192
+            },
+            "title": "Colon token — answer/label separator (e.g. \"A:\")",
+            "tags": [
+              "punctuation",
+              "answer-label",
+              "formatting"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 8790,
+              "baseline_feat": 9092,
+              "similarity": 0.9884004592895508
+            },
+            "title": "Sentence/end-of-text boundary detector",
+            "tags": [
+              "end-of-text",
+              "sentence-boundary",
+              "punctuation",
+              "formatting"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 3169,
+              "baseline_feat": 7791,
+              "similarity": 0.8105263113975525
+            },
+            "title": "Both detect wiki 'Category' lines; Group-SAE is more focused",
+            "tags": [
+              "wiki-category",
+              "formatting",
+              "specificity-vs-breadth"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 13009,
+              "baseline_feat": 13409,
+              "similarity": 0.8148148059844971
+            },
+            "title": "Both features detect Wikipedia 'Category:' lines",
+            "tags": [
+              "wiki-markup",
+              "structure-marker",
+              "high-similarity"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 12269,
+              "baseline_feat": 9092,
+              "similarity": 0.9859926700592041
+            },
+            "title": "Document/sentence boundary detector (end-of-text/punctuation)",
+            "tags": [
+              "end-of-document",
+              "sentence-final",
+              "punctuation"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 14667,
+              "baseline_feat": 3828,
+              "similarity": 0.858433723449707
+            },
+            "title": "Both features detect the in-text 'ref' markup token (high overlap)",
+            "tags": [
+              "reference-token",
+              "markup",
+              "figure-citation"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 8638,
+              "baseline_feat": 9092,
+              "similarity": 0.9908144474029541
+            },
+            "title": "End-of-text / sentence-final punctuation detector",
+            "tags": [
+              "end-of-text",
+              "sentence-boundary",
+              "punctuation"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "14",
+              "group_feat": 7473,
+              "baseline_feat": 9092,
+              "similarity": 0.9950829744338989
+            },
+            "title": "End-of-sequence / sentence-boundary detector",
+            "tags": [
+              "end-of-text",
+              "sentence-boundary",
+              "punctuation"
+            ]
+          }
+        ]
+      }
+    },
+    "G13-B15": {
+      "[0.20,0.40)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 3,
+            "reason": "Organization/institution detector: Baseline is a focused English institution-name feature (Center, Bureau, Institute), while the Group feature preserves that signal but importantly also activates on subword fragments and French morphemes (e.g., 'ité', 'ariat'), indicating sensitivity to word-final pieces and multilingual morphology. This example crisply illustrates how SAE can diverge by absorbing subword/multilingual cues vs a cleaner monolingual detector — informative for analyses of tokenization, morphology, and cross-lingual generalization."
+          },
+          {
+            "rank": 2,
+            "index": 5,
+            "reason": "Block-closing / else-branch detector in code: Group feature centers on the '}' token and else/else-if contexts (pure syntactic boundary detection), whereas the Baseline feature mixes that boundary signal with formatting cues (top tokens include tab characters), conflating block syntax with indentation/whitespace. This contrast is a clear, representative case of semantic vs formatting entanglement in model features and is valuable for interpreting code-structure representations."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 10323,
+              "baseline_feat": 8803,
+              "similarity": 0.378579705953598
+            },
+            "title": "Location/room detector — Group favors outdoor/structural nouns, Baseline favors indoor/furniture",
+            "tags": [
+              "spatial-nouns",
+              "indoor-vs-outdoor",
+              "room-furniture"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 5579,
+              "baseline_feat": 9464,
+              "similarity": 0.21074064075946808
+            },
+            "title": "Group: dash/en‑dash title separators vs Baseline: colon label separators",
+            "tags": [
+              "punctuation",
+              "section-separators",
+              "headings",
+              "metadata"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 16095,
+              "baseline_feat": 8510,
+              "similarity": 0.3139743506908417
+            },
+            "title": "Organization/institution detector — baseline is cleaner, group adds subword multilingual signals",
+            "tags": [
+              "organization-names",
+              "subword-morphology",
+              "multilingual",
+              "entity-detection"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 6471,
+              "baseline_feat": 13445,
+              "similarity": 0.29707711935043335
+            },
+            "title": "Prepositional tokens marking possession/agency (legal/formal contexts)",
+            "tags": [
+              "prepositions",
+              "function-words",
+              "legal-register",
+              "syntax"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 9867,
+              "baseline_feat": 14108,
+              "similarity": 0.36423248052597046
+            },
+            "title": "Block-closing / else-branch detector (Group vs Baseline)",
+            "tags": [
+              "block-boundary",
+              "control-flow",
+              "indentation",
+              "whitespace"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 1547,
+              "baseline_feat": 6592,
+              "similarity": 0.3126520812511444
+            },
+            "title": "Citation-marker detector — Group is narrower, Baseline conflates variants",
+            "tags": [
+              "citations",
+              "tokenization",
+              "sparsity",
+              "formatting"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 10965,
+              "baseline_feat": 8713,
+              "similarity": 0.35624998807907104
+            },
+            "title": "Detection of carriage-return/newline (blank-line) sequences",
+            "tags": [
+              "whitespace",
+              "linebreak",
+              "code-structure",
+              "boundary"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 4539,
+              "baseline_feat": 1131,
+              "similarity": 0.2741818130016327
+            },
+            "title": "Group feature specializes on HTML <div> containers while baseline covers diverse HTML tags",
+            "tags": [
+              "html",
+              "container",
+              "specialization",
+              "layout"
+            ]
+          }
+        ]
+      },
+      "[0.40,0.60)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 2,
+            "reason": "Clear, crisp phenomenon: both features encode negation but differ in tokenization/morphological sensitivity (full 'not' vs contractions/n't). This example cleanly exposes a common model behavior (splitting negation into surface variants) with a measurable moderate overlap, making it an instructive case for interpretability and debugging of tokenization-dependent semantics."
+          },
+          {
+            "rank": 2,
+            "index": 5,
+            "reason": "Contrasting functional roles: one feature indexes syntactic/geometry contexts and high-frequency function words while the other captures domain-specific physics vocabulary and morphemes. This pair highlights a divergent specialization (syntax/structure vs technical morphology/lexicon), demonstrating how similar activations can arise from different linguistic abstractions."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 9069,
+              "baseline_feat": 4910,
+              "similarity": 0.47731655836105347
+            },
+            "title": "Attribute/properties lexical cluster — Group emphasizes synonyms, Baseline adds evaluative/measurement terms",
+            "tags": [
+              "semantic-field",
+              "attributes",
+              "measurement"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 15755,
+              "baseline_feat": 7008,
+              "similarity": 0.4381912350654602
+            },
+            "title": "Negation captured with contraction sensitivity",
+            "tags": [
+              "negation",
+              "contractions",
+              "tokenization"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 542,
+              "baseline_feat": 7017,
+              "similarity": 0.410806268453598
+            },
+            "title": "Newline / document‑layout detector (Group: fine-grained vs Baseline: general)",
+            "tags": [
+              "newline",
+              "formatting",
+              "document-structure"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 2219,
+              "baseline_feat": 1507,
+              "similarity": 0.45517241954803467
+            },
+            "title": "Feature detects 'product' mentions across commercial and technical contexts",
+            "tags": [
+              "product-mentions",
+              "commercial-context",
+              "technical-id"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 4910,
+              "baseline_feat": 12217,
+              "similarity": 0.5097386837005615
+            },
+            "title": "Group: syntactic/geometry contexts vs Baseline: technical physics vocabulary and morphology",
+            "tags": [
+              "syntax",
+              "geometry",
+              "morphology",
+              "physics-terminology"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 13055,
+              "baseline_feat": 13010,
+              "similarity": 0.4538024663925171
+            },
+            "title": "Both features index the preposition \"of\"; group is narrower, baseline broader",
+            "tags": [
+              "function-word",
+              "preposition",
+              "collocation"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 2551,
+              "baseline_feat": 11260,
+              "similarity": 0.4566371738910675
+            },
+            "title": "Newline token in LaTeX/math line breaks",
+            "tags": [
+              "newline",
+              "LaTeX",
+              "math",
+              "line-break"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 15488,
+              "baseline_feat": 7919,
+              "similarity": 0.4954640567302704
+            },
+            "title": "Same token 'so' — discourse/filler vs formal intensifier",
+            "tags": [
+              "discourse-marker",
+              "intensifier",
+              "register"
+            ]
+          }
+        ]
+      },
+      "[0.60,0.80)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 6,
+            "reason": "High-similarity, crisp token-level detector for the double-quote (\") that generalizes across natural-language dialogue and code string-literals. Clear, easily interpretable behavior (opening-quote / string boundary) with strong Group vs Baseline contrast in placement/precision — a canonical punctuation/boundary example."
+          },
+          {
+            "rank": 2,
+            "index": 8,
+            "reason": "Consistent, interpretable function-word detector for the indefinite articles 'a'/'an' capturing a low-level syntactic signal across contexts. Complementary to the punctuation example (different phenomenon class: lexical/syntactic vs punctuation/token-shape), offering useful diversity for a compact camera-ready set."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 11506,
+              "baseline_feat": 2113,
+              "similarity": 0.6220223307609558
+            },
+            "title": "Feature for isolated 'U'/'u' tokens (hesitations, initials, code)",
+            "tags": [
+              "single-letter",
+              "filled-pause",
+              "code-identifiers",
+              "tokenization-artifact"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 14010,
+              "baseline_feat": 5389,
+              "similarity": 0.6867910623550415
+            },
+            "title": "Opening-quote / dialogue marker",
+            "tags": [
+              "dialogue",
+              "quotation",
+              "speaker-turns",
+              "punctuation"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 11330,
+              "baseline_feat": 5336,
+              "similarity": 0.6188846826553345
+            },
+            "title": "Sentence-final quoted punctuation (dialogue endings)",
+            "tags": [
+              "punctuation",
+              "dialogue",
+              "sentence-final",
+              "quotes"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 913,
+              "baseline_feat": 13048,
+              "similarity": 0.6209481954574585
+            },
+            "title": "Opening bracket '[' — markup/citation vs code/regex contexts",
+            "tags": [
+              "punctuation",
+              "markup",
+              "code",
+              "citation"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 15904,
+              "baseline_feat": 15094,
+              "similarity": 0.6251912117004395
+            },
+            "title": "Detector for two‑digit, zero‑padded numerals / list markers",
+            "tags": [
+              "numeric-format",
+              "enumeration",
+              "token-shape",
+              "dates"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 230,
+              "baseline_feat": 10898,
+              "similarity": 0.7598220705986023
+            },
+            "title": "Feature detects the double-quote token (quoted text / string boundaries)",
+            "tags": [
+              "punctuation",
+              "quotation",
+              "string-literals"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 13070,
+              "baseline_feat": 6706,
+              "similarity": 0.6301369667053223
+            },
+            "title": "Token '){' detecting publisher reference/markup",
+            "tags": [
+              "punctuation",
+              "reference-markup",
+              "tables-vs-figures"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 8704,
+              "baseline_feat": 2963,
+              "similarity": 0.6256653666496277
+            },
+            "title": "Indefinite article detector ('a' / 'an')",
+            "tags": [
+              "determiner",
+              "function-word",
+              "syntax"
+            ]
+          }
+        ]
+      },
+      "[0.80,1.01)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 4,
+            "reason": "Clear, high‑confidence end-of-text / sequence-termination detector: both group and baseline units overwhelmingly activate on the special <|endoftext|> token across diverse contexts (sentences, lists, code, math). Very high Jaccard (0.99) and the explanation make this a crisp, canonical example of a special-token boundary detector useful for illustrating cross-layer/shared representations of termination signals."
+          },
+          {
+            "rank": 2,
+            "index": 8,
+            "reason": "Distinct, non-boundary phenomenon: a tokenization-driven detector for the '0' token when it appears as the leading part of hex literals (0x...). Activations concentrate in code/hex-dump contexts, highlighting a concrete tokenization artifact and a code-specific feature. This contrasts well with the EOS example and adds diversity (tokenization/code vs. special-token/boundary)."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 1480,
+              "baseline_feat": 3470,
+              "similarity": 0.9889975786209106
+            },
+            "title": "End-of-text / document-boundary detector",
+            "tags": [
+              "end-of-text",
+              "sequence-boundary",
+              "formatting",
+              "punctuation"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 4856,
+              "baseline_feat": 8319,
+              "similarity": 0.8886076211929321
+            },
+            "title": "Performance/timing mentions in chat logs",
+            "tags": [
+              "performance",
+              "timing",
+              "numeric-values",
+              "debugging"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 2191,
+              "baseline_feat": 3470,
+              "similarity": 0.9871873259544373
+            },
+            "title": "End-of-text (EOS) token detector",
+            "tags": [
+              "end-of-document",
+              "EOS token",
+              "boundary detector"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 5075,
+              "baseline_feat": 1019,
+              "similarity": 0.9895960688591003
+            },
+            "title": "End-of-text (<|endoftext|>) token detector",
+            "tags": [
+              "special-token",
+              "document-boundary",
+              "termination"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 12700,
+              "baseline_feat": 5135,
+              "similarity": 0.964777946472168
+            },
+            "title": "Sentence‑terminal / closing‑punctuation detector",
+            "tags": [
+              "sentence-terminator",
+              "punctuation",
+              "markup"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 6227,
+              "baseline_feat": 1019,
+              "similarity": 0.9829787015914917
+            },
+            "title": "End-of-text / EOS token detector",
+            "tags": [
+              "end-of-sequence",
+              "delimiter",
+              "formatting"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 16078,
+              "baseline_feat": 3470,
+              "similarity": 0.9871873259544373
+            },
+            "title": "End-of-text (<|endoftext|>) detector — near-identical",
+            "tags": [
+              "eos-token",
+              "boundary-detector",
+              "shared-representation"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "13",
+              "baseline_layer": "15",
+              "group_feat": 8012,
+              "baseline_feat": 12525,
+              "similarity": 0.8461538553237915
+            },
+            "title": "Detector for the '0' token in hex literals (0x...)",
+            "tags": [
+              "hex-literals",
+              "tokenization",
+              "code-dumps"
+            ]
+          }
+        ]
+      }
+    },
+    "G14-B13": {
+      "[0.20,0.40)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 6,
+            "reason": "Strong, semantically crisp viral/infectious-disease detector present in both Group and Baseline but at different layers. Tokens and snippets are nearly identical, making this a clear example of a theme preserved across layers with subtle divergences (specific disease mentions, corpus/genre cues, or temporal signals). Useful for illustrating layer-shift effects on a single high-salience clinical concept."
+          },
+          {
+            "rank": 2,
+            "index": 4,
+            "reason": "Punctuation-driven feature: both units target the '(' token in methods-style parentheticals (manufacturers, kit names, catalog numbers). This is a concise, non-lexical phenomenon showing how features can pick out citation-like spans and formatting roles; contrasts well with the semantic disease example by highlighting structural/punctuation-driven representation differences."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 1745,
+              "baseline_feat": 612,
+              "similarity": 0.32319390773773193
+            },
+            "title": "Both features encode 'safe' semantics; Group favors abstract/nominal safety while Baseline favors concrete/idiomatic uses",
+            "tags": [
+              "semantic-safety",
+              "abstract-vs-concrete",
+              "token-variants"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 12512,
+              "baseline_feat": 10302,
+              "similarity": 0.20687928795814514
+            },
+            "title": "Walking/hiking (Group) vs running/aerobic (Baseline) — distinct locomotion features",
+            "tags": [
+              "locomotion",
+              "intensity",
+              "outdoor-vs-competitive",
+              "subword-morphology"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 6776,
+              "baseline_feat": 3144,
+              "similarity": 0.29353681206703186
+            },
+            "title": "Procedural legal term: 'motion' in court documents",
+            "tags": [
+              "legal",
+              "court-procedure",
+              "capitalization"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 3186,
+              "baseline_feat": 6920,
+              "similarity": 0.3764764964580536
+            },
+            "title": "Parenthesis token marking method/manufacturer parentheticals",
+            "tags": [
+              "parentheses",
+              "methods",
+              "manufacturer",
+              "punctuation"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 10490,
+              "baseline_feat": 14021,
+              "similarity": 0.3206286132335663
+            },
+            "title": "Group-SAE: broad character-bigram/infix detector vs Baseline-SAE: '-ov' name-suffix specialist",
+            "tags": [
+              "character-bigram",
+              "casing-robust",
+              "name-suffix",
+              "morpheme"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 12266,
+              "baseline_feat": 12356,
+              "similarity": 0.3862629234790802
+            },
+            "title": "Viral/virus infection contexts — moderate overlap",
+            "tags": [
+              "infectious-disease",
+              "lexical-semantic",
+              "layer-shift"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 669,
+              "baseline_feat": 10729,
+              "similarity": 0.29640552401542664
+            },
+            "title": "Short/index-like tokens (Group) vs. formatting/domain tokens (Baseline)",
+            "tags": [
+              "indices & short IDs",
+              "numeric literals",
+              "macros/labels"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 234,
+              "baseline_feat": 8442,
+              "similarity": 0.2740381360054016
+            },
+            "title": "Quotation/Dialogue boundary detectors — Group vs Baseline",
+            "tags": [
+              "dialogue",
+              "punctuation",
+              "quotes",
+              "speaker-turns"
+            ]
+          }
+        ]
+      },
+      "[0.40,0.60)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 1,
+            "reason": "Clear, crisp artifact: both features latch onto the punctuation/tokenization artifact `;\"` from HTML img/src attributes but diverge on nearby proper-name associations (cast-list 'Lance' vs media/discussion 'Snyder'). This example cleanly demonstrates an implementation-level tokenization/markup artifact driving spurious semantic co-activation, making it highly informative for interpretability and debugging."
+          },
+          {
+            "rank": 2,
+            "index": 6,
+            "reason": "Contrasting syntactic vs semantic specialization in programming/how‑to contexts: Group feature focuses on the infinitival/syntactic 'to' framing ('How to…') while the Baseline covers a wide variety of concrete programming action verbs. This is a representative, non-duplicate case showing how features can split along syntactic cue vs semantic operation lines in procedural text."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 10462,
+              "baseline_feat": 1251,
+              "similarity": 0.5
+            },
+            "title": "HTML attribute punctuation bound to proper names (Lance vs Snyder)",
+            "tags": [
+              "punctuation",
+              "html-attributes",
+              "named-entities",
+              "tokenization-artifact"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 6848,
+              "baseline_feat": 15468,
+              "similarity": 0.5656969547271729
+            },
+            "title": "Group feature detects sentence‑initial/markup 'You'; Baseline is a general 'you' pronoun detector",
+            "tags": [
+              "capitalization",
+              "markup",
+              "pronoun"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 13761,
+              "baseline_feat": 7392,
+              "similarity": 0.5142250657081604
+            },
+            "title": "Feature sensitive to the token \"another\" (determiner/pronoun/adverb)",
+            "tags": [
+              "lexical",
+              "determiner",
+              "capitalization",
+              "layer-difference"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 1280,
+              "baseline_feat": 3559,
+              "similarity": 0.40109091997146606
+            },
+            "title": "Demonstrative 'those' — general pronoun vs sentence-initial/discourse emphasis",
+            "tags": [
+              "demonstrative-pronoun",
+              "anaphora",
+              "sentence-initial",
+              "capitalization"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 1706,
+              "baseline_feat": 59,
+              "similarity": 0.44616177678108215
+            },
+            "title": "Detection of 'happen' (event-occurrence verb)",
+            "tags": [
+              "verbs",
+              "event-occurrence",
+              "tense-aspect"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 7244,
+              "baseline_feat": 9617,
+              "similarity": 0.405418336391449
+            },
+            "title": "How‑to / action‑verb detector — group is syntactic ('to') while baseline covers broader programming actions",
+            "tags": [
+              "how-to",
+              "action-verbs",
+              "programming"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 1503,
+              "baseline_feat": 11561,
+              "similarity": 0.42584097385406494
+            },
+            "title": "Chatty short-line vs. paragraph/newline marker",
+            "tags": [
+              "chat",
+              "emoticons",
+              "newline",
+              "structure"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 16339,
+              "baseline_feat": 14756,
+              "similarity": 0.4912570118904114
+            },
+            "title": "Line-break / formatting-separator detector (Group vs Baseline)",
+            "tags": [
+              "newline",
+              "formatting",
+              "code-structure",
+              "punctuation"
+            ]
+          }
+        ]
+      },
+      "[0.60,0.80)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 1,
+            "reason": "Clear, linguistically meaningful contrast: the Group feature narrowly targets very short bound morphemes/inflectional suffixes (en, ig, ug, etc.), while the Baseline picks out slightly longer stems/roots. This is a crisp example of how grouping produces a more focused morphological/orthographic detector versus a baseline that mixes stems — useful for demonstrating representational specialization on subword structure in a non-English language."
+          },
+          {
+            "rank": 2,
+            "index": 6,
+            "reason": "Shows syntactic-role specialization for numeric tokens: the Group feature activates on numbers used as multiplicative coefficients adjacent to variables/exponents, whereas the Baseline highlights standalone numeric constants in equations. This contrast is a clear, non-linguistic phenomenon (math/code syntax) that complements the morphological example and demonstrates that grouping yields finer-grained, role-aware features."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 3527,
+              "baseline_feat": 10614,
+              "similarity": 0.6806445717811584
+            },
+            "title": "German subword/affix detector",
+            "tags": [
+              "morphology",
+              "German",
+              "subword",
+              "affixes"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 13861,
+              "baseline_feat": 4683,
+              "similarity": 0.6123145222663879
+            },
+            "title": "Detector of name-start substrings (capitalized prefixes)",
+            "tags": [
+              "proper-names",
+              "name-prefixes",
+              "capitalization"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 9174,
+              "baseline_feat": 4380,
+              "similarity": 0.6362950801849365
+            },
+            "title": "Group feature focuses on abusive/subword fragments; baseline is more general/contextual",
+            "tags": [
+              "abusive-language",
+              "subword-fragments",
+              "function-words"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 11429,
+              "baseline_feat": 13905,
+              "similarity": 0.6227364540100098
+            },
+            "title": "Group feature focuses on clinical/medical language; Baseline is a broader, topic-mixed cluster",
+            "tags": [
+              "clinical-medical",
+              "mixed-topics",
+              "subword-fragments"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 9536,
+              "baseline_feat": 16229,
+              "similarity": 0.7096270322799683
+            },
+            "title": "Definite-article detector ('the')",
+            "tags": [
+              "function-word",
+              "article",
+              "capitalization",
+              "selectivity"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 544,
+              "baseline_feat": 1798,
+              "similarity": 0.6658841967582703
+            },
+            "title": "Polynomial coefficients vs. equation constants",
+            "tags": [
+              "numeric-coefficients",
+              "polynomial-context",
+              "equation-constants"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 6443,
+              "baseline_feat": 8583,
+              "similarity": 0.7099574208259583
+            },
+            "title": "Comma/connective feature (listing and clause boundaries)",
+            "tags": [
+              "punctuation",
+              "connectives",
+              "syntax"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 6757,
+              "baseline_feat": 10306,
+              "similarity": 0.6729627847671509
+            },
+            "title": "LaTeX/math opening-delimiter detector",
+            "tags": [
+              "latex",
+              "math-delimiters",
+              "punctuation"
+            ]
+          }
+        ]
+      },
+      "[0.80,1.01)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 2,
+            "reason": "Clear, interpretable contrast: the Group feature specializes on uppercase/structural math symbols (R, B, H, L, p, g) while the Baseline prefers lowercase variable/index names (s, x, a, i). This example highlights semantic vs surface-level specialization, a layer-shift behavior, and is a crisp, non-redundant phenomenon useful for discussing how features encode mathematical structure versus generic variables."
+          },
+          {
+            "rank": 2,
+            "index": 3,
+            "reason": "A canonical end-of-text (EOS) / document-boundary detector that activates exclusively on the special token across genres. Its very high Jaccard shows near-redundant copies across adjacent layers, making it a concise example to discuss dataset/tokenization artifacts, boundary signaling, and inter-layer redundancy."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 5205,
+              "baseline_feat": 310,
+              "similarity": 0.8475427627563477
+            },
+            "title": "Single-letter token detector: Group is sharper, Baseline is broader",
+            "tags": [
+              "single-letter",
+              "case-sensitivity",
+              "tokenization",
+              "surface-form"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 902,
+              "baseline_feat": 13840,
+              "similarity": 0.8667640089988708
+            },
+            "title": "Single-letter math-token detector — group picks structural symbols, baseline picks generic variables",
+            "tags": [
+              "math-symbols",
+              "single-letter",
+              "structural-vs-variable",
+              "layer-shift"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 5242,
+              "baseline_feat": 7929,
+              "similarity": 0.9829993844032288
+            },
+            "title": "Detector for the end-of-text token / document boundary",
+            "tags": [
+              "end-of-text",
+              "document-boundary",
+              "special-token"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 10370,
+              "baseline_feat": 9092,
+              "similarity": 0.833743691444397
+            },
+            "title": "Hyphen/dash token (\"-\"): hyphenation and dash punctuation",
+            "tags": [
+              "punctuation",
+              "hyphenation",
+              "tokenization",
+              "compounding"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 2733,
+              "baseline_feat": 7929,
+              "similarity": 0.9741275310516357
+            },
+            "title": "EOS / document-boundary detector",
+            "tags": [
+              "end-of-text",
+              "boundary",
+              "tokenization",
+              "redundant"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 2397,
+              "baseline_feat": 7929,
+              "similarity": 0.978234589099884
+            },
+            "title": "End-of-text / document-boundary detector",
+            "tags": [
+              "end-of-text",
+              "boundary-detection",
+              "special-token"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 730,
+              "baseline_feat": 7929,
+              "similarity": 0.9800242185592651
+            },
+            "title": "End-of-text (EOS) / boundary-token detector",
+            "tags": [
+              "end-of-text",
+              "boundary-token",
+              "dataset-artifact"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "13",
+              "group_feat": 12992,
+              "baseline_feat": 7929,
+              "similarity": 0.9841945171356201
+            },
+            "title": "End-of-text / document-boundary detector",
+            "tags": [
+              "end-of-text",
+              "document-boundary",
+              "inter-layer-redundancy"
+            ]
+          }
+        ]
+      }
+    },
+    "G14-B14": {
+      "[0.20,0.40)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 1,
+            "reason": "Clear, crisp structural phenomenon: both units target the same punctuation token '{' in LaTeX/math contexts but differ in specialization (Group focusing on environment/opening-label uses vs Baseline on broader argument/grouping). This contrast cleanly illustrates interpretability insights about narrowly focused vs generalized feature decomposition in syntax-rich code/math text."
+          },
+          {
+            "rank": 2,
+            "index": 2,
+            "reason": "Domain-specific semantic contrast: Group-SAE specializes on MRI/resonance imaging terminology while Baseline-SAE captures a wider set of analytical-instrument vocabulary. This pair provides a complementary, non-linguistic example of how features can split by subdomain vs broad instrumentation, adding diversity to the paper's phenomena set."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 1984,
+              "baseline_feat": 7286,
+              "similarity": 0.3483709394931793
+            },
+            "title": "Curly brace \"{\" in LaTeX equation contexts",
+            "tags": [
+              "LaTeX",
+              "brace",
+              "math-syntax"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 4680,
+              "baseline_feat": 3881,
+              "similarity": 0.24537305533885956
+            },
+            "title": "Group feature = MRI/magnetic‑resonance; Baseline = general analytical instrumentation",
+            "tags": [
+              "MRI",
+              "spectroscopy",
+              "analytical-instruments",
+              "medical-imaging"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 7248,
+              "baseline_feat": 2828,
+              "similarity": 0.2493506520986557
+            },
+            "title": "Group feature: 'confidence' (statistical term) vs Baseline: '(' (parenthetical/math formatting)",
+            "tags": [
+              "statistical-terms",
+              "morphology",
+              "punctuation",
+              "math-formatting"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 1375,
+              "baseline_feat": 13612,
+              "similarity": 0.3649306893348694
+            },
+            "title": "Feature contrast: isolated/technical 'v' vs lexical/URL 'v' fragments",
+            "tags": [
+              "single-letter-token",
+              "code/math-identifiers",
+              "lexical-fragments"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 939,
+              "baseline_feat": 2558,
+              "similarity": 0.38063979148864746
+            },
+            "title": "Group focuses on single-letter math identifiers; baseline on LaTeX/formatting",
+            "tags": [
+              "math-variables",
+              "LaTeX-syntax",
+              "notation-formatting"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 4817,
+              "baseline_feat": 6928,
+              "similarity": 0.35871076583862305
+            },
+            "title": "Indefinite article 'a' — both detect 'a', Group favors narrative 'take a' contexts while Baseline includes more colloquial/imperative uses",
+            "tags": [
+              "article",
+              "take-collocation",
+              "style-register"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 13040,
+              "baseline_feat": 9512,
+              "similarity": 0.34370315074920654
+            },
+            "title": "Both features pick up the token 'aus' — group is cleaner, baseline is broader/noisier",
+            "tags": [
+              "preposition",
+              "tokenization",
+              "noise",
+              "context-specificity"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 12374,
+              "baseline_feat": 6340,
+              "similarity": 0.21602289378643036
+            },
+            "title": "Month-name detectors — 'May' specialized vs. broader months",
+            "tags": [
+              "temporal",
+              "month-names",
+              "specificity",
+              "lexical-variation"
+            ]
+          }
+        ]
+      },
+      "[0.40,0.60)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 1,
+            "reason": "Clear, concrete contrast in scope: both features pick up the LaTeX delimiter token '\\left', but Group-SAE generalizes across many mathematical constructions (\\exp\\left(...\\right), integrals, asymptotics) while Baseline-SAE is narrower, concentrated on repeated specific spans (e.g., '\\left( s\\right)') often embedded in Portuguese/Spanish text. This example crisply illustrates how two features can share a lexical cue yet differ in functional breadth and co-occurrence patterns — useful for demonstrating group-level generalization vs phrase-level/language-biased patches."
+          },
+          {
+            "rank": 2,
+            "index": 3,
+            "reason": "Representative dialogue/register detector: both features strongly activate on conversational 1st/2nd-person pronouns and contractions (you, I, you're, we're). The Group feature slightly favors addressing/second-person contexts while the Baseline shows a mixed I/you distribution. This example cleanly illustrates a pragmatic/register phenomenon (informal, dialogic language) and how features can split subtle discourse roles, making it a complementary contrast to the syntactic/formatting example above."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 7952,
+              "baseline_feat": 1103,
+              "similarity": 0.5042017102241516
+            },
+            "title": "Both features pick up LaTeX '\\left' delimiters — group is broader, baseline is more narrow/language-biased",
+            "tags": [
+              "latex",
+              "math-parenthesis",
+              "tokenization",
+              "language-bias"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 14066,
+              "baseline_feat": 7272,
+              "similarity": 0.4221777021884918
+            },
+            "title": "Technical 'measurement' focus vs broader 'measure' usage",
+            "tags": [
+              "morphology",
+              "scientific-usage",
+              "polysemy"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 14921,
+              "baseline_feat": 7542,
+              "similarity": 0.5522549748420715
+            },
+            "title": "Conversational 1st/2nd-person pronouns and contractions",
+            "tags": [
+              "pronouns",
+              "contractions",
+              "dialogue"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 6966,
+              "baseline_feat": 2910,
+              "similarity": 0.43294116854667664
+            },
+            "title": "Feature detects markup/citation attribute token (=\" )",
+            "tags": [
+              "markup",
+              "citations",
+              "punctuation"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 1351,
+              "baseline_feat": 13117,
+              "similarity": 0.43399810791015625
+            },
+            "title": "'to' (destination/infinitival preposition) — substantial overlap",
+            "tags": [
+              "function-word",
+              "preposition",
+              "movement",
+              "high-frequency"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 15376,
+              "baseline_feat": 10225,
+              "similarity": 0.4124999940395355
+            },
+            "title": "Newline / answer-separator detector",
+            "tags": [
+              "whitespace",
+              "answer-separator",
+              "line-break"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 61,
+              "baseline_feat": 15028,
+              "similarity": 0.4724809527397156
+            },
+            "title": "Casing/prefix sensitivity for 'me'",
+            "tags": [
+              "casing",
+              "prefix",
+              "pronoun",
+              "subword"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 3898,
+              "baseline_feat": 11987,
+              "similarity": 0.5917532444000244
+            },
+            "title": "Linebreak/newline detector",
+            "tags": [
+              "newline",
+              "whitespace",
+              "formatting",
+              "control-character"
+            ]
+          }
+        ]
+      },
+      "[0.60,0.80)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 3,
+            "reason": "Clear, high‑precision phenomenon: the Group feature isolates the token 'pone' in PLOS ONE–style citation/figure/table markup while the Baseline conflates multiple journal tokens. This gives a crisp example of how group‑SAE can produce a narrower, more interpretable detector for citation-format patterns."
+          },
+          {
+            "rank": 2,
+            "index": 7,
+            "reason": "Distinct linguistic/tokenization phenomenon: both features detect the possessive clitic ’s, but the Group feature is narrowly focused on apostrophe‑s while the Baseline leaks to plain “s”. This is a representative, interpretable contrast illustrating morphology/tokenization sensitivity versus broader surface-form activation."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 15700,
+              "baseline_feat": 15509,
+              "similarity": 0.6230529546737671
+            },
+            "title": "Both features detect the token “number” as a count/quantity marker",
+            "tags": [
+              "count-word",
+              "lexical",
+              "capitalization"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 12834,
+              "baseline_feat": 16218,
+              "similarity": 0.6187499761581421
+            },
+            "title": "Colon (':') as an answer/label marker — math/LaTeX vs programming contexts",
+            "tags": [
+              "punctuation",
+              "answer_marker",
+              "mathematics",
+              "programming"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 8886,
+              "baseline_feat": 2274,
+              "similarity": 0.7380281686782837
+            },
+            "title": "Group feature isolates 'pone' citation/figure/table markup; baseline mixes journal citation tokens",
+            "tags": [
+              "citation-format",
+              "PLOS-ONE",
+              "reference-markup",
+              "specificity"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 15750,
+              "baseline_feat": 6941,
+              "similarity": 0.6230477690696716
+            },
+            "title": "Single-letter algebraic variable detector",
+            "tags": [
+              "algebra",
+              "single-letter-variables",
+              "math-expressions"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 1374,
+              "baseline_feat": 6090,
+              "similarity": 0.6435537338256836
+            },
+            "title": "Short code-like tokens and subtoken fragments",
+            "tags": [
+              "code-identifiers",
+              "short-abbreviations",
+              "numeric-tokens"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 10749,
+              "baseline_feat": 4299,
+              "similarity": 0.6152030825614929
+            },
+            "title": "Authority/Control cluster (layer 14)",
+            "tags": [
+              "authority",
+              "control",
+              "responsibility",
+              "institutions"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 7886,
+              "baseline_feat": 1658,
+              "similarity": 0.6927303671836853
+            },
+            "title": "Possessive 's (genitive) marker",
+            "tags": [
+              "possessive",
+              "clitic",
+              "tokenization"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 14239,
+              "baseline_feat": 634,
+              "similarity": 0.6138039827346802
+            },
+            "title": "Single-letter math variables — Group focuses on function-def names, Baseline on argument/operand roles",
+            "tags": [
+              "single-letter-variables",
+              "function-definitions",
+              "argument-position",
+              "math-expressions"
+            ]
+          }
+        ]
+      },
+      "[0.80,1.01)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 8,
+            "reason": "Perfect duplicate: Group and Baseline features have identical top tokens (Jaccard 1.0) detecting the semicolon + double-quote sequence commonly found ending HTML attribute values. Extremely crisp, high-precision token-level pattern — ideal for demonstrating exact redundancy/replication between methods and a clear, interpretable phenomenon (HTML attribute-boundary punctuation)."
+          },
+          {
+            "rank": 2,
+            "index": 1,
+            "reason": "Case-sensitivity / capitalization contrast: Group feature isolates uppercase 'F' (headers, initials, acronyms) while Baseline also includes lowercase 'f' (mid-word). This provides a complementary, linguistically meaningful example showing how tokenization/case handling produces narrowly focused vs broader features, distinct from the many boundary/punctuation examples."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 6625,
+              "baseline_feat": 9081,
+              "similarity": 0.8388994932174683
+            },
+            "title": "Uppercase 'F' focus vs mixed-case capture",
+            "tags": [
+              "case-sensitivity",
+              "capitalization",
+              "tokenization"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 9009,
+              "baseline_feat": 9092,
+              "similarity": 0.9835966229438782
+            },
+            "title": "Sentence/document terminator detector — Group anchors on <|endoftext|>, Baseline on terminal punctuation",
+            "tags": [
+              "boundary",
+              "punctuation",
+              "end-of-text",
+              "termination"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 14977,
+              "baseline_feat": 9092,
+              "similarity": 0.990791916847229
+            },
+            "title": "End-of-sequence / sentence-boundary detector (Group vs Baseline)",
+            "tags": [
+              "end-of-sequence",
+              "punctuation",
+              "boundary-detector"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 13832,
+              "baseline_feat": 9092,
+              "similarity": 0.9853925704956055
+            },
+            "title": "Boundary detectors — Group focused on <|endoftext|>, Baseline on punctuation/quotes",
+            "tags": [
+              "boundary-detection",
+              "endoftext",
+              "punctuation",
+              "formatting"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 2733,
+              "baseline_feat": 9092,
+              "similarity": 0.9764776825904846
+            },
+            "title": "End-of-text / sentence-boundary detector",
+            "tags": [
+              "end-of-text",
+              "sentence-boundary",
+              "punctuation"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 9307,
+              "baseline_feat": 9092,
+              "similarity": 0.9890042543411255
+            },
+            "title": "End-of-text / sentence-boundary detector (Group vs Baseline)",
+            "tags": [
+              "end-of-text",
+              "sentence-boundary",
+              "punctuation"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 7752,
+              "baseline_feat": 9092,
+              "similarity": 0.9723723530769348
+            },
+            "title": "Sentence/document-boundary (end-of-text) detector",
+            "tags": [
+              "end-of-text",
+              "punctuation",
+              "sentence-boundary"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "14",
+              "group_feat": 582,
+              "baseline_feat": 11044,
+              "similarity": 1.0
+            },
+            "title": "Semicolon followed by quote in HTML attributes",
+            "tags": [
+              "punctuation",
+              "HTML",
+              "attribute-boundary",
+              "redundancy"
+            ]
+          }
+        ]
+      }
+    },
+    "G14-B15": {
+      "[0.20,0.40)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 7,
+            "reason": "Clear, crisp math-notion detector: both features strongly and specifically activate on index variables (i, n, k), small integer literals and summation contexts (Sigma). This is a canonical, easily interpretable phenomenon (indexing/summation in formulas) and the paired features show a small but meaningful emphasis difference (constants/Sigma vs. generic index variables), making it highly informative for a camera-ready interpretability paper."
+          },
+          {
+            "rank": 2,
+            "index": 3,
+            "reason": "Lexical/semantic lemma detector: both features capture the lemma 'listen' across inflections (listen/listening/listened) and activate on hearing/attending contexts. This is a clean, human-interpretable semantic pattern contrasting with the syntactic/mathematical nature of the first pick, providing useful diversity (semantic lemma detection vs. formal math notation) and demonstrating layer- and model-specific contextual preferences."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 4997,
+              "baseline_feat": 3914,
+              "similarity": 0.20088894665241241
+            },
+            "title": "Opening-delimiter feature — Group targets square-bracket/interval uses; Baseline picks compound LaTeX openers",
+            "tags": [
+              "delimiters",
+              "LaTeX",
+              "math-notation"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 3799,
+              "baseline_feat": 2175,
+              "similarity": 0.20154254138469696
+            },
+            "title": "Math delimiters: Group captures closers/numerals, Baseline captures openers",
+            "tags": [
+              "math-delimiters",
+              "closing-tokens",
+              "opening-tokens"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 9780,
+              "baseline_feat": 5726,
+              "similarity": 0.3097345232963562
+            },
+            "title": "Both features detect the lemma “listen” (different contextual weighting)",
+            "tags": [
+              "lemma",
+              "verb-morphology",
+              "auditory-action"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 3755,
+              "baseline_feat": 3673,
+              "similarity": 0.25
+            },
+            "title": "Typographic/label token vs. sentence-boundary/function-word sensitivity",
+            "tags": [
+              "punctuation",
+              "capitalization",
+              "abbreviation"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 555,
+              "baseline_feat": 14388,
+              "similarity": 0.3335723578929901
+            },
+            "title": "Punctuation/suffix detector (Group) vs lexical/entity detector (Baseline)",
+            "tags": [
+              "punctuation",
+              "suffixes",
+              "multilingual",
+              "entity"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 6184,
+              "baseline_feat": 6279,
+              "similarity": 0.24898511171340942
+            },
+            "title": "Character-level Greek detectors: σ (Group) vs τ (Baseline)",
+            "tags": [
+              "character-level",
+              "Greek",
+              "morphology",
+              "orthography"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 1874,
+              "baseline_feat": 13391,
+              "similarity": 0.3577098250389099
+            },
+            "title": "Math indices and summation tokens",
+            "tags": [
+              "math-notation",
+              "indexing",
+              "summation"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 6231,
+              "baseline_feat": 1132,
+              "similarity": 0.2222222238779068
+            },
+            "title": "Feature detects corrupted/replacement Unicode characters",
+            "tags": [
+              "unicode",
+              "encoding",
+              "corruption",
+              "tokenization"
+            ]
+          }
+        ]
+      },
+      "[0.40,0.60)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 7,
+            "reason": "Clear, crisp numeric/measurement detector: both features target numeric tokens in experimental/scientific text (doses, concentrations, percentages). Group-SAE concentrates on rounded, coarse-grained values (10, 25, 30, 50…), while the Baseline captures more varied magnitudes and punctuated/unit‑adjacent tokens. This pair cleanly illustrates a functional split (granularity/genre) in numeric representations across layers, making it highly informative for interpretability."
+          },
+          {
+            "rank": 2,
+            "index": 4,
+            "reason": "Distinct subword/multilingual morphology detector: both features pick recurring subword fragments (aut, financ, érie, zi, etc.) appearing across Romance-language and finance/community contexts. They act as morpheme/subword detectors rather than high‑level semantic concepts; Group returns slightly broader phonological/morphological fragments while Baseline is a bit more concentrated on financial/Italian instances. This example highlights subword-level, cross‑lingual signal and tokenization effects."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 1107,
+              "baseline_feat": 3543,
+              "similarity": 0.488666832447052
+            },
+            "title": "Degree/Intensity adjective detector — Group vs Baseline",
+            "tags": [
+              "scalar adjectives",
+              "intensity/degree",
+              "medical-scientific",
+              "tokenization-noise"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 14191,
+              "baseline_feat": 14786,
+              "similarity": 0.4033398926258087
+            },
+            "title": "Both features encode the high‑frequency preposition “of” (slightly different contexts)",
+            "tags": [
+              "function-word",
+              "preposition",
+              "high-frequency",
+              "syntactic"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 12350,
+              "baseline_feat": 126,
+              "similarity": 0.4274711310863495
+            },
+            "title": "Both capture the 'build' lemma; group shows broader morphology, baseline leans technical",
+            "tags": [
+              "lemma-family",
+              "morphological-forms",
+              "domain-specific"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 8279,
+              "baseline_feat": 8648,
+              "similarity": 0.4481322765350342
+            },
+            "title": "Multilingual subword/morphology detector (finance & community fragments)",
+            "tags": [
+              "morphology",
+              "multilingual",
+              "finance",
+              "subword"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 7946,
+              "baseline_feat": 2483,
+              "similarity": 0.4323161244392395
+            },
+            "title": "Ownership/transfer verbs and punctuation",
+            "tags": [
+              "ownership",
+              "transactions",
+              "verbs"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 8940,
+              "baseline_feat": 7324,
+              "similarity": 0.5102479457855225
+            },
+            "title": "Numeric-count detectors — small/technical vs round/large counts",
+            "tags": [
+              "numeric",
+              "counts",
+              "magnitude",
+              "genre"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 13594,
+              "baseline_feat": 7078,
+              "similarity": 0.5254986882209778
+            },
+            "title": "Numeric/measurement token feature (round vs varied numbers)",
+            "tags": [
+              "numerical",
+              "doses/concentrations",
+              "percentages"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 3240,
+              "baseline_feat": 9210,
+              "similarity": 0.4719827473163605
+            },
+            "title": "Newline/category-list separator detector",
+            "tags": [
+              "newline",
+              "wikipedia-categories",
+              "formatting",
+              "separator"
+            ]
+          }
+        ]
+      },
+      "[0.60,0.80)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 2,
+            "reason": "Clear, high-value contrast on morphology/subword behavior: Group-SAE produces longer, meaningful stems that yield a coherent topical detector for consumer‑protection/sales language, while Baseline-SAE is noisier with fragmented subword pieces. This is a crisp, representative example of how tokenization and subword fragmentation affect interpretability and probe quality."
+          },
+          {
+            "rank": 2,
+            "index": 4,
+            "reason": "Strong, unambiguous token-level detector for LaTeX inline math start ('$\\'), capturing math-command contexts across corpora. It cleanly illustrates a tokenization/structure phenomenon (math vs. surrounding domain usages) and is highly interpretable and actionable for analyses of syntax-sensitive features."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 1205,
+              "baseline_feat": 11755,
+              "similarity": 0.6224308013916016
+            },
+            "title": "Same token '0' — Group attends to code/hex/bitmask uses, Baseline to decimals/measurements",
+            "tags": [
+              "numeric-token",
+              "code-context",
+              "scientific-decimals"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 13320,
+              "baseline_feat": 15104,
+              "similarity": 0.7448225021362305
+            },
+            "title": "Both features capture consumer‑protection / sales contexts; Group tokens are cleaner stems while Baseline shows fragmented subwords",
+            "tags": [
+              "morphology",
+              "consumer-protection",
+              "subword-fragments"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 379,
+              "baseline_feat": 594,
+              "similarity": 0.6574074029922485
+            },
+            "title": "Feature detecting the 'Q:' question delimiter (colon)",
+            "tags": [
+              "punctuation",
+              "QA-separator",
+              "forum-format"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 2348,
+              "baseline_feat": 12015,
+              "similarity": 0.6021233797073364
+            },
+            "title": "Detector for '$\\\\' (LaTeX math-command)",
+            "tags": [
+              "LaTeX",
+              "math",
+              "tokenization"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 819,
+              "baseline_feat": 696,
+              "similarity": 0.6203323006629944
+            },
+            "title": "Maritime / nautical vocabulary (sea, ship, boat)",
+            "tags": [
+              "maritime",
+              "lexical-semantic",
+              "capitalization",
+              "domain-coverage"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 2843,
+              "baseline_feat": 8785,
+              "similarity": 0.6055370569229126
+            },
+            "title": "Defines/list items around 'represents' — punctuation + article/verb signals",
+            "tags": [
+              "enumeration",
+              "chemical-definitions",
+              "punctuation",
+              "boundary-detection"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 9204,
+              "baseline_feat": 2080,
+              "similarity": 0.6625000238418579
+            },
+            "title": "Colon as delimiter in biomedical abbreviation/definition lists",
+            "tags": [
+              "punctuation",
+              "abbreviations",
+              "biomedical"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 13174,
+              "baseline_feat": 13511,
+              "similarity": 0.6056782603263855
+            },
+            "title": "LaTeX opening-brace: matrices vs. document/environments",
+            "tags": [
+              "LaTeX",
+              "brace",
+              "matrices",
+              "document-structure"
+            ]
+          }
+        ]
+      },
+      "[0.80,1.01)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 2,
+            "reason": "Clear, crisp detector for the special question-delimiter token \">Q\" that signals QA boundaries/formatting in the dataset. This unit captures a non-semantic structural marker (question-start) rather than content, making it a representative example of format-token/delimiter phenomena."
+          },
+          {
+            "rank": 2,
+            "index": 4,
+            "reason": "Representative reference/citation-marker detector (instances of 'ref') that consistently fires on figure/table/citation markup. Shows how the model encodes document-structure cues rather than semantics; complements the question-delimiter example by covering citation/markup phenomena."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 1975,
+              "baseline_feat": 2901,
+              "similarity": 1.0
+            },
+            "title": "LaTeX/TikZ token `]\\`",
+            "tags": [
+              "LaTeX",
+              "punctuation",
+              "TikZ"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 10042,
+              "baseline_feat": 9817,
+              "similarity": 0.8245614171028137
+            },
+            "title": "Question-delimiter token (>Q) / formatting marker",
+            "tags": [
+              "delimiter",
+              "question-marker",
+              "format-token"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 12269,
+              "baseline_feat": 3470,
+              "similarity": 0.981796145439148
+            },
+            "title": "End-of-text (EOS) / document boundary detector",
+            "tags": [
+              "end-of-text",
+              "boundary",
+              "special-token"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 14667,
+              "baseline_feat": 2711,
+              "similarity": 0.9479451775550842
+            },
+            "title": "Reference/figure/table citation token detector",
+            "tags": [
+              "citation-marker",
+              "markup",
+              "document-structure"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 9217,
+              "baseline_feat": 5116,
+              "similarity": 0.9952915906906128
+            },
+            "title": "End-of-text / sequence-boundary detector (near-identical)",
+            "tags": [
+              "end-of-text",
+              "sequence-boundary",
+              "token-level",
+              "high-jaccard"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 4610,
+              "baseline_feat": 1019,
+              "similarity": 0.988386332988739
+            },
+            "title": "End-of-text (EOS) token detector",
+            "tags": [
+              "end-of-text",
+              "delimiter",
+              "sequence-boundary"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 205,
+              "baseline_feat": 3470,
+              "similarity": 0.9806060791015625
+            },
+            "title": "End-of-text (EOS) token detector",
+            "tags": [
+              "end-of-text",
+              "boundary",
+              "structural-token"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "14",
+              "baseline_layer": "15",
+              "group_feat": 11152,
+              "baseline_feat": 3470,
+              "similarity": 0.9823922514915466
+            },
+            "title": "End-of-text / EOS detector (redundant across layers)",
+            "tags": [
+              "end-of-text",
+              "termination-token",
+              "redundancy"
+            ]
+          }
+        ]
+      }
+    },
+    "G15-B13": {
+      "[0.20,0.40)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 1,
+            "reason": "Clear, crisp contrast between a syntactic detector and an orthography-oriented baseline: Group-SAE concentrates on German subordinating/relative-clause words (daß, wo, wenn, ob, wel...), indicating a genuine syntactic/class word detector, while the Baseline picks up short cross-linguistic surface tokens and diacritics. This pair cleanly illustrates a shift from language-specific syntactic representation to heterogeneous orthographic signal — highly informative for interpretability and model-ablation narratives."
+          },
+          {
+            "rank": 2,
+            "index": 6,
+            "reason": "Concise, domain-specific lexical detector: both features robustly mark the '.h' C/C++ header-file token across include directives and filename suffixes, showing token-level recognition tied to programming syntax and file-extension morphology. This example is a crisp, non-linguistic semantic case that highlights tokenization, domain generalization, and practical utility for debugging model behavior on code."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 10787,
+              "baseline_feat": 958,
+              "similarity": 0.3155239522457123
+            },
+            "title": "German subordinating/relative-word detector vs. multilingual short-token mix",
+            "tags": [
+              "German conjunctions",
+              "subordination",
+              "multilingual orthography"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 3112,
+              "baseline_feat": 8669,
+              "similarity": 0.3743760287761688
+            },
+            "title": "Detector for the token \"ever\" (case-insensitive adverbial uses)",
+            "tags": [
+              "lexical",
+              "adverb",
+              "token-level"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 4238,
+              "baseline_feat": 6340,
+              "similarity": 0.3150492310523987
+            },
+            "title": "Both/both — coordinating determiner",
+            "tags": [
+              "coordination",
+              "sentence-start",
+              "capitalization",
+              "register"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 586,
+              "baseline_feat": 10324,
+              "similarity": 0.2360500544309616
+            },
+            "title": "Detector for legal citation punctuation and city names",
+            "tags": [
+              "legal-citation",
+              "punctuation",
+              "location-names"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 2702,
+              "baseline_feat": 7156,
+              "similarity": 0.3667621910572052
+            },
+            "title": "Period punctuation / citation markers",
+            "tags": [
+              "punctuation",
+              "sentence-boundary",
+              "citations"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 1017,
+              "baseline_feat": 12255,
+              "similarity": 0.3636363744735718
+            },
+            "title": "'.h' token — C/C++ header marker",
+            "tags": [
+              "file-extension",
+              "C/C++-headers",
+              "preprocessor"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 3914,
+              "baseline_feat": 7177,
+              "similarity": 0.20212766528129578
+            },
+            "title": "Ultrasound / ultrasonic lexical concept (subword-sensitive)",
+            "tags": [
+              "ultrasound",
+              "morphological_variants",
+              "subword_tokenization"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 9176,
+              "baseline_feat": 13595,
+              "similarity": 0.25375625491142273
+            },
+            "title": "Group: time/doctype (boundary/heading) vs Baseline: minus/hyphen (math)",
+            "tags": [
+              "time",
+              "markup",
+              "punctuation"
+            ]
+          }
+        ]
+      },
+      "[0.40,0.60)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 1,
+            "reason": "Clear, crisp syntactic-cue: both features activate on the token 'Suppose' used to introduce arithmetic constraints. The pair cleanly isolates math-problem framing (useful for studying constraint signaling), with Group-SAE focused on compact, stepwise constraint lines and Baseline-SAE covering broader problem statements—complementary granularity."
+          },
+          {
+            "rank": 2,
+            "index": 3,
+            "reason": "Distinct formatting/genre phenomenon: both features target the newline token but in different contexts—Group-SAE highlights markup-rich/newline-embedded metadata (Markdown, code fences, captions) while Baseline-SAE highlights narrative paragraph and dialogue breaks. This gives a clear contrast between markup-aware vs prose-oriented newline usage."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 2124,
+              "baseline_feat": 10061,
+              "similarity": 0.5555555820465088
+            },
+            "title": "Activation on 'Suppose' marking arithmetic problem constraints",
+            "tags": [
+              "syntactic-cue",
+              "math-constraints",
+              "token-Suppose"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 13246,
+              "baseline_feat": 12622,
+              "similarity": 0.42801743745803833
+            },
+            "title": "Write-family verbs: non-progressive/action vs progressive/activity",
+            "tags": [
+              "tense-aspect",
+              "verb-forms",
+              "usage-register"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 5403,
+              "baseline_feat": 3476,
+              "similarity": 0.5263871550559998
+            },
+            "title": "Newline token — markup/metadata vs narrative paragraph breaks",
+            "tags": [
+              "newline",
+              "markup-formatting",
+              "narrative-paragraphs"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 16017,
+              "baseline_feat": 15087,
+              "similarity": 0.5257402062416077
+            },
+            "title": "In-text citation openings: escaped brackets vs. punctuation-adjacent",
+            "tags": [
+              "citations",
+              "punctuation",
+              "formatting"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 14527,
+              "baseline_feat": 10965,
+              "similarity": 0.4097748100757599
+            },
+            "title": "Tab indentation vs. line-start lexical tokens",
+            "tags": [
+              "tab",
+              "indentation",
+              "code-syntax",
+              "line-start"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 11719,
+              "baseline_feat": 5141,
+              "similarity": 0.4376496970653534
+            },
+            "title": "Copula / contraction detector ('s, is)",
+            "tags": [
+              "copula",
+              "contraction",
+              "tokenization"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 8815,
+              "baseline_feat": 6555,
+              "similarity": 0.42586544156074524
+            },
+            "title": "Shared token 'current' with group leaning toward code/event contexts",
+            "tags": [
+              "camelCase",
+              "web-events",
+              "prose"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 5009,
+              "baseline_feat": 8489,
+              "similarity": 0.5102806091308594
+            },
+            "title": "Comma: discourse/technical punctuation",
+            "tags": [
+              "punctuation",
+              "discourse-marker",
+              "math-latex",
+              "technical-prose"
+            ]
+          }
+        ]
+      },
+      "[0.60,0.80)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 7,
+            "reason": "Clear, semantically meaningful feature: a verb/action detector with a tight domain specialization (agriculture/commercial) in the Group-SAE vs a broader operation-oriented Baseline. This example is informative because it showcases how features can converge on the same grammatical class (verbs) while diverging in topical scope and agent-focus — a crisp interpretability phenomenon (semantic narrowing vs polysemy) that is distinct from purely surface or formatting signals."
+          },
+          {
+            "rank": 2,
+            "index": 5,
+            "reason": "Distinct orthographic/markup phenomenon: escaped punctuation in LaTeX/math (punctuation immediately followed by backslash). This is a crisp, surface-level tokenization/markup pattern that contrasts well with the semantic verb example, illustrating a different kind of feature specialization (syntactic/formatting boundary detection) and offering coverage of technical/markup-specific activations."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 9562,
+              "baseline_feat": 2173,
+              "similarity": 0.6977130770683289
+            },
+            "title": "Newline / formatting separator",
+            "tags": [
+              "newline",
+              "formatting",
+              "layout",
+              "whitespace"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 10364,
+              "baseline_feat": 1295,
+              "similarity": 0.6482758522033691
+            },
+            "title": "Detection of PLOS ONE citation token ('pone') in reference brackets",
+            "tags": [
+              "citation",
+              "bibliography",
+              "formatting"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 15685,
+              "baseline_feat": 2889,
+              "similarity": 0.600697934627533
+            },
+            "title": "Single-letter 'k' / 'K' — orthographic surface token",
+            "tags": [
+              "orthography",
+              "tokenization",
+              "surface-form"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 15904,
+              "baseline_feat": 1763,
+              "similarity": 0.6385257840156555
+            },
+            "title": "Numeric/enumeration detector — both capture digits, baseline is broader",
+            "tags": [
+              "numeric-enumeration",
+              "timestamps",
+              "formatting-noise"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 3350,
+              "baseline_feat": 6193,
+              "similarity": 0.6625964641571045
+            },
+            "title": "Escaped punctuation / punctuation+backslash in LaTeX/math markup",
+            "tags": [
+              "latex",
+              "punctuation",
+              "math",
+              "token-boundary"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 982,
+              "baseline_feat": 5388,
+              "similarity": 0.7140758037567139
+            },
+            "title": "Newline / paragraph-break detector with genre bias",
+            "tags": [
+              "newline",
+              "paragraph-break",
+              "genre-bias",
+              "formatting"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 1409,
+              "baseline_feat": 4431,
+              "similarity": 0.6476655006408691
+            },
+            "title": "Verb/action detector — focused agricultural/commercial vs. broad technical verbs",
+            "tags": [
+              "verbs",
+              "agriculture",
+              "technical",
+              "domain-specific"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 13475,
+              "baseline_feat": 5388,
+              "similarity": 0.6173844337463379
+            },
+            "title": "Newline / paragraph-boundary detector",
+            "tags": [
+              "newline",
+              "formatting",
+              "paragraph-boundary",
+              "structural"
+            ]
+          }
+        ]
+      },
+      "[0.80,1.01)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 8,
+            "reason": "Highest-similarity, crystal-clear end-of-text / document-boundary detector (sim=0.987). Both features exclusively and strongly activate on the <|endoftext|> token across genres (narrative, code, math, citations), showing an essentially identical, domain-agnostic EOS signal learned at nearby layers — a concise, robust example of a tokenization/boundary neuron."
+          },
+          {
+            "rank": 2,
+            "index": 6,
+            "reason": "Distinct phenomenon: divergence between a higher-layer Group feature that encodes meaningful subword/morpheme fragments and a Baseline feature that responds to diacritic vowels (character-level orthography). This contrast illustrates representational specialization (morphological/subword units vs. orthographic characters) rather than redundant EOS detection, adding diversity to the set."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 15206,
+              "baseline_feat": 7929,
+              "similarity": 0.9841945171356201
+            },
+            "title": "End-of-text / document-boundary detector",
+            "tags": [
+              "end-of-text",
+              "boundary-detection",
+              "tokenization"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 2716,
+              "baseline_feat": 7929,
+              "similarity": 0.9806178212165833
+            },
+            "title": "End-of-text (EOS) / document-boundary detector",
+            "tags": [
+              "end-of-document",
+              "boundary",
+              "special-token",
+              "punctuation"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 4898,
+              "baseline_feat": 6074,
+              "similarity": 0.9764065146446228
+            },
+            "title": "EOS / sequence-boundary detector (both models)",
+            "tags": [
+              "end-of-text",
+              "boundary token",
+              "high overlap"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 4461,
+              "baseline_feat": 7929,
+              "similarity": 0.9776570200920105
+            },
+            "title": "End-of-text / sequence-boundary detector",
+            "tags": [
+              "end-of-text",
+              "sequence-boundary",
+              "formatting"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 9009,
+              "baseline_feat": 7929,
+              "similarity": 0.9700419306755066
+            },
+            "title": "End-of-text (EOS) / document-boundary detector",
+            "tags": [
+              "end-of-text",
+              "boundary",
+              "sequence-termination"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 15398,
+              "baseline_feat": 14540,
+              "similarity": 0.8815789222717285
+            },
+            "title": "Group feature encodes diverse subword/morpheme pieces; baseline captures diacritic vowels",
+            "tags": [
+              "subword",
+              "diacritics",
+              "morphology",
+              "higher-layer"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 778,
+              "baseline_feat": 7929,
+              "similarity": 0.9677226543426514
+            },
+            "title": "End-of-text / sequence-boundary detector (near-duplicate)",
+            "tags": [
+              "end-of-text",
+              "boundary-detector",
+              "redundant-feature"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "13",
+              "group_feat": 6850,
+              "baseline_feat": 7929,
+              "similarity": 0.9865935444831848
+            },
+            "title": "End-of-text / document boundary detector",
+            "tags": [
+              "end-of-text",
+              "boundary",
+              "formatting"
+            ]
+          }
+        ]
+      }
+    },
+    "G15-B14": {
+      "[0.20,0.40)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 5,
+            "reason": "Clear, high-quality example of a functional-word detector: both features predominantly detect English articles ('the', 'a', 'an'), with the Group feature showing an instructive mixture (articles + a rare content token 'representatives'). This is a crisp, easily interpretable phenomenon (function-word specialization vs slight lexical mixing) and is useful to illustrate how grouping can produce a purer or slightly more specialized feature."
+          },
+          {
+            "rank": 2,
+            "index": 7,
+            "reason": "Complementary and distinct phenomenon: a structural punctuation detector that clearly maps to code/templating boundaries (closing tokens like '},', ']', '}' in JSON/JS/templates) versus a generic separator baseline. This showcases token-level structural sensitivity (programming/markup) rather than lexical semantics, providing diversity from the function-word example and a crisp contrast between structure-specific vs general delimiter features."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 5660,
+              "baseline_feat": 7267,
+              "similarity": 0.31596651673316956
+            },
+            "title": "Group feature captures discourse/legal contexts; baseline shows noisy/morphological fragments",
+            "tags": [
+              "discourse",
+              "legal-context",
+              "multilingual",
+              "encoding-noise"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 5700,
+              "baseline_feat": 11888,
+              "similarity": 0.3227899372577667
+            },
+            "title": "Both detect “injury” — Group focuses singular contexts; Baseline covers plurals and technical collocations",
+            "tags": [
+              "surface-form",
+              "pluralization",
+              "domain-specific"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 8579,
+              "baseline_feat": 6161,
+              "similarity": 0.37477511167526245
+            },
+            "title": "Mathematical connective / equation-reference tokens",
+            "tags": [
+              "math-text",
+              "function-words",
+              "reference-markers"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 9180,
+              "baseline_feat": 11602,
+              "similarity": 0.2905539274215698
+            },
+            "title": "Markup- and tokenization-sensitive group feature vs broader technical baseline",
+            "tags": [
+              "markup",
+              "biomedical",
+              "notation"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 3746,
+              "baseline_feat": 4200,
+              "similarity": 0.39113205671310425
+            },
+            "title": "Both features detect articles; Group feature mixes in a rare content token",
+            "tags": [
+              "function-word",
+              "article-detector",
+              "lexical-mixing"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 4086,
+              "baseline_feat": 561,
+              "similarity": 0.23226097226142883
+            },
+            "title": "Punctuation in bibliographic contexts — periods (initials) vs comma separators",
+            "tags": [
+              "punctuation",
+              "citations",
+              "initials"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 15846,
+              "baseline_feat": 4258,
+              "similarity": 0.24035042524337769
+            },
+            "title": "Structured closing punctuation vs. general separators",
+            "tags": [
+              "punctuation",
+              "code-structure",
+              "json/templating"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 16095,
+              "baseline_feat": 3617,
+              "similarity": 0.32127004861831665
+            },
+            "title": "Organization/affiliation detector — group picks subword/multilingual variants, baseline picks full-word institution nouns",
+            "tags": [
+              "organization",
+              "morphology",
+              "multilingual",
+              "entities"
+            ]
+          }
+        ]
+      },
+      "[0.40,0.60)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 1,
+            "reason": "Clear, crisp semantic divergence: the Group-SAE unit activates on concrete, content-bearing nouns and topical entities (e.g., skeleton, captain, walls) while the Baseline-SAE prefers verbs and abstract/event terms (e.g., plans, won, moved). The contrast is interpretable, representative, and useful for demonstrating how nearby units can split noun/topic vs action/ discourse sensitivities despite moderate overlap."
+          },
+          {
+            "rank": 2,
+            "index": 3,
+            "reason": "High-overlap orthographic/subword detector: both units reliably pick up short technical fragments (polym-, -iem-, -em) found in biomedical and multilingual tokens. The Group unit is slightly more capitalization-sensitive (e.g., 'OM') while the Baseline covers more lowercase variants, illustrating morphology/subword encoding and tokenization-relevant behavior with substantial Jaccard overlap (~0.596)."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 10501,
+              "baseline_feat": 10935,
+              "similarity": 0.43671298027038574
+            },
+            "title": "Group feature emphasizes concrete nouns/topics; baseline emphasizes actions/abstract terms",
+            "tags": [
+              "noun-focused",
+              "action/abstract",
+              "topical-coherence",
+              "frequency-bias"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 1008,
+              "baseline_feat": 3099,
+              "similarity": 0.5033556818962097
+            },
+            "title": "Period / sentence-boundary marker around citations and figure/table labels",
+            "tags": [
+              "punctuation",
+              "citations",
+              "sentence-boundary",
+              "formatting"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 14008,
+              "baseline_feat": 4181,
+              "similarity": 0.5959274172782898
+            },
+            "title": "Subword/orthographic fragment detector (polym, iem, em)",
+            "tags": [
+              "subword-morphology",
+              "orthography",
+              "technical-terms"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 12336,
+              "baseline_feat": 15888,
+              "similarity": 0.5590223670005798
+            },
+            "title": "Math-symbol / linear-algebra tokens",
+            "tags": [
+              "math-notation",
+              "linear-algebra",
+              "single-letter-symbols"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 11570,
+              "baseline_feat": 13323,
+              "similarity": 0.42098546028137207
+            },
+            "title": "Left-parenthesis '(' — parenthetical marker",
+            "tags": [
+              "punctuation",
+              "parenthetical",
+              "syntax",
+              "token-level"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 12358,
+              "baseline_feat": 8562,
+              "similarity": 0.4303516149520874
+            },
+            "title": "LaTeX subscript markers vs formatting/spacing tokens",
+            "tags": [
+              "LaTeX_subscripts",
+              "formatting_commands",
+              "punctuation",
+              "tokenization"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 8081,
+              "baseline_feat": 13071,
+              "similarity": 0.5685594081878662
+            },
+            "title": "Detection of the definite article \"The\" (often before titles/names)",
+            "tags": [
+              "definite-article",
+              "named-entities",
+              "function-word",
+              "news-titles"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 15761,
+              "baseline_feat": 1142,
+              "similarity": 0.5007827281951904
+            },
+            "title": "Underscore as LaTeX subscript vs brace‑underscore pattern",
+            "tags": [
+              "LaTeX",
+              "subscript",
+              "punctuation"
+            ]
+          }
+        ]
+      },
+      "[0.60,0.80)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 1,
+            "reason": "Crisp, high-overlap markup/metadata detector (Jaccard 0.758): both features reliably pick out the token 'type' inside reference/figure/table attributes (e.g., ref-type=\"fig\", supplementary-material). This is a clear, low-noise phenomenon useful for studying how the model represents structural/HTML-like metadata; the group vs baseline contrast (curly-brace/supplementary vs plain ref/table variants) also illustrates layer-specific abstraction."
+          },
+          {
+            "rank": 2,
+            "index": 8,
+            "reason": "Syntactic/function-word detector for subordinating conjunctions/complementizers (if, because, that): group feature is a tight complementizer/causal-conditional signal while the baseline is broader across subordinators. This offers a complementary, linguistically meaningful phenomenon (syntax/function words) distinct from markup, making the pair maximally diverse and representative."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 8664,
+              "baseline_feat": 1928,
+              "similarity": 0.7582417726516724
+            },
+            "title": "Detects 'type' in figure/table/citation markup",
+            "tags": [
+              "markup",
+              "citation",
+              "metadata",
+              "attributes"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 11755,
+              "baseline_feat": 10635,
+              "similarity": 0.6095890402793884
+            },
+            "title": "Group feature isolates the question delimiter; Baseline mixes delimiter with Cyrillic subwords",
+            "tags": [
+              "delimiter-token",
+              "structural",
+              "Cyrillic-subword",
+              "multilingual"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 902,
+              "baseline_feat": 11352,
+              "similarity": 0.7803230881690979
+            },
+            "title": "Group feature focuses on single-letter math symbols; baseline mixes math and domain tokens",
+            "tags": [
+              "math-symbols",
+              "single-letter-variables",
+              "tokenization-mix"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 14844,
+              "baseline_feat": 14560,
+              "similarity": 0.6134882569313049
+            },
+            "title": "Group feature picks up topical/plural discourse tokens; baseline favors user/interface words",
+            "tags": [
+              "discourse",
+              "plural-nouns",
+              "interface-terms",
+              "layer-difference"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 10078,
+              "baseline_feat": 5106,
+              "similarity": 0.6802661418914795
+            },
+            "title": "Single-letter 'V' token (word-initial / subword artifact)",
+            "tags": [
+              "character-token",
+              "tokenization",
+              "case-sensitivity"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 9124,
+              "baseline_feat": 3395,
+              "similarity": 0.7568745613098145
+            },
+            "title": "Subtoken for the letter 'b' (word-initial; Group captures uppercase too)",
+            "tags": [
+              "subword",
+              "case-sensitivity",
+              "code-and-text"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 8565,
+              "baseline_feat": 12890,
+              "similarity": 0.6540033221244812
+            },
+            "title": "Shared subword n-grams: clean suffix/morpheme detector (Group) vs. noisier mixed-token detector (Baseline)",
+            "tags": [
+              "subword-ngrams",
+              "morphology",
+              "noise-code"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 2961,
+              "baseline_feat": 5655,
+              "similarity": 0.7062072157859802
+            },
+            "title": "Subordinating-conjunction / complementizer detector (Group narrower, Baseline broader)",
+            "tags": [
+              "subordinating-conjunction",
+              "complementizer",
+              "function-words",
+              "syntax"
+            ]
+          }
+        ]
+      },
+      "[0.80,1.01)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 2,
+            "reason": "Clear, informative contrast: the Group feature is a coherent topical/lexical detector (activates on content-bearing words like \"traumatic\", \"tradition\", \"expectations\") while the Baseline unit is noisy, picking up short fragments, function-word substrings and OCR-like artifacts (e.g., \"ho\", \"uf\", \"Soph\"). This item neatly illustrates how the group-trained SAE yields cleaner, semantically meaningful features versus the baseline’s formatting/orthographic artifacts, making it a high-value example for demonstrating training-induced interpretability differences."
+          },
+          {
+            "rank": 2,
+            "index": 8,
+            "reason": "Crisp structural/markup detector: both features reliably activate on citation and reference markers (e.g., \"Fig.\", \"Table\", inline [ref]-style annotations) across scientific text. High Jaccard shows they overlap in flagging document-level reference tokens rather than semantic content, providing a distinct phenomenon (markup/citation detection) complementary to lexical/semantic examples."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 10832,
+              "baseline_feat": 9092,
+              "similarity": 0.9835966229438782
+            },
+            "title": "Sentence / document boundary detector",
+            "tags": [
+              "sentence-boundary",
+              "punctuation",
+              "document-end"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 15181,
+              "baseline_feat": 2574,
+              "similarity": 0.9142193794250488
+            },
+            "title": "Group feature is a coherent topical/lexical detector; baseline is noisy/fragments",
+            "tags": [
+              "semantic-coherence",
+              "token-fragments",
+              "noise",
+              "interpretability"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 14015,
+              "baseline_feat": 9092,
+              "similarity": 0.9859926700592041
+            },
+            "title": "End-of-text / sentence-boundary detector",
+            "tags": [
+              "end-of-text",
+              "sentence-boundary",
+              "punctuation"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 8757,
+              "baseline_feat": 7745,
+              "similarity": 0.863095223903656
+            },
+            "title": "End-of-text / document-boundary detector",
+            "tags": [
+              "end-of-text",
+              "document-boundary",
+              "structural-token"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 14600,
+              "baseline_feat": 9092,
+              "similarity": 0.9884004592895508
+            },
+            "title": "End-of-sequence / punctuation boundary detector",
+            "tags": [
+              "sequence-boundary",
+              "punctuation",
+              "document-terminator"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 342,
+              "baseline_feat": 1469,
+              "similarity": 0.8154605627059937
+            },
+            "title": "Preposition “in” (both capitalizations)",
+            "tags": [
+              "function-word",
+              "capitalization",
+              "high-frequency"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 2343,
+              "baseline_feat": 634,
+              "similarity": 0.8142041563987732
+            },
+            "title": "Single-letter variable tokens — Group focuses on differentiation, Baseline on function/assignment contexts",
+            "tags": [
+              "math-variables",
+              "calculus",
+              "function-notation"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "14",
+              "group_feat": 6789,
+              "baseline_feat": 3751,
+              "similarity": 0.9276139140129089
+            },
+            "title": "Feature detects citation/reference tokens (fig/table refs)",
+            "tags": [
+              "citation",
+              "reference-marker",
+              "markup"
+            ]
+          }
+        ]
+      }
+    },
+    "G15-B15": {
+      "[0.20,0.40)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 6,
+            "reason": "Clear, interpretable contrast: both features detect the same surface token ('?') but specialize to different QA semantics (time/minutes word-problems vs numeric-sequence/‘what is next’ tasks). This crisply illustrates how the model learns multiple punctuation-centric detectors that are distinguished by surrounding semantics, a useful phenomenon for interpretability."
+          },
+          {
+            "rank": 2,
+            "index": 1,
+            "reason": "Compact, representative example of whitespace/structure specialization: both features center on the tab token but diverge into a broad, cross-language indentation/formatting detector versus a narrow C-style, low-level code idiom detector. This highlights how similar surface cues are repartitioned into distinct contextual niches."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 3893,
+              "baseline_feat": 15835,
+              "similarity": 0.3175351023674011
+            },
+            "title": "Tab character: general indentation vs C-style code idioms",
+            "tags": [
+              "whitespace",
+              "indentation",
+              "code-structure"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 2753,
+              "baseline_feat": 10329,
+              "similarity": 0.25653207302093506
+            },
+            "title": "Newline-rich answer / code-snippet pattern",
+            "tags": [
+              "answer-block",
+              "formatting",
+              "code-snippet"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 6913,
+              "baseline_feat": 2955,
+              "similarity": 0.2730182707309723
+            },
+            "title": "Period (sentence-final) vs. newline/HTML paragraph markers",
+            "tags": [
+              "punctuation",
+              "formatting",
+              "sentence-boundary"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 7040,
+              "baseline_feat": 13530,
+              "similarity": 0.33259981870651245
+            },
+            "title": "LaTeX/math punctuation and operator markers",
+            "tags": [
+              "LaTeX",
+              "math-punctuation",
+              "operators",
+              "brackets"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 3509,
+              "baseline_feat": 3119,
+              "similarity": 0.36446142196655273
+            },
+            "title": "Group feature encodes motion/travel content; baseline encodes pronouns/function words",
+            "tags": [
+              "motion",
+              "pronouns",
+              "travel",
+              "syntax"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 3763,
+              "baseline_feat": 7623,
+              "similarity": 0.3638332486152649
+            },
+            "title": "Two '?' detectors with different contextual specializations",
+            "tags": [
+              "punctuation",
+              "time-questions",
+              "sequence-questions"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 8954,
+              "baseline_feat": 1921,
+              "similarity": 0.21550947427749634
+            },
+            "title": "Newline token — alphabetical/header vs. generic index breaks",
+            "tags": [
+              "newline",
+              "index-header",
+              "list-separator",
+              "formatting"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 13334,
+              "baseline_feat": 10815,
+              "similarity": 0.26720350980758667
+            },
+            "title": "France vs French — demonym/country lexical cluster",
+            "tags": [
+              "demonym",
+              "country-name",
+              "lexical-variation"
+            ]
+          }
+        ]
+      },
+      "[0.40,0.60)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 2,
+            "reason": "Clear, high-precision syntactic detector: both features consistently activate on copula/linking-verb tokens (is, are, was, ’s) across diverse contexts. This makes a crisp example of a function-word/syntax neuron that abstracts away from semantics, useful for illustrating how models encode grammatical roles and for contrasting distributional vs. lexical triggers."
+          },
+          {
+            "rank": 2,
+            "index": 1,
+            "reason": "Tokenization/identifier signal that cleanly captures single-letter hex subtokens inside hashes, session IDs and code-like identifiers. The features largely overlap on specific hex letters (c, b, d, e) while Group also emphasizes 'a', highlighting a subtle difference in subtoken weighting — a compact, representative case for showing how models detect structured alphanumeric identifiers."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 11135,
+              "baseline_feat": 6724,
+              "similarity": 0.49275362491607666
+            },
+            "title": "Feature detects single-letter hex/ID characters in hashes and session tokens",
+            "tags": [
+              "hexadecimal",
+              "identifiers",
+              "hashes",
+              "tokenization"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 993,
+              "baseline_feat": 3517,
+              "similarity": 0.47950589656829834
+            },
+            "title": "Detector for copula / 'to be' forms",
+            "tags": [
+              "copula",
+              "function-words",
+              "syntax",
+              "verb-forms"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 5407,
+              "baseline_feat": 6402,
+              "similarity": 0.48184606432914734
+            },
+            "title": "Hyphenation / compound-word marker",
+            "tags": [
+              "punctuation",
+              "hyphenation",
+              "morphology",
+              "orthography"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 1685,
+              "baseline_feat": 1101,
+              "similarity": 0.4722222089767456
+            },
+            "title": "'ost' as an orthographic/morphological substring token",
+            "tags": [
+              "substring-token",
+              "morphology",
+              "multilingual",
+              "orthography"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 266,
+              "baseline_feat": 1357,
+              "similarity": 0.4141303300857544
+            },
+            "title": "Coordinating conjunction and comma (syntax/function words)",
+            "tags": [
+              "conjunction",
+              "punctuation",
+              "syntax"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 4251,
+              "baseline_feat": 5665,
+              "similarity": 0.431017130613327
+            },
+            "title": "Detects 'M' + short subword sequences (multilingual name fragments)",
+            "tags": [
+              "multilingual",
+              "M-prefix",
+              "diacritics",
+              "subword-ngrams"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 7259,
+              "baseline_feat": 7975,
+              "similarity": 0.5737187266349792
+            },
+            "title": "Concrete technical noun cluster (Group) vs measurement/instrumentation tilt (Baseline)",
+            "tags": [
+              "concrete-nouns",
+              "technical-terms",
+              "measurement-vs-topical"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 9863,
+              "baseline_feat": 12798,
+              "similarity": 0.4385964870452881
+            },
+            "title": "Both features detect 'www' (URLs); Group leans toward protocol/markup contexts",
+            "tags": [
+              "urls",
+              "www",
+              "protocol",
+              "markup-context"
+            ]
+          }
+        ]
+      },
+      "[0.60,0.80)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 1,
+            "reason": "Crisp subword/suffix detector that generalizes across code, HTML and scientific text — clearly highlights a form-based (n-gram/subword) feature rather than high-level semantics. The description explains the overlap, the small but meaningful Group/Baseline differences (identifier fragments vs adjectival suffixes), and the high Jaccard, making it a representative example of token-piece / morphology-driven features."
+          },
+          {
+            "rank": 2,
+            "index": 7,
+            "reason": "Clear, narrowly focused punctuation-pattern feature detecting the '=\"' attribute punctuation used in reference/markup contexts. The snippets show a consistent structural signal (attribute boundary) with a interpretable Group vs Baseline skew (fig vs table/ref-type variants). This contrasts well with the subword example and illustrates syntax-level tokenization/markup detection."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 13345,
+              "baseline_feat": 4977,
+              "similarity": 0.6073092818260193
+            },
+            "title": "Short subword/suffix detector spanning code, HTML and scientific text",
+            "tags": [
+              "subword",
+              "suffix",
+              "code/html",
+              "scientific"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 342,
+              "baseline_feat": 6827,
+              "similarity": 0.6083054542541504
+            },
+            "title": "Detection of the token \"in\" (case-insensitive)",
+            "tags": [
+              "stopword",
+              "preposition",
+              "case-insensitive",
+              "sentence-initial"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 12993,
+              "baseline_feat": 13050,
+              "similarity": 0.7421383857727051
+            },
+            "title": "Colon (:) — shared token, Group slightly skewed to technical/structured contexts",
+            "tags": [
+              "colon",
+              "punctuation",
+              "code-syntax"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 9079,
+              "baseline_feat": 7992,
+              "similarity": 0.7591731548309326
+            },
+            "title": "Curly apostrophe (’): possessive vs. contraction contexts",
+            "tags": [
+              "apostrophe",
+              "possessive",
+              "contraction",
+              "tokenization"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 638,
+              "baseline_feat": 12,
+              "similarity": 0.6485544443130493
+            },
+            "title": "Entities and legal/technical mix vs diffuse technical/legal feature",
+            "tags": [
+              "entities",
+              "legal",
+              "technical",
+              "fragments"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 913,
+              "baseline_feat": 13048,
+              "similarity": 0.6649106740951538
+            },
+            "title": "Opening square bracket '[' — Group vs Baseline",
+            "tags": [
+              "punctuation",
+              "brackets",
+              "logs/markup",
+              "code"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 5849,
+              "baseline_feat": 12929,
+              "similarity": 0.7373493909835815
+            },
+            "title": "Feature detecting attribute punctuation in reference markup (token '=\"')",
+            "tags": [
+              "markup-attribute",
+              "punctuation-token",
+              "references",
+              "fig-table-distinction"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 12107,
+              "baseline_feat": 13679,
+              "similarity": 0.6868716478347778
+            },
+            "title": "Overlap in topical signals but different lexical focus",
+            "tags": [
+              "semantic overlap",
+              "domain specificity",
+              "morphological variation"
+            ]
+          }
+        ]
+      },
+      "[0.80,1.01)": {
+        "count_candidates": 8,
+        "selected": [
+          {
+            "rank": 1,
+            "index": 3,
+            "reason": "Distinct phenomenon: a feature focused on short plural/variable-like tokens common in code/UI/config (colors, ids, filters, fields). Crisp, interpretable activation pattern and a clear contrast where the Baseline feature includes more domain outliers — useful to study domain-specific semantic vs noisy activations."
+          },
+          {
+            "rank": 2,
+            "index": 2,
+            "reason": "Representative structural/boundary phenomenon: a very clean detector for the explicit end-of-text special token \"<|endoftext|>\" that activates across diverse contexts (dialogue, equations, code, lists). Concise, high-similarity example of a non-semantic, sequence-termination signal."
+          }
+        ],
+        "candidates_manifest": [
+          {
+            "index": 1,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 2397,
+              "baseline_feat": 1019,
+              "similarity": 0.9853747487068176
+            },
+            "title": "End-of-text / segment-boundary detector (activates on <|endoftext|>)",
+            "tags": [
+              "end-of-text",
+              "boundary",
+              "termination",
+              "punctuation"
+            ]
+          },
+          {
+            "index": 2,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 362,
+              "baseline_feat": 1019,
+              "similarity": 0.9853747487068176
+            },
+            "title": "Detector for the end-of-text special token",
+            "tags": [
+              "end-of-text",
+              "special-token",
+              "boundary"
+            ]
+          },
+          {
+            "index": 3,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 6224,
+              "baseline_feat": 11018,
+              "similarity": 0.8908354043960571
+            },
+            "title": "Plural/variable tokens around UI/config (high overlap; baseline shows more domain outliers)",
+            "tags": [
+              "programming",
+              "plural-nouns",
+              "domain-noise"
+            ]
+          },
+          {
+            "index": 4,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 730,
+              "baseline_feat": 3470,
+              "similarity": 0.971188485622406
+            },
+            "title": "End-of-text / sequence-boundary detector (near-duplicate)",
+            "tags": [
+              "end-of-text",
+              "sequence-boundary",
+              "token-level",
+              "redundant"
+            ]
+          },
+          {
+            "index": 5,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 737,
+              "baseline_feat": 3470,
+              "similarity": 0.9871873259544373
+            },
+            "title": "End-of-text token detector",
+            "tags": [
+              "end-of-text",
+              "boundary",
+              "special-token",
+              "formatting"
+            ]
+          },
+          {
+            "index": 6,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 10056,
+              "baseline_feat": 3470,
+              "similarity": 0.9752863049507141
+            },
+            "title": "End-of-text / sequence-boundary detector",
+            "tags": [
+              "end-of-text",
+              "sequence-boundary",
+              "special-token"
+            ]
+          },
+          {
+            "index": 7,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 5322,
+              "baseline_feat": 1019,
+              "similarity": 0.9859756231307983
+            },
+            "title": "End-of-text / document-boundary detector (layer 15)",
+            "tags": [
+              "end_of_text",
+              "document_boundary",
+              "tokenization",
+              "termination"
+            ]
+          },
+          {
+            "index": 8,
+            "pair": {
+              "group_layer": "15",
+              "baseline_layer": "15",
+              "group_feat": 4368,
+              "baseline_feat": 3470,
+              "similarity": 0.9823922514915466
+            },
+            "title": "End-of-text / sequence-boundary detector (near-identical)",
+            "tags": [
+              "end-of-text",
+              "sequence-boundary",
+              "redundant"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
