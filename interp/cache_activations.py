@@ -103,7 +103,10 @@ def main():
     )
 
     # Load SAEs.
-    sae_folder_path = os.path.join("/home/lse/sae_training/group-sae/training/checkpoints-clusters/", MODEL_MAP[args.model_name]["short_name"].replace('_', '-') + "-sequential-topk/step_15258")
+    sae_folder_path = os.path.join(
+        "/home/lse/sae_training/group-sae/training/checkpoints-clusters/",
+        MODEL_MAP[args.model_name]["short_name"].replace("_", "-") + "-sequential-topk/step_15258",
+    )
     saes = load_saes_by_training_clusters(
         sae_folder_path, cluster=args.cluster, device=device, model_name=args.model_name
     )
