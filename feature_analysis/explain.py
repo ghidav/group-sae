@@ -53,7 +53,7 @@ def get_top_activating_tokens(
 
     for rank, idx in enumerate(top_k_indices):
         token_idx = feature_positions[0][idx].item()
-        activation_value = activation_values[idx].item()
+        activation_values[idx].item()
 
         # Calculate the original token position in the sequence
         batch_size = tokens.shape[1] if len(tokens.shape) > 1 else len(tokens)
@@ -69,10 +69,10 @@ def get_top_activating_tokens(
 
         if len(tokens.shape) == 1:
             context_tokens = tokens[start_pos:end_pos]
-            target_token = tokens[original_token_pos]
+            tokens[original_token_pos]
         else:
             context_tokens = tokens[sequence_idx, start_pos:end_pos]
-            target_token = tokens[sequence_idx, original_token_pos]
+            tokens[sequence_idx, original_token_pos]
 
         # Highlight the target token in context
         target_pos_in_context = original_token_pos - start_pos
@@ -413,7 +413,7 @@ class TransientOpenAIError(Exception):
 
 
 def get_openai_client():
-    api_key = os.environ.get("OPENAI_API_KEY")
+    os.environ.get("OPENAI_API_KEY")
     # if not api_key:
     #     raise RuntimeError("Please set OPENAI_API_KEY in your environment.")
     return OpenAI(
@@ -780,7 +780,7 @@ def main():
     random.seed(args.seed)
     os.makedirs(args.out_dir, exist_ok=True)
     jsonl_path = os.path.join(args.out_dir, "pair_explanations.jsonl")
-    selection_path = os.path.join(args.out_dir, "representative_selection.json")
+    os.path.join(args.out_dir, "representative_selection.json")
 
     # Tokenizer (global for renderer)
     global tokenizer

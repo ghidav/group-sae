@@ -4,7 +4,7 @@ import os
 import random
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from openai import OpenAI
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
@@ -101,7 +101,7 @@ class TransientOpenAIError(Exception):
 
 
 def get_client():
-    api_key = os.environ.get("OPENAI_API_KEY")
+    os.environ.get("OPENAI_API_KEY")
     # if not api_key:
     #     raise RuntimeError("Please set OPENAI_API_KEY in your environment.")
     return OpenAI(
