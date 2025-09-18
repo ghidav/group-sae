@@ -1,12 +1,13 @@
-import os
 import json
+import os
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 
-from group_sae.utils import load_training_clusters, load_cluster_map, MODEL_MAP, palette
+from group_sae.utils import MODEL_MAP, load_training_clusters, palette
 
 FUZZ_DIR = "/home/lse/sae_training/group-sae/interp/results/fuzzing_sequential"
 DETECT_DIR = "/home/lse/sae_training/group-sae/interp/results/detection_sequential"
