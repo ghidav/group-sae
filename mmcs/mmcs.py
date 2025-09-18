@@ -5,9 +5,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from group_sae.utils import MODEL_MAP
-from group_sae.utils import load_saes
-
+from group_sae.utils import MODEL_MAP, load_saes
 
 DTYPE_MAP = {
     "fp32": "float32",
