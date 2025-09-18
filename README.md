@@ -1,5 +1,9 @@
 # Group-SAE: Efficient Training of Sparse Autoencoders for Large Language Models via Layer Groups
 
+<p align="center">
+  <img src="imgs/paper_img.pdf" alt="Group-SAE paper figure" width="75%" />
+</p>
+
 This repository contains the code that accompanies the EMNLP 2025 paper *Group-SAE: Efficient Training of Sparse Autoencoders for Large Language Models via Layer Groups*. It provides the full training, evaluation, and analysis pipeline for reproducing the results on the Pythia family of language models.
 
 ## Overview
