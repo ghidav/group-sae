@@ -171,4 +171,10 @@ Please cite the paper if you use this codebase or the released SAEs:
 ```
 
 ## Acknowledgements
-The implementation builds on [TransformerLens](https://github.com/neelnanda-io/TransformerLens) and [sae-lens](https://github.com/jbloom/sae_lens). We thank the authors of previous SAE work whose tooling we extend in this repository.
+The implementation builds on:
+
+- [TransformerLens](https://github.com/neelnanda-io/TransformerLens)
+- [sae-lens](https://github.com/jbloom/sae_lens)
+- [sparsify](https://github.com/EleutherAI/sparsify)
+
+We thank the authors of previous SAE work whose tooling we extend in this repository.
