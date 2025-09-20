@@ -6,43 +6,18 @@
   </object>
 </p>
 
-This repository contains the code that accompanies the EMNLP 2025 paper *Group-SAE: Efficient Training of Sparse Autoencoders for Large Language Models via Layer Groups*. It provides the full training, evaluation, and analysis pipeline for reproducing the results on the Pythia family of language models.
+Sparse autoencoders (SAEs) are a powerful tool for interpreting the latent computations of large language models, but training an SAE per layer is expensive. **Group-SAE** clusters similar transformer blocks and trains a *single* SAE over each cluster, preserving reconstruction quality while cutting training cost. This repository hosts the official implementation for the EMNLP 2025 paper *Efficient Training of Sparse Autoencoders for Large Language Models via Layer Groups* and the full pipeline used for the Pythia 160M/410M/1B models.
 
-## Overview
-- **Group-SAE** trains a single sparse autoencoder (SAE) for groups of contiguous transformer layers that exhibit similar residual stream representations.
-- **AMAD (Average Maximum Angular Distance)** quantifies layer similarity and guides the choice of the number of groups, trading off reconstruction quality against training cost.
-- The codebase covers baseline per-layer SAEs, grouped training, reconstruction benchmarking, downstream task faithfulness, feature-level analyses, and interpretability studies.
-- Pre-computed layer groupings and trained SAEs for Pythia-160M/410M/1B are bundled to enable plug-and-play evaluation.
+## TL;DR
+- Layer-wise SAEs are replaced by **clustered SAEs** trained jointly on groups of contiguous transformer blocks.
+- **AMAD (Average Maximum Angular Distance)** selects the number of clusters by balancing reconstruction fidelity against wall-clock cost.
+- The repo ships with **pre-computed layer assignments, trained checkpoints, evaluation artefacts, feature caches,** and interpretability tooling.
+- Supports **baseline (per-layer) and clustered training**, distributed runs, reconstruction/faithfulness benchmarks, feature-level analyses, and GPT-assisted interpretation.
 
-## Repository Layout
-- `group_sae/`: Core training library (`Sae`, `SaeTrainer`, `ClusterSaeTrainer`, configuration dataclasses, hooks, utilities, AMAD helpers).
-- `training/`: Entry points for baseline (`train_topk.py`) and Group-SAE (`train_cluster_topk.py`) training, plus multi-GPU launch scripts.
-- `groups/`: Scripts and JSON artefacts for distance computation and AMAD-driven layer grouping.
-- `recon/`, `downstream/`, `feature_concordance/`, `feature_spreading/`, `effects/`, `faithfulness/`, `mmcs/`, `interp/`: Evaluation and interpretability pipelines used in the paper.
-- `scripts/`: Convenience shell scripts to run the full suite of experiments reported in the paper.
-- `eval/`, `faithfulness/`, `effects/`, etc.: Cached results that match the tables and figures from the paper.
+## Quickstart
 
-## Scripts Reference
-- `scripts/auto_interp.sh`: Runs the end-to-end interpretability workflow (cache activations, generate feature explanations, score outputs) for baseline and grouped SAEs across Pythia-160M/410M/1B.
-- `scripts/cache_features.sh`: Caches latent activations for each model, both baseline and clustered SAEs, to support downstream interpretability analyses.
-- `scripts/distances.sh`: Computes inter-layer similarity matrices (angular distance and CKA) used by AMAD when deriving layer groups.
-- `scripts/download.sh`: Clones the released SAE checkpoints from Hugging Face into `saes/` and preps baseline vs. cluster config files.
-- `scripts/download_features.sh`: Retrieves pre-computed latent feature dumps required by the interpretability notebooks (git-lfs access needed).
-- `scripts/explain_features.sh`: Generates GPT-based textual explanations for baseline and grouped SAEs for each model size.
-- `scripts/feature_caching.sh`: Populates feature caches for concordance analysis by iterating over K values and saving top-activating features.
-- `scripts/feature_concordance.sh`: Sweeps K for every model to quantify feature-sharing via `feature_concordance/concordance.py` (expects cached features and uses CUDA paths hard-coded for the cluster runs).
-- `scripts/feature_spreading.sh`: Measures feature spreading statistics (unique feature usage per token) across K values for all models.
-- `scripts/get_effects_pythia_160m.sh`: Runs the circuit-effects attribution benchmark on all tasks and group sizes for Pythia-160M.
-- `scripts/get_effects_pythia_410m.sh`: Same as above but for Pythia-410M.
-- `scripts/get_effects_pythia_1b.sh`: Same as above but for Pythia-1B.
-- `scripts/get_faith_pythia_160m.sh`: Sweeps faithfulness/completeness metrics across tasks and K values for Pythia-160M.
-- `scripts/get_faith_pythia_410m.sh`: Faithfulness sweep for Pythia-410M.
-- `scripts/get_faith_pythia_1b.sh`: Faithfulness sweep for Pythia-1B.
-- `scripts/mmcs.sh`: Launches mean maximum causal score computations for each model across all reported K values.
-- `scripts/run_evals_recon.sh`: Recomputes reconstruction metrics (baseline vs. cluster) for every model via `recon/recon.py`.
-
-## Installation
-Requirements: Python 3.10+, PyTorch with GPU support, and access to the Hugging Face Hub (weights and datasets). We recommend creating a virtual environment:
+### 1. Environment
+Requirements: Python 3.10+, CUDA-ready PyTorch installation, and access to the Hugging Face Hub.
 
 ```bash
 python -m venv .venv
@@ -51,136 +26,155 @@ pip install --upgrade pip
 pip install -e .
 ```
 
-Optional extras:
-- `pip install bitsandbytes` to enable 8-bit Adam.
-- `pip install -r requirements-dev.txt` (if you maintain your own dev extras) for linting and tests.
-- The repository ships with a `uv.lock`; you can alternatively run `uv pip sync uv.lock`.
+Optional additions:
+- `pip install bitsandbytes` to enable the 8-bit Adam optimizer path (`TrainConfig.adam_8bit`).
+- `pip install uv` and `uv pip sync uv.lock` if you prefer uv-managed environments.
+- `pip install pytest ruff black` for the lightweight developer tooling defined in `pyproject.toml`.
 
-## Data, Weights, and Layer Groups
-- **Datasets:** Training and evaluation use tokenised versions of *The Pile*. The scripts default to `NeelNanda/pile-small-tokenized-2b`; Hugging Face will download shards on demand. For raw text runs, utilities in `group_sae/data.py` chunk and tokenise arbitrary datasets.
-- **Layer groups:** Ready-to-use assignments are stored under `group_sae/groups/pythia-*.json`. They include training clusters and AMAD curves. Load them programmatically via `group_sae.utils.load_training_clusters` or `group_sae.utils.load_amds`.
-- **Pretrained SAEs:** Download the published checkpoints and configs with:
+> The training scripts stream from `NeelNanda/pile-small-tokenized-2b`. Export `HF_TOKEN` if you need gated access. GPU VRAM requirements scale roughly with model width × cluster size.
 
-  ```bash
-  bash scripts/download.sh
-  ```
-
-  This clones the Hugging Face repositories into `saes/pythia_{size}-topk/{baseline,cluster}` and copies the configuration files required by the trainers and evaluation code.
-- **Latent caches:** Feature activation caches used for interpretability figures can be fetched with `bash scripts/download_features.sh` (requires git-lfs access to private repositories).
-
-## Selecting Layer Groups with AMAD
-1. **Collect layer-wise activations:** Compute similarity matrices for each model/metric via:
-
-   ```bash
-   python groups/distance.py --model pythia-160m-deduped --method angular --num_tokens 10_000_000
-   python groups/distance.py --model pythia-160m-deduped --method cka --num_tokens 10_000_000
-   ```
-
-   Supported metrics are `angular`, `cka`, and `svcca`. Results are saved to `groups/dist/`.
-2. **Score candidate partitions:** The notebook `groups/plots.ipynb` (or the helpers in `group_sae.utils`) converts the distance matrices into AMAD curves across possible group counts.
-3. **Pick the operating point:** AMAD returns tuples `(G, AMAD, C)` where `G` is the number of groups and `C = A + T·G` approximates training cost (constants are model-specific). Choose the smallest `G` that satisfies your reconstruction or downstream threshold.
-4. **Persist the mapping:** Store the final mapping as `{cluster_id: [layer indices]}` under `group_sae/groups/` and pass it to `ClusterSaeTrainer` via `TrainConfig(clusters=...)`.
-
-## Training Sparse Autoencoders
-### Baseline (layer-wise) SAEs
-- `training/train_topk.py` reproduces the per-layer top-k SAEs used as the reference point in prior work.
-- Launch with torchrun for multi-GPU training:
-
-  ```bash
-  torchrun --nproc-per-node=8 --standalone training/train_topk.py \
-    --model_name EleutherAI/pythia-160m-deduped --batch 16
-  ```
-
-  Key `TrainConfig` knobs include `num_training_tokens`, `k`, `l1_coefficient`, `normalize_activations`, and `save_every`.
-
-### Group-SAE (clustered layers)
-- `training/train_cluster_topk.py` instantiates `ClusterSaeTrainer`, which shares a single SAE across all layers in a cluster.
-- Example command (mirrors the paper setup):
-
-  ```bash
-  torchrun --nproc-per-node=8 --standalone training/train_cluster_topk.py \
-    --model_name pythia-410m --batch 8 --layers 24
-  ```
-
-  The script looks up the appropriate `training_clusters` entry from `group_sae/groups/pythia_{size}_sequential.json` and augments it with singleton clusters for the baseline comparison.
-- `TrainConfig` accepts cluster dictionaries, automatic LR schedules, gradient accumulation, activation normalisation, and checkpoint retention (`keep_last_n_checkpoints`). Logging to Weights & Biases is enabled by default when `log_to_wandb=True`.
-- The shortcut `training/run.sh` reproduces the three models in the paper (160M, 410M, 1B).
-
-### Tips
-- Resuming: set `resume_from` to a checkpoint directory.
-- Mixed-precision: adjust `torch_dtype` when loading models if you want bfloat16 training.
-- Token loaders: replace the default dataset shard or collator by modifying `group_sae/hooks.from_tokens` or using the streaming utilities in `group_sae/data.py`.
-
-## Evaluation & Analysis Pipelines
-### Reconstruction Quality
-Run the TransformerLens-based evaluation suite to compute KL-divergence, cross-entropy, explained variance, sparsity, and norm diagnostics:
+### 2. Download released checkpoints & assets
+We host clustered/baseline SAEs on Hugging Face. The helper script pulls everything (git-lfs required):
 
 ```bash
-python recon/recon.py --model pythia-160m --batch_size 8
-python recon/recon.py --model pythia-160m --cluster --batch_size 8
+bash scripts/download.sh         # downloads baseline + clustered SAEs into ./saes
+bash scripts/download_features.sh # optional: grabs cached latents for interpretation
 ```
 
-Outputs are written to `eval_recon_sequential/{model}_{baseline|cluster}.csv` and match the paper tables.
+Layer-group JSON files for each model live in `group_sae/groups/` and mirror the configurations used in the paper.
 
-### Downstream Faithfulness Experiments
-- **Circuit attribution effects:**
+### 3. Train your own SAEs
+Baseline (single layer) training entrypoint (`training/train_topk.py`):
 
-  ```bash
-  python downstream/effects.py -d ioi -m pythia-160m --sae_root_folder saes/pythia_160m-topk --K 3
-  ```
+```bash
+python training/train_topk.py \
+  --model EleutherAI/pythia-160m-deduped \
+  --batch_size 16 \
+  --num_training_tokens 1_000_000_000
+```
 
-  The script averages indirect effects over IOI, `greater_than`, and `subject_verb` tasks (JSON definitions in `downstream/tasks/`). Convenience launchers `scripts/get_effects_pythia_*.sh` sweep all K values.
-- **Faithfulness vs. sparsity thresholds:**
+Clustered training (`training/train_cluster_topk.py`) accepts the same hyperparameters plus automatic loading of AMAD-derived clusters. Use `torchrun` for multi-GPU:
 
-  ```bash
-  python downstream/faith_topk.py -d ioi -m pythia-410m --sae_root_folder saes/pythia_410m-topk --K 5
-  ```
+```bash
+torchrun --nproc-per-node=8 training/train_cluster_topk.py \
+  --model_name pythia-410m \
+  --batch 8           # sequences/GPU
+```
 
-  Metrics are cached under `downstream/faithfulness_topk/` and aggregated in `faithfulness/`.
+Under the hood:
+- `group_sae.config.TrainConfig` / `SaeConfig` capture all training knobs (k-sparsity, JumpReLU, aux losses, schedulers, logging).
+- `group_sae.trainer.SaeTrainer` handles per-layer SAEs, gradient accumulation, activation normalization, FVU/L2 losses, dead feature pruning, resume logic, and (optional) distributed parameter sharding.
+- `group_sae.trainer_cluster.ClusterSaeTrainer` extends the trainer to shared weights across clustered hookpoints and ensures shape consistency within each cluster.
 
-### Feature Concordance & Spreading
-- Cache activations and top-k features:
+### 4. Evaluate & analyse
+Once checkpoints are in `saes/<model>-topk/`, the provided scripts reproduce the paper’s tables:
 
-  ```bash
-  python feature_concordance/caching.py --model_name pythia-410m --K 9 \
-    --sae_root_folder saes/pythia_410m-topk --max_tokens 1_000_000
-  ```
+| Script | What it does |
+| --- | --- |
+| `scripts/run_evals_recon.sh` | KL/CE reconstruction metrics via `recon/recon.py` using SAE Lens `EvalConfig` |
+| `scripts/get_effects_pythia_*.sh` | Circuit efficiency & causal tracing benchmarks (`downstream/effects.py`) |
+| `scripts/get_faith_pythia_*.sh` | Logit-diff faithfulness / completeness curves (`downstream/faith_topk.py`) |
+| `scripts/feature_concordance.sh` | Feature overlap across cluster sizes (`feature_concordance/concordance.py`) |
+| `scripts/feature_spreading.sh` | Token-level feature utilisation stats (`feature_spreading/feature_spreading.py`) |
+| `scripts/mmcs.sh` | Mean Maximum Causal Score heatmaps (`mmcs/mmcs.py`) |
+| `scripts/auto_interp.sh` | End-to-end activation caching + GPT explanations + grading (`interp/*.py`) |
 
-- Compute concordance statistics with `feature_concordance/concordance.py` and feature spreading with `feature_spreading/feature_spreading.py`. Batch scripts in `scripts/feature_concordance.sh` and `scripts/feature_spreading.sh` reproduce the plots from the paper.
+Most pipelines expect cached features (see `scripts/cache_features.sh` or `feature_concordance/caching.py`) and will spill results to the sibling directories (`recon/`, `faithfulness/`, `feature_concordance/`, `feature_spreading/`, `mmcs/`, `interp/`).
 
-### Automated Feature Interpretation
-The `interp/` pipeline integrates cached features with GPT-based explanations. Run `bash scripts/auto_interp.sh` to cache activations, generate natural language descriptors for baseline vs. grouped SAEs, and grade the outputs.
+## Repository Tour
 
-### Additional Analyses
-- `mmcs/mmcs.py` computes mean maximum causal scores across group sizes.
-- `feature_analysis/` hosts scripts to select representative neurons and compare cluster vs. baseline features.
-- `effects/` and `faithfulness/` directories contain the artefacts reported in the main paper and appendix.
+```
+├── group_sae/              # Core library (configs, trainers, SAE module, Triton kernels, utilities)
+│   ├── config.py           # Dataclasses for TrainConfig / SaeConfig / RunConfig
+│   ├── sae.py              # SAE module with JumpReLU, top-k support, disk & hub loaders
+│   ├── trainer*.py         # Baseline + clustered trainers, DDP-aware
+│   ├── distance.py         # Angular distance + (Approx) CKA metrics used for AMAD
+│   ├── normalization.py    # Activation norm scaling estimation
+│   ├── utils.py            # MODEL_MAP, loading helpers, lr / l1 schedulers, Triton decoder
+│   └── groups/*.json       # Layer-cluster assignments for Pythia family (baseline + sequential)
+├── training/               # CLI entrypoints & launch scripts for large-scale runs
+├── recon/, downstream/, feature_* , faithfulness/, mmcs/, interp/  # Evaluation & analysis suites
+├── scripts/                # Bash wrappers for reproducing experiments end-to-end
+├── groups/                 # AMAD sweeps, sequential baselines, and artefacts bundled with the paper
+├── eval*/                  # Cached evaluation CSVs from the paper (cluster vs. baseline)
+├── imgs/                   # Figures referenced in README/paper
+└── tests/                  # Smoke tests for cluster aggregation logic (`test_new_utils.py`)
+```
 
-## Utilities and API Snippets
-- `group_sae.utils.load_saes` / `load_saes_by_training_clusters` load saved checkpoints into TransformerLens-compatible `SAE` objects.
-- `group_sae.export.to_sae_lens` converts internal checkpoints into the `sae_lens` format for downstream tooling.
-- `group_sae.normalization.estimate_norm_scaling_factor` reproduces the activation norm scaling used in the experiments.
-- `group_sae.utils.chunk_almost_equal_sum` and friends help distribute clusters evenly across devices when using DDP.
+You can import the packaged API directly:
+
+```python
+from group_sae import Sae, SaeConfig, SaeTrainer, ClusterSaeTrainer, TrainConfig
+```
+
+## Working with pretrained SAEs
+Utilities in `group_sae.utils` smooth the hand-off between training outputs and downstream tooling:
+
+- `load_saes` and `load_saes_by_training_clusters` convert saved checkpoints into [`sae_lens`](https://github.com/jbloomAus/SAELens) compatible modules, automatically folding in activation-norm scaling factors and matching cluster layouts.
+- `to_sae_lens` (also re-exported in `export/to_sae_lens.py`) mirrors the conversion pipeline used in the released Hugging Face repos.
+- `MODEL_MAP` records per-model metadata (layers, width, AMAD coefficients) consumed throughout the evaluation suite.
+- `load_cluster_map`, `load_training_clusters`, and `chunk_almost_equal_sum` power the AMAD grouping logic and device-aware workload balancing.
+
+Example: load cluster `K=5` SAEs for Pythia-410M and inspect reconstructions from cached activations:
+
+```python
+from transformer_lens import HookedTransformer
+from group_sae.utils import load_saes
+
+model = HookedTransformer.from_pretrained("pythia-410m", device="cuda")
+tokenizer = model.tokenizer
+saes = load_saes("saes/pythia_410m-topk", model_name="pythia-410m", cluster="5")
+
+inputs = tokenizer("The Eiffel Tower is in Paris", return_tensors="pt").to(model.cfg.device)
+with torch.no_grad():
+    logits, cache = model.run_with_cache(**inputs)
+    hook_name = "blocks.6.hook_resid_post"
+    activations = cache[hook_name]              # (batch, tokens, d_model)
+    sae = saes[hook_name].to(activations.device)
+    features = sae.encode(activations)
+    reconstruction = sae.decode(features)
+```
+
+## Evaluation & interpretability modules
+- **Reconstruction (`recon/recon.py`)** – wraps SAE Lens `run_evals` with cluster-aware loading and exports CSVs summarising KL divergence, CE loss, sparsity, and variance metrics per layer/cluster.
+- **Downstream causal analysis (`downstream/*.py`)** – implements IOI, subject-verb, and greater-than tasks using SAE-mediated patching hooks (`downstream/hooks.py`). Supports attribution (`effects.py`), faithfulness vs. sparsity thresholds (`faith_thr.py`), and logit-diff curves (`faith_topk.py`).
+- **Feature concordance/spreading** – caches top-activating features, computes Jaccard overlaps across cluster sizes, and quantifies feature reuse ratios.
+- **Interpretability tooling (`interp/`)** – caches activations, sends prompts to GPT (set `OPENAI_API_KEY`), scores explanations, and renders seaborn/matplotlib figures (`interp/analysis.py`).
+- **Feature analysis (`feature_analysis/`)** – selects representative latent pairs, generates GPT explanations, and aggregates similarity JSON for camera-ready figures.
+- **MMCS (`mmcs/mmcs.py`)** – computes Mean Maximum Causal Score matrices by comparing decoder columns between baseline and clustered SAEs.
+
+Most scripts accept `--sae_root_folder`, `--model_name`, `--K`, and `--n_devices` arguments; consult each file for task-specific flags.
+
+## Computing layer similarity & AMAD
+The grouping heuristics originate from `group_sae/distance.py`:
+- `AngularDistance` tracks the average angular separation between layer activations.
+- `CKA` and `ApproxCKA` implement exact and approximate Centered Kernel Alignment.
+`scripts/distances.sh` wraps these utilities to pre-compute similarity matrices before applying AMAD. Resulting JSON artefacts (per number of clusters `G`) are what populate `group_sae/groups/` and downstream evaluation folders.
+
+## Development tips
+- Run `pytest` to execute the sanity checks in `tests/`.
+- `ruff check .`, `black .`, and `isort .` obey the formatting constraints defined in `pyproject.toml` (99-char lines, import sorting, etc.).
+- Training supports DDP launches (`TrainConfig.distribute_modules`) and gradient/micro-batching (`grad_acc_steps`, `micro_acc_steps`). Watch for the `ClusterSaeTrainer` requirement that all modules in a cluster emit identically shaped activations.
+- The Triton decoder (`group_sae/kernels.py`) accelerates top-k decoding; set `SAE_DISABLE_TRITON=1` to fall back to the eager implementation if Triton is unavailable.
 
 ## Citation
-Please cite the paper if you use this codebase or the released SAEs:
+If you use this codebase or the released SAEs, please cite:
 
 ```
 @inproceedings{
   ghilardi2025efficient,
   title={Efficient Training of Sparse Autoencoders for Large Language Models via Layer Groups},
   author={Davide Ghilardi and Federico Belotti and Marco Molinari and Tao Ma and Matteo Palmonari},
-  booktitle={The 2025 Conference on Empirical Methods in Natural Language Processing},
+  booktitle={Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing},
   year={2025},
   url={https://openreview.net/forum?id=bk4PhF17cm}
 }
 ```
 
-## Acknowledgements
-The implementation builds on:
-
+## License & acknowledgements
+Released under the MIT License (see `pyproject.toml`). Built on top of:
 - [TransformerLens](https://github.com/neelnanda-io/TransformerLens)
 - [sae-lens](https://github.com/jbloomAus/SAELens)
-- [sparsify](https://github.com/EleutherAI/sparsify)
+- [EleutherAI sparse autoencoder kernels](https://github.com/EleutherAI/sae)
 
-We thank the authors of previous SAE work whose tooling we extend in this repository.
+We thank the interpretability community for open-sourcing tooling that made this project possible.
